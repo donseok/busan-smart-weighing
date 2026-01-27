@@ -16,6 +16,8 @@ build/
 dist/
 *.egg-info/
 target/
+.gradle/
+bin/
 
 # Environment
 .env
