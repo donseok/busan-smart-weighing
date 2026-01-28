@@ -101,4 +101,11 @@ public class WeighingRecord extends BaseEntity {
     public void markError() {
         this.weighingStatus = WeighingStatus.ERROR;
     }
+
+    /**
+     * 테스트/개발 데이터용 - 생성일시 수동 설정
+     */
+    public void setCreatedAtForDevData(java.time.LocalDateTime createdAt) {
+        super.setCreatedAtForTest(createdAt);
+    }
 }

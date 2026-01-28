@@ -11,6 +11,8 @@ import lombok.*;
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Faq extends BaseEntity {
 
     @Id
@@ -28,22 +30,17 @@ public class Faq extends BaseEntity {
     @Column(name = "category", nullable = false, length = 30)
     private FaqCategory category;
 
+    @Builder.Default
     @Column(name = "sort_order", nullable = false)
     private int sortOrder = 0;
 
+    @Builder.Default
     @Column(name = "is_published", nullable = false)
     private boolean isPublished = true;
 
+    @Builder.Default
     @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
-
-    @Builder
-    public Faq(String question, String answer, FaqCategory category, int sortOrder) {
-        this.question = question;
-        this.answer = answer;
-        this.category = category;
-        this.sortOrder = sortOrder;
-    }
 
     public void update(String question, String answer, FaqCategory category, int sortOrder) {
         this.question = question;

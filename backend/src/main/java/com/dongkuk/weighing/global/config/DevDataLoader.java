@@ -593,6 +593,82 @@ public class DevDataLoader {
             log.info("계량 실적 12건 생성 완료");
 
             // ========================================
+            // 7-1. 통계용 과거 60일 계량 데이터 생성
+            // ========================================
+            Company[] companies = {company1, company2, company3, company4};
+            Vehicle[] vehicles = {v1, v2, v3, v4, v5, v6, v7, v8};
+            Scale[] scales = {scale1, scale2, scale3};
+            ItemType[] itemTypes = ItemType.values();
+            String[] itemNames = {"슬래그", "더스트", "폐유", "스케일", "코크스", "석회석", "열연코일", "냉연코일", "H빔", "철스크랩"};
+            WeighingMode[] modes = {WeighingMode.LPR_AUTO, WeighingMode.MOBILE_OTP, WeighingMode.MANUAL};
+
+            java.util.Random random = new java.util.Random(42); // 재현 가능한 랜덤
+            int historicalCount = 0;
+
+            for (int daysAgo = 60; daysAgo >= 1; daysAgo--) {
+                LocalDate targetDate = today.minusDays(daysAgo);
+                LocalDateTime targetDateTime = targetDate.atTime(9, 0); // 오전 9시 기준
+
+                // 하루에 3~8건의 계량 데이터 생성
+                int dailyRecords = 3 + random.nextInt(6);
+
+                for (int r = 0; r < dailyRecords; r++) {
+                    Company company = companies[random.nextInt(companies.length)];
+                    Vehicle vehicle = vehicles[random.nextInt(vehicles.length)];
+                    Scale scale = scales[random.nextInt(scales.length)];
+                    ItemType itemType = itemTypes[random.nextInt(itemTypes.length)];
+                    String itemName = itemNames[random.nextInt(itemNames.length)];
+                    WeighingMode mode = modes[random.nextInt(modes.length)];
+
+                    // 시간을 랜덤하게 분산 (오전 8시 ~ 오후 5시)
+                    LocalDateTime recordTime = targetDate.atTime(8 + random.nextInt(9), random.nextInt(60));
+
+                    // 배차 생성
+                    Dispatch histDispatch = Dispatch.builder()
+                            .vehicleId(vehicle.getVehicleId())
+                            .companyId(company.getCompanyId())
+                            .itemType(itemType)
+                            .itemName(itemName)
+                            .dispatchDate(targetDate)
+                            .originLocation("공장")
+                            .destination("처리장")
+                            .createdBy(manager.getUserId())
+                            .build();
+                    histDispatch.startProgress();
+                    histDispatch.complete();
+                    histDispatch = dispatchRepository.save(histDispatch);
+
+                    // 중량 랜덤 생성 (15000 ~ 40000 kg)
+                    BigDecimal grossWeight = new BigDecimal(15000 + random.nextInt(25000));
+                    BigDecimal tareWeight = new BigDecimal(7000 + random.nextInt(6000));
+
+                    // 계량 레코드 생성
+                    WeighingRecord histWeighing = WeighingRecord.builder()
+                            .dispatchId(histDispatch.getDispatchId())
+                            .scaleId(scale.getScaleId())
+                            .weighingMode(mode)
+                            .weighingStep(WeighingStep.FIRST)
+                            .grossWeight(grossWeight)
+                            .build();
+
+                    if (mode == WeighingMode.LPR_AUTO) {
+                        // LPR 데이터 설정 (reflection 또는 별도 처리 필요 시)
+                    }
+
+                    histWeighing.recordTareWeight(tareWeight);
+                    histWeighing.complete();
+
+                    // createdAt을 과거 날짜로 설정 (저장 전에 설정해야 함)
+                    histWeighing.setCreatedAtForDevData(recordTime);
+                    weighingRepository.save(histWeighing);
+
+                    historicalCount++;
+                }
+            }
+
+            log.info("통계용 과거 데이터 {}건 생성 완료 (60일치)", historicalCount);
+
+            // ========================================
             // 8. 출문 관리 (GatePass) 8건
             // ========================================
             // PENDING (2건)

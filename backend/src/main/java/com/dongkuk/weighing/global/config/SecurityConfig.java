@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/otp/generate").permitAll()
                         // WebSocket
                         .requestMatchers("/ws/**").permitAll()
+                        // Help/FAQ (공개 접근)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/help/faqs", "/api/v1/help/faqs/**").permitAll()
                         // Swagger & Actuator & H2 Console
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
