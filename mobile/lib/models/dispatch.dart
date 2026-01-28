@@ -50,13 +50,13 @@ enum DispatchStatus {
   Color get color {
     switch (this) {
       case DispatchStatus.registered:
-        return const Color(0xFF1677FF);
+        return const Color(0xFF06B6D4);
       case DispatchStatus.inProgress:
-        return const Color(0xFFFA8C16);
+        return const Color(0xFFF59E0B);
       case DispatchStatus.completed:
-        return const Color(0xFF52C41A);
+        return const Color(0xFF10B981);
       case DispatchStatus.cancelled:
-        return const Color(0xFFF5222D);
+        return const Color(0xFFF43F5E);
     }
   }
 

@@ -37,6 +37,19 @@ class ApiConfig {
 
   // Push
   static String get fcmTokenUrl => '$baseUrl/push/token';
+  static String get pushRegisterUrl => '$baseUrl/notifications/push/register';
+  static String get pushUnregisterUrl => '$baseUrl/notifications/push/unregister';
+
+  // Notifications
+  static String get notificationsUrl => '$baseUrl/notifications';
+  static String get notificationsUnreadCountUrl => '$baseUrl/notifications/unread-count';
+
+  // OTP Auth
+  static String get otpLoginUrl => '$baseUrl/auth/login/otp';
+  static String get otpGenerateUrl => '$baseUrl/otp/generate';
+
+  // Inquiry
+  static String get inquiryCallLogUrl => '$baseUrl/inquiries/call-log';
 
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 15);

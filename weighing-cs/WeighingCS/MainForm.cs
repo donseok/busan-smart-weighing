@@ -1,6 +1,8 @@
 using Newtonsoft.Json;
+using WeighingCS.Interfaces;
 using WeighingCS.Models;
 using WeighingCS.Services;
+using WeighingCS.Simulators;
 
 namespace WeighingCS;
 
@@ -19,6 +21,12 @@ public partial class MainForm : Form
     private BarrierService? _barrier;
     private LocalCacheService? _cache;
     private WeighingProcessService? _process;
+
+    // -- Simulators -----------------------------------------------------------
+
+    private LprCameraSimulator? _lprSimulator;
+    private VehicleSensorSimulator? _sensorSimulator;
+    private VehicleDetectorSimulator? _detectorSimulator;
 
     // -- Dispatch search results cache ----------------------------------------
     private List<DispatchInfo> _searchResults = new();
@@ -43,6 +51,7 @@ public partial class MainForm : Form
         AppendLog("Busan Smart Weighing CS starting...");
         AppendLog($"Scale ID: {_settings.Scale.ScaleId} | COM: {_settings.Scale.ComPort} | Baud: {_settings.Scale.BaudRate}");
 
+        InitializeSimulators();
         await InitializeCacheAsync();
         await ConnectServicesAsync();
     }
@@ -138,6 +147,81 @@ public partial class MainForm : Form
         _process.WeighingCompleted += OnWeighingCompleted;
         _process.ProcessError += OnProcessError;
         _process.StatusMessage += (_, msg) => InvokeUI(() => AppendLog($"[PROCESS] {msg}"));
+    }
+
+    // -- Simulator initialization ----------------------------------------------
+
+    private void InitializeSimulators()
+    {
+        _lprSimulator = new LprCameraSimulator();
+        _sensorSimulator = new VehicleSensorSimulator();
+        _detectorSimulator = new VehicleDetectorSimulator();
+
+        // Wire simulator pipeline: sensor detection -> LPR capture -> auto weigh
+        _sensorSimulator.VehicleDetected += async (s, e) =>
+        {
+            InvokeUI(() => AppendLog($"[SIM] Vehicle detected by sensor {e.SensorId} at {e.DetectedAt:HH:mm:ss}"));
+
+            if (_lprSimulator is not null && _process is not null)
+            {
+                var lpr = await _lprSimulator.CaptureAsync();
+                InvokeUI(() => AppendLog($"[SIM] LPR captured: {lpr.PlateNumber} (confidence: {lpr.Confidence:P1})"));
+                await _process.AutoWeighAsync(lpr.PlateNumber, lpr.Confidence, lpr.CaptureImageUrl);
+            }
+        };
+
+        _detectorSimulator.PositionChanged += (s, e) =>
+        {
+            InvokeUI(() => AppendLog($"[SIM] Vehicle position: {(e.IsInPosition ? "IN POSITION" : "NOT IN POSITION")}"));
+        };
+
+        _lprSimulator.PlateCaptured += (s, e) =>
+        {
+            InvokeUI(() => AppendLog($"[SIM] LPR plate event: {e.PlateNumber} (confidence: {e.Confidence:P1})"));
+        };
+
+        // Wire simulator button events
+        chkSimulatorMode.CheckedChanged += OnSimulatorModeChanged;
+        btnSimSensor.Click += OnSimSensorClick;
+        btnSimLpr.Click += OnSimLprClick;
+        btnSimPosition.Click += OnSimPositionClick;
+        btnSyncNow.Click += OnSyncNowClick;
+    }
+
+    private void OnSimulatorModeChanged(object? sender, EventArgs e)
+    {
+        bool enabled = chkSimulatorMode.Checked;
+        btnSimSensor.Enabled = enabled;
+        btnSimLpr.Enabled = enabled;
+        btnSimPosition.Enabled = enabled;
+        btnSyncNow.Enabled = enabled;
+        AppendLog(enabled ? "[SIM] Simulator mode ENABLED" : "[SIM] Simulator mode DISABLED");
+    }
+
+    private void OnSimSensorClick(object? sender, EventArgs e)
+    {
+        _sensorSimulator?.TriggerDetection();
+    }
+
+    private async void OnSimLprClick(object? sender, EventArgs e)
+    {
+        if (_lprSimulator is null) return;
+
+        var result = await _lprSimulator.CaptureAsync();
+        AppendLog($"[SIM] Manual LPR capture: {result.PlateNumber} (confidence: {result.Confidence:P1})");
+    }
+
+    private void OnSimPositionClick(object? sender, EventArgs e)
+    {
+        _detectorSimulator?.TogglePosition();
+    }
+
+    private async void OnSyncNowClick(object? sender, EventArgs e)
+    {
+        if (_cache is null) return;
+
+        AppendLog("[CACHE] Manual sync triggered...");
+        await _cache.SyncPendingRecordsAsync();
     }
 
     private async Task InitializeCacheAsync()

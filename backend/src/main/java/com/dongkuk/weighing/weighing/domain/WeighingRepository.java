@@ -31,4 +31,27 @@ public interface WeighingRepository extends JpaRepository<WeighingRecord, Long> 
             @Param("status") WeighingStatus status,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to);
+
+    // Statistics queries
+    @Query("SELECT COUNT(w) FROM WeighingRecord w WHERE w.createdAt >= :from AND w.createdAt <= :to")
+    long countByPeriod(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT COALESCE(SUM(w.netWeight), 0) FROM WeighingRecord w " +
+            "WHERE w.weighingStatus = 'COMPLETED' AND w.createdAt >= :from AND w.createdAt <= :to")
+    java.math.BigDecimal sumNetWeightByPeriod(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT w.weighingMode, COUNT(w) FROM WeighingRecord w " +
+            "WHERE w.createdAt >= :from AND w.createdAt <= :to GROUP BY w.weighingMode")
+    List<Object[]> countGroupByWeighingMode(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT d.itemType, COUNT(w) FROM WeighingRecord w " +
+            "JOIN com.dongkuk.weighing.dispatch.domain.Dispatch d ON w.dispatchId = d.dispatchId " +
+            "WHERE w.createdAt >= :from AND w.createdAt <= :to GROUP BY d.itemType")
+    List<Object[]> countGroupByItemType(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT CAST(w.createdAt AS LocalDate), COUNT(w), COALESCE(SUM(w.netWeight), 0) " +
+            "FROM WeighingRecord w WHERE w.weighingStatus = 'COMPLETED' " +
+            "AND w.createdAt >= :from AND w.createdAt <= :to " +
+            "GROUP BY CAST(w.createdAt AS LocalDate) ORDER BY CAST(w.createdAt AS LocalDate)")
+    List<Object[]> findDailyStatistics(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

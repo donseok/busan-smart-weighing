@@ -52,8 +52,7 @@ api:
   internal-key: ${API_INTERNAL_KEY:test-internal-key}
 
 cors:
-  allowed-origins:
-    - ${CORS_ORIGIN_WEB:http://localhost:3000}
+  allowed-origins: ${CORS_ORIGIN_WEB:http://localhost:3000}
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: "*"
   allow-credentials: true

@@ -71,7 +71,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1677FF),
+                      color: const Color(0xFF06B6D4),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -92,10 +92,10 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: const Color(0xFF334155),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.share, color: Colors.black87),
+                    child: const Icon(Icons.share, color: Color(0xFFF8FAFC)),
                   ),
                   title: const Text('기타'),
                   subtitle: const Text('다른 앱으로 공유'),

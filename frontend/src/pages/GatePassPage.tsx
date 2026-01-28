@@ -5,9 +5,10 @@ import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import type { GatePass } from '../types';
 import dayjs from 'dayjs';
+import { colors } from '../theme/themeConfig';
 
 const statusColors: Record<string, string> = {
-  PENDING: 'processing', PASSED: 'success', REJECTED: 'error',
+  PENDING: colors.warning, PASSED: colors.success, REJECTED: colors.error,
 };
 
 const statusLabels: Record<string, string> = {

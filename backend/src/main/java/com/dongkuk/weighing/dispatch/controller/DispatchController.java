@@ -1,5 +1,6 @@
 package com.dongkuk.weighing.dispatch.controller;
 
+import com.dongkuk.weighing.auth.security.UserPrincipal;
 import com.dongkuk.weighing.dispatch.domain.DispatchStatus;
 import com.dongkuk.weighing.dispatch.domain.ItemType;
 import com.dongkuk.weighing.dispatch.dto.*;
@@ -12,9 +13,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/dispatches")
@@ -30,6 +33,13 @@ public class DispatchController {
         // TODO: createdBy는 SecurityContext에서 추출 - 현재는 null 처리
         DispatchResponse response = dispatchService.createDispatch(request, null);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<DispatchResponse>>> getMyDispatches(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        List<DispatchResponse> response = dispatchService.getMyDispatches(principal.getUserId());
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     @GetMapping("/{dispatchId}")

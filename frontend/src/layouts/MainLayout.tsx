@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, theme, Typography } from 'antd';
+import { Layout, Menu, Typography, Button } from 'antd';
 import {
   DashboardOutlined,
   CarOutlined,
@@ -10,7 +10,9 @@ import {
   FileTextOutlined,
   BankOutlined,
   ToolOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
+import { colors } from '../theme/themeConfig';
 
 const { Header, Sider, Content } = Layout;
 
@@ -36,16 +38,67 @@ const MainLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    navigate('/login');
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed}>
-        <div style={{ height: 32, margin: 16, textAlign: 'center' }}>
-          <Typography.Text strong style={{ color: '#fff', fontSize: collapsed ? 12 : 16 }}>
-            {collapsed ? 'BSW' : '부산 스마트 계량'}
-          </Typography.Text>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={setCollapsed}
+        width={240}
+        style={{
+          borderRight: `1px solid ${colors.border}`,
+        }}
+      >
+        {/* 로고 영역 */}
+        <div
+          style={{
+            height: 64,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderBottom: `1px solid ${colors.border}`,
+            gap: 8,
+          }}
+        >
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: `linear-gradient(135deg, ${colors.primary}, #0891B2)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 16,
+              fontWeight: 700,
+              color: '#fff',
+              flexShrink: 0,
+            }}
+          >
+            B
+          </div>
+          {!collapsed && (
+            <Typography.Text
+              strong
+              style={{
+                color: colors.textPrimary,
+                fontSize: 15,
+                letterSpacing: '-0.02em',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              부산 스마트 계량
+            </Typography.Text>
+          )}
         </div>
+
         <Menu
           theme="dark"
           selectedKeys={[location.pathname]}
@@ -53,14 +106,47 @@ const MainLayout: React.FC = () => {
           mode="inline"
           items={menuItems}
           onClick={({ key }) => navigate(key)}
+          style={{ marginTop: 8, border: 'none' }}
         />
       </Sider>
+
       <Layout>
-        <Header style={{ padding: '0 24px', background: colorBgContainer, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-          <Typography.Text type="secondary">관리자</Typography.Text>
+        <Header
+          style={{
+            padding: '0 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 16,
+            borderBottom: `1px solid ${colors.border}`,
+            backdropFilter: 'blur(12px)',
+            background: 'rgba(30, 41, 59, 0.8)',
+          }}
+        >
+          <Typography.Text style={{ color: colors.textSecondary, fontSize: 13 }}>
+            관리자
+          </Typography.Text>
+          <Button
+            type="text"
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+            style={{ color: colors.textSecondary }}
+            size="small"
+          >
+            로그아웃
+          </Button>
         </Header>
-        <Content style={{ margin: 16 }}>
-          <div style={{ padding: 24, minHeight: 360, background: colorBgContainer, borderRadius: borderRadiusLG }}>
+
+        <Content style={{ margin: 16, overflow: 'auto' }}>
+          <div
+            style={{
+              padding: 24,
+              minHeight: 360,
+              background: colors.bgSurface,
+              borderRadius: 12,
+              border: `1px solid ${colors.border}`,
+            }}
+          >
             <Outlet />
           </div>
         </Content>

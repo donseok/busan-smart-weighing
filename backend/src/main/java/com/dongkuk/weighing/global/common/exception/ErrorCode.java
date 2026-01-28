@@ -48,6 +48,18 @@ public enum ErrorCode {
     SLIP_001(404, "계량표를 찾을 수 없습니다"),
     SLIP_002(400, "완료되지 않은 계량은 계량표를 생성할 수 없습니다"),
 
+    // Notification
+    NOTIFICATION_001(404, "알림을 찾을 수 없습니다"),
+    NOTIFICATION_002(400, "이미 읽은 알림입니다"),
+    NOTIFICATION_003(400, "유효하지 않은 알림 유형입니다"),
+
+    // FCM
+    FCM_001(400, "FCM 토큰 등록에 실패했습니다"),
+    FCM_002(500, "푸시 알림 발송에 실패했습니다"),
+
+    // Inquiry
+    INQUIRY_001(404, "문의 이력을 찾을 수 없습니다"),
+
     // Common
     VALIDATION_ERROR(400, "입력값 검증 오류"),
     INTERNAL_ERROR(500, "서버 내부 오류가 발생했습니다");

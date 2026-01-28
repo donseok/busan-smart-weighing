@@ -274,6 +274,52 @@ partial class MainForm
         this.grpActions.Controls.Add(this.btnReset);
         this.grpActions.Controls.Add(this.btnBarrierOpen);
 
+        // -- Simulator controls group --------------------------------------------
+        this.grpSimulator = new GroupBox();
+        this.grpSimulator.Text = "시뮬레이터";
+        this.grpSimulator.Dock = DockStyle.Top;
+        this.grpSimulator.Height = 110;
+
+        this.chkSimulatorMode = new CheckBox();
+        this.chkSimulatorMode.Text = "시뮬레이터 모드";
+        this.chkSimulatorMode.Location = new Point(10, 25);
+        this.chkSimulatorMode.AutoSize = true;
+        this.chkSimulatorMode.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+
+        this.btnSimSensor = new Button();
+        this.btnSimSensor.Text = "차량 감지";
+        this.btnSimSensor.Location = new Point(10, 55);
+        this.btnSimSensor.Width = 90;
+        this.btnSimSensor.Height = 35;
+        this.btnSimSensor.Enabled = false;
+
+        this.btnSimLpr = new Button();
+        this.btnSimLpr.Text = "LPR 촬영";
+        this.btnSimLpr.Location = new Point(108, 55);
+        this.btnSimLpr.Width = 90;
+        this.btnSimLpr.Height = 35;
+        this.btnSimLpr.Enabled = false;
+
+        this.btnSimPosition = new Button();
+        this.btnSimPosition.Text = "정위치 토글";
+        this.btnSimPosition.Location = new Point(206, 55);
+        this.btnSimPosition.Width = 90;
+        this.btnSimPosition.Height = 35;
+        this.btnSimPosition.Enabled = false;
+
+        this.btnSyncNow = new Button();
+        this.btnSyncNow.Text = "즉시 동기화";
+        this.btnSyncNow.Location = new Point(304, 55);
+        this.btnSyncNow.Width = 90;
+        this.btnSyncNow.Height = 35;
+        this.btnSyncNow.Enabled = false;
+
+        this.grpSimulator.Controls.Add(this.chkSimulatorMode);
+        this.grpSimulator.Controls.Add(this.btnSimSensor);
+        this.grpSimulator.Controls.Add(this.btnSimLpr);
+        this.grpSimulator.Controls.Add(this.btnSimPosition);
+        this.grpSimulator.Controls.Add(this.btnSyncNow);
+
         // -- Process state label ----------------------------------------------
         this.lblProcessState = new Label();
         this.lblProcessState.Text = "State: Idle";
@@ -303,6 +349,7 @@ partial class MainForm
         // Assemble right panel (order matters for Dock.Top: add bottom-first)
         this.panelRight.Controls.Add(this.grpLog);
         this.panelRight.Controls.Add(this.lblProcessState);
+        this.panelRight.Controls.Add(this.grpSimulator);
         this.panelRight.Controls.Add(this.grpActions);
         this.panelRight.Controls.Add(this.grpManual);
         this.panelRight.Controls.Add(this.grpMode);
@@ -389,4 +436,12 @@ partial class MainForm
     private Label lblProcessState;
     private GroupBox grpLog;
     private TextBox txtLog;
+
+    // Simulator controls
+    private GroupBox grpSimulator;
+    private CheckBox chkSimulatorMode;
+    private Button btnSimSensor;
+    private Button btnSimLpr;
+    private Button btnSimPosition;
+    private Button btnSyncNow;
 }

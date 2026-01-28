@@ -115,3 +115,40 @@ export interface GatePass {
   rejectReason?: string;
   createdAt: string;
 }
+
+// Weighing Statistics
+export interface DailyStatistic {
+  date: string;
+  totalCount: number;
+  totalNetWeightTon: number;
+}
+
+export interface WeighingStatistics {
+  todayTotalCount: number;
+  todayCompletedCount: number;
+  todayInProgressCount: number;
+  todayTotalNetWeightTon: number;
+  monthTotalCount: number;
+  monthTotalNetWeightTon: number;
+  countByItemType: Record<string, number>;
+  countByWeighingMode: Record<string, number>;
+  dailyStatistics: DailyStatistic[];
+}
+
+// Login
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+// Notification
+export interface NotificationItem {
+  notificationId: number;
+  notificationType: string;
+  title: string;
+  message: string;
+  referenceId?: number;
+  isRead: boolean;
+  createdAt: string;
+}

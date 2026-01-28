@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'auth/otp_login_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -222,10 +223,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: authProvider.isLoading
                         ? null
                         : () {
-                            // Navigate to OTP login flow
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('안전 로그인은 관리자에게 문의하세요.'),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const OtpLoginScreen(),
                               ),
                             );
                           },

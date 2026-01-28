@@ -15,24 +15,29 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
             accountName: Text(
               user?.name ?? '사용자',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+                color: Color(0xFFF8FAFC),
               ),
             ),
             accountEmail: Text(
               user?.isManager == true ? '관리자' : '운전자',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.85),
+              style: const TextStyle(
+                color: Color(0xFF94A3B8),
               ),
             ),
             currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
+              backgroundColor: const Color(0xFF06B6D4).withValues(alpha: 0.15),
               child: Icon(
                 user?.isManager == true ? Icons.admin_panel_settings : Icons.person,
                 size: 36,
@@ -74,10 +79,10 @@ class AppDrawer extends StatelessWidget {
           const Spacer(),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
+            leading: Icon(Icons.logout, color: theme.colorScheme.error),
+            title: Text(
               '로그아웃',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: theme.colorScheme.error),
             ),
             onTap: () async {
               final confirmed = await showDialog<bool>(
@@ -92,7 +97,7 @@ class AppDrawer extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
                       child: const Text('로그아웃'),
                     ),
                   ],

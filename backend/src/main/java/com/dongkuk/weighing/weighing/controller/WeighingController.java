@@ -30,6 +30,12 @@ public class WeighingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
+    @GetMapping("/statistics")
+    public ResponseEntity<ApiResponse<WeighingStatisticsResponse>> getStatistics() {
+        WeighingStatisticsResponse response = weighingService.getStatistics();
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
     @GetMapping("/{weighingId}")
     public ResponseEntity<ApiResponse<WeighingResponse>> getWeighing(
             @PathVariable Long weighingId) {

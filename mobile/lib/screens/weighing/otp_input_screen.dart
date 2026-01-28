@@ -124,7 +124,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('OTP 인증이 완료되었습니다.'),
-            backgroundColor: Color(0xFF52C41A),
+            backgroundColor: Color(0xFF10B981),
           ),
         );
         Navigator.pop(context, true);

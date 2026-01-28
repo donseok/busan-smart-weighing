@@ -29,6 +29,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception ->
@@ -40,9 +41,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/otp/verify").permitAll()
                         // 내부 API (API Key 인증)
                         .requestMatchers("/api/v1/otp/generate").permitAll()
-                        // Swagger & Actuator
+                        // WebSocket
+                        .requestMatchers("/ws/**").permitAll()
+                        // Swagger & Actuator & H2 Console
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
                         // 관리자 전용
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/*/toggle-active").hasRole("ADMIN")

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'app.dart';
 import 'services/api_service.dart';
 import 'services/auth_service.dart';
@@ -10,6 +11,7 @@ import 'providers/dispatch_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
@@ -17,13 +19,13 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Set system UI overlay style
+  // Set system UI overlay style - Dark Theme
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Color(0xFF0B1120),
+      systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
 
@@ -31,6 +33,7 @@ void main() async {
   final apiService = ApiService();
   final authService = AuthService(apiService);
   final notificationService = NotificationService(apiService);
+  await notificationService.initialize();
 
   // Create providers
   final authProvider = AuthProvider(authService);

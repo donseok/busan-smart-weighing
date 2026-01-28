@@ -39,6 +39,29 @@ class AuthService {
     return response;
   }
 
+  Future<ApiResponse<LoginResponse>> loginWithOtp({
+    required String phoneNumber,
+    required String otpCode,
+  }) async {
+    final response = await _apiService.post<LoginResponse>(
+      ApiConfig.otpLoginUrl,
+      data: {'phoneNumber': phoneNumber, 'otpCode': otpCode},
+      fromData: (data) =>
+          LoginResponse.fromJson(data as Map<String, dynamic>),
+    );
+
+    if (response.success && response.data != null) {
+      final loginResponse = response.data!;
+      await _apiService.saveTokens(
+        accessToken: loginResponse.token.accessToken,
+        refreshToken: loginResponse.token.refreshToken,
+      );
+      await _saveUser(loginResponse.user);
+    }
+
+    return response;
+  }
+
   Future<void> logout() async {
     try {
       await _apiService.post(ApiConfig.logoutUrl);

@@ -5,12 +5,18 @@ import com.dongkuk.weighing.dispatch.domain.DispatchRepository;
 import com.dongkuk.weighing.dispatch.dto.*;
 import com.dongkuk.weighing.global.common.exception.BusinessException;
 import com.dongkuk.weighing.global.common.exception.ErrorCode;
+import com.dongkuk.weighing.master.domain.Vehicle;
+import com.dongkuk.weighing.master.domain.VehicleRepository;
+import com.dongkuk.weighing.user.domain.User;
+import com.dongkuk.weighing.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -19,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DispatchService {
 
     private final DispatchRepository dispatchRepository;
+    private final VehicleRepository vehicleRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public DispatchResponse createDispatch(DispatchCreateRequest request, Long createdBy) {
@@ -100,6 +108,26 @@ public class DispatchService {
 
         log.info("배차 상태 변경: dispatchId={}, newStatus={}", dispatchId, dispatch.getDispatchStatus());
         return DispatchResponse.from(dispatch);
+    }
+
+    public List<DispatchResponse> getMyDispatches(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_001));
+
+        Long companyId = user.getCompanyId();
+        if (companyId == null) {
+            return List.of();
+        }
+
+        List<Vehicle> vehicles = vehicleRepository.findByCompanyIdAndIsActiveTrue(companyId);
+        if (vehicles.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> vehicleIds = vehicles.stream().map(Vehicle::getVehicleId).toList();
+        return dispatchRepository.findActiveByVehicleIds(vehicleIds).stream()
+                .map(DispatchResponse::from)
+                .toList();
     }
 
     private Dispatch findDispatchById(Long dispatchId) {

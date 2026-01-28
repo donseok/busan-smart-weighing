@@ -7,11 +7,16 @@ import 'screens/home_screen.dart';
 import 'screens/dispatch/dispatch_detail_screen.dart';
 import 'screens/weighing/otp_input_screen.dart';
 import 'screens/slip/slip_detail_screen.dart';
+import 'screens/notice/notification_list_screen.dart';
 
 class BusanWeighingApp extends StatelessWidget {
   const BusanWeighingApp({super.key});
 
-  static const Color _primaryColor = Color(0xFF1677FF);
+  // Modern Industrial Intelligence - Dark Theme Palette
+  static const Color _primaryColor = Color(0xFF06B6D4);  // Neon Cyan
+  static const Color _bgBase = Color(0xFF0B1120);         // Deep Navy
+  static const Color _bgSurface = Color(0xFF1E293B);      // Charcoal
+  static const Color _bgElevated = Color(0xFF0F172A);     // Elevated surface
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +71,11 @@ class BusanWeighingApp extends StatelessWidget {
                 return SlipDetailScreen(slipId: id);
               },
             ),
+            GoRoute(
+              path: 'notifications',
+              builder: (context, state) =>
+                  const NotificationListScreen(),
+            ),
           ],
         ),
       ],
@@ -84,24 +94,43 @@ class BusanWeighingApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: _primaryColor,
-          brightness: Brightness.light,
+          brightness: Brightness.dark,
+          surface: _bgSurface,
+          onSurface: const Color(0xFFF8FAFC),
+          error: const Color(0xFFF43F5E),
         ),
+        scaffoldBackgroundColor: _bgBase,
         fontFamily: 'Pretendard',
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           centerTitle: true,
           elevation: 0,
           scrolledUnderElevation: 1,
+          backgroundColor: _bgSurface,
+          foregroundColor: const Color(0xFFF8FAFC),
+          surfaceTintColor: Colors.transparent,
         ),
         cardTheme: CardThemeData(
           elevation: 0,
+          color: _bgSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: Color(0xFF334155)),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
+          fillColor: _bgElevated,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF334155)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF334155)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: _primaryColor, width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -122,11 +151,16 @@ class BusanWeighingApp extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            side: const BorderSide(color: Color(0xFF334155)),
+            foregroundColor: const Color(0xFFF8FAFC),
           ),
         ),
         navigationBarTheme: NavigationBarThemeData(
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           height: 72,
+          backgroundColor: _bgSurface,
+          surfaceTintColor: Colors.transparent,
+          indicatorColor: _primaryColor.withValues(alpha: 0.15),
           indicatorShape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -134,12 +168,25 @@ class BusanWeighingApp extends StatelessWidget {
         dividerTheme: const DividerThemeData(
           space: 1,
           thickness: 1,
+          color: Color(0xFF334155),
         ),
         snackBarTheme: SnackBarThemeData(
           behavior: SnackBarBehavior.floating,
+          backgroundColor: _bgSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: _bgSurface,
+          surfaceTintColor: Colors.transparent,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+        ),
+        dialogTheme: DialogThemeData(
+          backgroundColor: _bgSurface,
+          surfaceTintColor: Colors.transparent,
         ),
       ),
     );

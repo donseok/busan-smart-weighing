@@ -12,6 +12,7 @@ public sealed class LocalCacheService : IDisposable
 {
     private const int SyncIntervalMs = 10000; // 10 seconds
     private const int NetworkCheckIntervalMs = 15000; // 15 seconds
+    private const int MaxRetryCount = 5;
 
     private readonly string _dbPath;
     private readonly string _connectionString;
@@ -258,19 +259,74 @@ public sealed class LocalCacheService : IDisposable
         using var conn = new SQLiteConnection(_connectionString);
         await conn.OpenAsync();
 
-        const string sql = @"
-            UPDATE cached_weighings
-            SET retry_count = retry_count + 1,
-                last_error = @error,
-                last_retry_at = datetime('now','localtime')
-            WHERE id = @id";
+        // Check current retry count to decide whether to quarantine.
+        const string selectSql = "SELECT retry_count FROM cached_weighings WHERE id = @id";
+        using var selectCmd = new SQLiteCommand(selectSql, conn);
+        selectCmd.Parameters.AddWithValue("@id", id);
+        var currentCount = Convert.ToInt32(await selectCmd.ExecuteScalarAsync());
 
-        using var cmd = new SQLiteCommand(sql, conn);
-        cmd.Parameters.AddWithValue("@id", id);
-        cmd.Parameters.AddWithValue("@error", error);
+        if (currentCount + 1 >= MaxRetryCount)
+        {
+            // Quarantine: max retries reached.
+            const string quarantineSql = @"
+                UPDATE cached_weighings
+                SET sync_status = 'QUARANTINED',
+                    retry_count = retry_count + 1,
+                    last_error = @error,
+                    last_retry_at = datetime('now','localtime')
+                WHERE id = @id";
+
+            using var quarantineCmd = new SQLiteCommand(quarantineSql, conn);
+            quarantineCmd.Parameters.AddWithValue("@id", id);
+            quarantineCmd.Parameters.AddWithValue("@error", error);
+            await quarantineCmd.ExecuteNonQueryAsync();
+
+            SyncError?.Invoke(this, $"Cache record {id} quarantined after {MaxRetryCount} retries: {error}");
+        }
+        else
+        {
+            const string retrySql = @"
+                UPDATE cached_weighings
+                SET retry_count = retry_count + 1,
+                    last_error = @error,
+                    last_retry_at = datetime('now','localtime')
+                WHERE id = @id";
+
+            using var retryCmd = new SQLiteCommand(retrySql, conn);
+            retryCmd.Parameters.AddWithValue("@id", id);
+            retryCmd.Parameters.AddWithValue("@error", error);
+            await retryCmd.ExecuteNonQueryAsync();
+
+            SyncError?.Invoke(this, $"Cache record {id} retry failed: {error}");
+        }
+    }
+
+    // -- Quarantine operations -------------------------------------------------
+
+    /// <summary>
+    /// Returns the number of records that have been quarantined after exceeding max retries.
+    /// </summary>
+    public async Task<int> GetQuarantinedCountAsync()
+    {
+        using var conn = new SQLiteConnection(_connectionString);
+        await conn.OpenAsync();
+        using var cmd = new SQLiteCommand("SELECT COUNT(*) FROM cached_weighings WHERE sync_status = 'QUARANTINED'", conn);
+        var result = await cmd.ExecuteScalarAsync();
+        return Convert.ToInt32(result);
+    }
+
+    /// <summary>
+    /// Requeues all quarantined records back to PENDING status with reset retry counts.
+    /// </summary>
+    public async Task RequeueQuarantinedAsync()
+    {
+        using var conn = new SQLiteConnection(_connectionString);
+        await conn.OpenAsync();
+        using var cmd = new SQLiteCommand(
+            "UPDATE cached_weighings SET sync_status = 'PENDING', retry_count = 0, last_error = NULL WHERE sync_status = 'QUARANTINED'",
+            conn);
         await cmd.ExecuteNonQueryAsync();
-
-        SyncError?.Invoke(this, $"Cache record {id} retry failed: {error}");
+        SyncError?.Invoke(this, "[Cache] Quarantined records requeued for sync");
     }
 
     // -- IDisposable -----------------------------------------------------------

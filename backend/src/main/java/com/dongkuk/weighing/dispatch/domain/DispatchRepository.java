@@ -27,4 +27,9 @@ public interface DispatchRepository extends JpaRepository<Dispatch, Long> {
     boolean existsByCompanyId(Long companyId);
 
     boolean existsByVehicleId(Long vehicleId);
+
+    @Query("SELECT d FROM Dispatch d WHERE d.vehicleId IN :vehicleIds " +
+            "AND d.dispatchStatus IN ('REGISTERED', 'IN_PROGRESS') " +
+            "ORDER BY d.dispatchDate DESC")
+    java.util.List<Dispatch> findActiveByVehicleIds(@Param("vehicleIds") java.util.List<Long> vehicleIds);
 }

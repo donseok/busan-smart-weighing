@@ -126,8 +126,8 @@ class _HistoryScreenState extends State<HistoryScreen>
           child: TabBarView(
             controller: _tabController,
             children: [
-              _buildHistoryList(provider, theme),
-              _buildHistoryList(provider, theme),
+              _buildHistoryList(provider, theme, showSummary: true),
+              _buildHistoryList(provider, theme, showSummary: false),
             ],
           ),
         ),
@@ -216,7 +216,11 @@ class _HistoryScreenState extends State<HistoryScreen>
     );
   }
 
-  Widget _buildHistoryList(DispatchProvider provider, ThemeData theme) {
+  Widget _buildHistoryList(
+    DispatchProvider provider,
+    ThemeData theme, {
+    bool showSummary = false,
+  }) {
     if (provider.isLoading && provider.weighingRecords.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -251,13 +255,66 @@ class _HistoryScreenState extends State<HistoryScreen>
       onRefresh: _loadHistory,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: dateKeys.length,
+        itemCount: dateKeys.length + (showSummary ? 1 : 0),
         itemBuilder: (context, index) {
-          final date = dateKeys[index];
+          if (showSummary && index == 0) {
+            return _buildMonthlySummary(theme, provider.weighingRecords);
+          }
+          final adjustedIndex = showSummary ? index - 1 : index;
+          final date = dateKeys[adjustedIndex];
           final records = grouped[date]!;
           return _buildDateGroup(theme, date, records);
         },
       ),
+    );
+  }
+
+  Widget _buildMonthlySummary(ThemeData theme, List<WeighingRecord> records) {
+    final completedCount =
+        records.where((r) => r.status == WeighingStatus.completed).length;
+    final totalNetWeight = records
+        .where((r) => r.netWeight != null)
+        .fold<double>(0.0, (sum, r) => sum + (r.netWeight ?? 0));
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: theme.colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildSummaryItem(theme, '전체', '${records.length}건'),
+            _buildSummaryItem(theme, '완료', '$completedCount건'),
+            _buildSummaryItem(
+              theme,
+              '총 순중량',
+              '${(totalNetWeight / 1000).toStringAsFixed(1)}톤',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(ThemeData theme, String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onPrimaryContainer,
+          ),
+        ),
+      ],
     );
   }
 

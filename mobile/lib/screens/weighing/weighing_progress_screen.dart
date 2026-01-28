@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/weighing_record.dart';
@@ -17,6 +18,7 @@ class WeighingProgressScreen extends StatefulWidget {
 
 class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
   Timer? _refreshTimer;
+  Set<String> _previouslyCompletedIds = {};
 
   @override
   void initState() {
@@ -44,6 +46,50 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
       startDate: today,
       endDate: today,
     );
+
+    if (!mounted) return;
+
+    // Check for newly completed records
+    final currentCompleted = provider.weighingRecords
+        .where((r) => r.status == WeighingStatus.completed)
+        .map((r) => r.id)
+        .toSet();
+
+    final newlyCompleted = currentCompleted.difference(_previouslyCompletedIds);
+
+    if (newlyCompleted.isNotEmpty && _previouslyCompletedIds.isNotEmpty) {
+      // Find the first newly completed record for the dialog
+      final completedRecord = provider.weighingRecords.firstWhere(
+        (r) => newlyCompleted.contains(r.id),
+      );
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('계량 완료'),
+            content: Text(
+              '${completedRecord.dispatchNumber} 계량이 완료되었습니다.\n계량표를 확인하시겠습니까?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('닫기'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  context.go('/slip/${completedRecord.id}');
+                },
+                child: const Text('계량표 보기'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    _previouslyCompletedIds = currentCompleted;
   }
 
   @override

@@ -57,15 +57,15 @@ enum WeighingStatus {
   Color get color {
     switch (this) {
       case WeighingStatus.waiting:
-        return const Color(0xFF8C8C8C);
+        return const Color(0xFF94A3B8);
       case WeighingStatus.firstWeighing:
-        return const Color(0xFF1677FF);
+        return const Color(0xFF06B6D4);
       case WeighingStatus.secondWeighing:
-        return const Color(0xFFFA8C16);
+        return const Color(0xFFF59E0B);
       case WeighingStatus.completed:
-        return const Color(0xFF52C41A);
+        return const Color(0xFF10B981);
       case WeighingStatus.error:
-        return const Color(0xFFF5222D);
+        return const Color(0xFFF43F5E);
     }
   }
 
