@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Layout, Menu, Typography, Button, Tooltip, Switch, Popover } from 'antd';
 import {
@@ -35,6 +35,7 @@ const menuItems = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '대시보드' },
   { key: '/dispatch', icon: <CarOutlined />, label: '배차 관리' },
   { key: '/weighing', icon: <ExperimentOutlined />, label: '계량 현황' },
+  { key: '/inquiry', icon: <FileSearchOutlined />, label: '계량 조회' },
   {
     key: 'master',
     icon: <DatabaseOutlined />,
@@ -71,6 +72,37 @@ const MainLayout: React.FC = () => {
   const location = useLocation();
   const { themeMode, toggleTheme } = useTheme();
 
+  // 현재 경로에 따라 열려야 할 서브메뉴 계산
+  const getOpenKeys = () => {
+    const keys: string[] = [];
+    for (const item of menuItems) {
+      if ('children' in item && item.children) {
+        for (const child of item.children) {
+          if (child.key === location.pathname) {
+            keys.push(item.key);
+          }
+        }
+      }
+    }
+    return keys;
+  };
+
+  const [openKeys, setOpenKeys] = useState<string[]>(() => {
+    const pathKeys = getOpenKeys();
+    return pathKeys.length > 0 ? pathKeys : ['master'];
+  });
+
+  // 경로 변경 시 해당 서브메뉴 자동 열기
+  useEffect(() => {
+    const pathKeys = getOpenKeys();
+    if (pathKeys.length > 0) {
+      setOpenKeys(prev => {
+        const merged = new Set([...prev, ...pathKeys]);
+        return Array.from(merged);
+      });
+    }
+  }, [location.pathname]);
+
   // 현재 페이지 정보
   const currentPageInfo = menuItems.flatMap(item =>
     'children' in item && item.children ? item.children : [item]
@@ -97,6 +129,8 @@ const MainLayout: React.FC = () => {
         style={{
           borderRight: `1px solid ${colors.border}`,
           background: colors.bgSider,
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         {/* 로고 영역 */}
@@ -148,19 +182,22 @@ const MainLayout: React.FC = () => {
           )}
         </div>
 
-        <Menu
-          theme={isDark ? 'dark' : 'light'}
-          selectedKeys={[location.pathname]}
-          defaultOpenKeys={['master']}
-          mode="inline"
-          items={menuItems}
-          onClick={({ key }) => navigate(key)}
-          style={{
-            marginTop: 8,
-            border: 'none',
-            background: 'transparent',
-          }}
-        />
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          <Menu
+            theme={isDark ? 'dark' : 'light'}
+            selectedKeys={[location.pathname]}
+            openKeys={openKeys}
+            onOpenChange={(keys) => setOpenKeys(keys)}
+            mode="inline"
+            items={menuItems}
+            onClick={({ key }) => navigate(key)}
+            style={{
+              marginTop: 8,
+              border: 'none',
+              background: 'transparent',
+            }}
+          />
+        </div>
       </Sider>
 
       <Layout style={{ background: colors.bgBase }}>

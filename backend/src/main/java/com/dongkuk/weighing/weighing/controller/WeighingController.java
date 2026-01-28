@@ -58,12 +58,13 @@ public class WeighingController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<WeighingResponse>>> searchWeighings(
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) WeighingMode weighingMode,
+            @RequestParam(value = "date_from", required = false) LocalDate dateFrom,
+            @RequestParam(value = "date_to", required = false) LocalDate dateTo,
+            @RequestParam(value = "weighing_mode", required = false) WeighingMode weighingMode,
             @RequestParam(required = false) WeighingStatus status,
+            @RequestParam(value = "lpr_plate_number", required = false) String lprPlateNumber,
             Pageable pageable) {
-        WeighingSearchCondition condition = new WeighingSearchCondition(dateFrom, dateTo, weighingMode, status);
+        WeighingSearchCondition condition = new WeighingSearchCondition(dateFrom, dateTo, weighingMode, status, lprPlateNumber);
         Page<WeighingResponse> response = weighingService.searchWeighings(condition, pageable);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }

@@ -80,8 +80,11 @@ public class WeighingService {
         LocalDateTime dateTo = condition.dateTo() != null
                 ? condition.dateTo().atTime(LocalTime.MAX) : null;
 
+        String plateNumber = condition.lprPlateNumber() != null && !condition.lprPlateNumber().isBlank()
+                ? condition.lprPlateNumber().trim() : null;
+
         return weighingRepository.findByConditions(
-                dateFrom, dateTo, condition.weighingMode(), condition.status(), pageable
+                dateFrom, dateTo, condition.weighingMode(), condition.status(), plateNumber, pageable
         ).map(WeighingResponse::from);
     }
 

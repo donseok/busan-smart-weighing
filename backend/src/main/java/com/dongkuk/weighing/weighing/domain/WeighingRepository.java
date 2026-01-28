@@ -17,12 +17,14 @@ public interface WeighingRepository extends JpaRepository<WeighingRecord, Long> 
             "(:dateFrom IS NULL OR w.createdAt >= :dateFrom) AND " +
             "(:dateTo IS NULL OR w.createdAt <= :dateTo) AND " +
             "(:weighingMode IS NULL OR w.weighingMode = :weighingMode) AND " +
-            "(:status IS NULL OR w.weighingStatus = :status)")
+            "(:status IS NULL OR w.weighingStatus = :status) AND " +
+            "(:lprPlateNumber IS NULL OR w.lprPlateNumber LIKE CONCAT('%', :lprPlateNumber, '%'))")
     Page<WeighingRecord> findByConditions(
             @Param("dateFrom") LocalDateTime dateFrom,
             @Param("dateTo") LocalDateTime dateTo,
             @Param("weighingMode") WeighingMode weighingMode,
             @Param("status") WeighingStatus status,
+            @Param("lprPlateNumber") String lprPlateNumber,
             Pageable pageable);
 
     @Query("SELECT COUNT(w) FROM WeighingRecord w WHERE w.weighingStatus = :status " +

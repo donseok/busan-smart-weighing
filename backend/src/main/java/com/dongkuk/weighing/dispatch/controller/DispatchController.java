@@ -51,9 +51,9 @@ public class DispatchController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<DispatchResponse>>> searchDispatches(
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
-            @RequestParam(required = false) ItemType itemType,
+            @RequestParam(value = "date_from", required = false) LocalDate dateFrom,
+            @RequestParam(value = "date_to", required = false) LocalDate dateTo,
+            @RequestParam(value = "item_type", required = false) ItemType itemType,
             @RequestParam(required = false) DispatchStatus status,
             Pageable pageable) {
         DispatchSearchCondition condition = new DispatchSearchCondition(dateFrom, dateTo, itemType, status);

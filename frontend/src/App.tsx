@@ -16,6 +16,7 @@ import AdminUserPage from './pages/admin/AdminUserPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 import AdminAuditLogPage from './pages/admin/AdminAuditLogPage';
 import StatisticsPage from './pages/StatisticsPage';
+import InquiryPage from './pages/InquiryPage';
 import MonitoringPage from './pages/MonitoringPage';
 import MyPage from './pages/MyPage';
 import HelpPage from './pages/HelpPage';
@@ -29,6 +30,7 @@ const App: React.FC = () => {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="dispatch" element={<DispatchPage />} />
         <Route path="weighing" element={<WeighingPage />} />
+        <Route path="inquiry" element={<InquiryPage />} />
         <Route path="master/codes" element={<MasterCodePage />} />
         <Route path="master/companies" element={<MasterCompanyPage />} />
         <Route path="master/vehicles" element={<MasterVehiclePage />} />

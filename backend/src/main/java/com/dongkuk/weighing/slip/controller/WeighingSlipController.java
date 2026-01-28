@@ -42,8 +42,8 @@ public class WeighingSlipController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<SlipResponse>>> searchSlips(
-            @RequestParam(required = false) LocalDate dateFrom,
-            @RequestParam(required = false) LocalDate dateTo,
+            @RequestParam(value = "date_from", required = false) LocalDate dateFrom,
+            @RequestParam(value = "date_to", required = false) LocalDate dateTo,
             Pageable pageable) {
         Page<SlipResponse> response = slipService.searchSlips(dateFrom, dateTo, pageable);
         return ResponseEntity.ok(ApiResponse.ok(response));

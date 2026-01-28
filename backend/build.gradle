@@ -75,7 +75,7 @@ dependencies {
 }
 
 bootRun {
-    systemProperty 'spring.profiles.active', findProperty('profile') ?: 'default'
+    systemProperty 'spring.profiles.active', findProperty('profile') ?: 'dev'
 }
 
 tasks.named('test') {

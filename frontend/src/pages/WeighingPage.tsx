@@ -10,7 +10,7 @@ import {
   Descriptions,
 } from 'antd';
 import SortableTable from '../components/SortableTable';
-import { ReloadOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import type { WeighingRecord } from '../types';
@@ -133,7 +133,13 @@ const WeighingPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
+
+  const handleReset = () => {
+    setStatusFilter(undefined);
+    setModeFilter(undefined);
+    setDateRange(null);
+  };
 
   const handleWsMessage = useCallback(() => {
     fetchData();
@@ -157,12 +163,14 @@ const WeighingPage: React.FC = () => {
       <Typography.Title level={4}>계량 현황</Typography.Title>
       <Space style={{ marginBottom: 16 }} wrap>
         <RangePicker
+          value={dateRange}
           placeholder={['시작일', '종료일']}
           onChange={handleDateRangeChange}
           allowClear
           style={{ width: 260 }}
         />
         <Select
+          value={statusFilter}
           placeholder="상태 필터"
           allowClear
           style={{ width: 150 }}
@@ -173,14 +181,18 @@ const WeighingPage: React.FC = () => {
           }))}
         />
         <Select
+          value={modeFilter}
           placeholder="계량방식"
           allowClear
           style={{ width: 160 }}
           onChange={setModeFilter}
           options={modeOptions}
         />
-        <Button icon={<ReloadOutlined />} onClick={fetchData}>
-          새로고침
+        <Button type="primary" icon={<SearchOutlined />} onClick={fetchData}>
+          조회
+        </Button>
+        <Button icon={<ReloadOutlined />} onClick={handleReset}>
+          초기화
         </Button>
       </Space>
 

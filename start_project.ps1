@@ -8,7 +8,7 @@ $scriptPath = $PSScriptRoot
 $backendPath = Join-Path $scriptPath "backend"
 if (Test-Path $backendPath) {
     Write-Host "Launching Backend (Gradle)..." -ForegroundColor Green
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/k cd /d `"$backendPath`" && gradlew.bat bootRun"
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/k cd /d `"$backendPath`" && gradlew.bat bootRun -Pprofile=dev"
 } else {
     Write-Error "Backend directory not found at $backendPath"
 }

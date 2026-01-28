@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Button, Space, Typography, Tag, DatePicker, Select, Modal, Form, Input, Popconfirm, message } from 'antd';
-import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import React, { useState, useCallback } from 'react';
+import { Button, Space, Typography, Tag, DatePicker, Select, Modal, Form, Input, Popconfirm, message, Card, Row, Col, Pagination } from 'antd';
+import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import type { Dispatch } from '../types';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import { colors } from '../theme/themeConfig';
 import SortableTable from '../components/SortableTable';
 
@@ -26,38 +26,66 @@ const statusOptions = Object.entries(statusLabels).map(([value, label]) => ({ va
 const itemTypeOptions = Object.entries(itemTypeLabels).map(([value, label]) => ({ value, label }));
 
 interface FilterParams {
-  startDate?: string;
-  endDate?: string;
+  dateRange: [Dayjs | null, Dayjs | null] | null;
   itemType?: string;
   dispatchStatus?: string;
 }
 
+const initialFilters: FilterParams = {
+  dateRange: null,
+  itemType: undefined,
+  dispatchStatus: undefined,
+};
+
 const DispatchPage: React.FC = () => {
   const [data, setData] = useState<Dispatch[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Dispatch | null>(null);
-  const [filters, setFilters] = useState<FilterParams>({});
+  const [filters, setFilters] = useState<FilterParams>({ ...initialFilters });
   const [createForm] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  const fetchData = useCallback(async (currentFilters?: FilterParams) => {
+  const fetchData = useCallback(async (page = 1, size = 20) => {
     setLoading(true);
     try {
-      const params: Record<string, unknown> = { size: 20 };
-      const appliedFilters = currentFilters ?? filters;
-      if (appliedFilters.startDate) params.startDate = appliedFilters.startDate;
-      if (appliedFilters.endDate) params.endDate = appliedFilters.endDate;
-      if (appliedFilters.itemType) params.itemType = appliedFilters.itemType;
-      if (appliedFilters.dispatchStatus) params.dispatchStatus = appliedFilters.dispatchStatus;
+      const params: Record<string, unknown> = { page: page - 1, size };
+      if (filters.dateRange?.[0]) params.startDate = filters.dateRange[0].format('YYYY-MM-DD');
+      if (filters.dateRange?.[1]) params.endDate = filters.dateRange[1].format('YYYY-MM-DD');
+      if (filters.itemType) params.itemType = filters.itemType;
+      if (filters.dispatchStatus) params.dispatchStatus = filters.dispatchStatus;
       const res = await apiClient.get('/dispatches', { params });
-      setData(res.data.data.content || []);
+      const pageData = res.data.data;
+      setData(pageData.content || []);
+      setTotalElements(pageData.totalElements || 0);
+      setSearched(true);
     } catch { /* ignore */ }
     setLoading(false);
   }, [filters]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchData(1, pageSize);
+  };
+
+  const handleReset = () => {
+    setFilters({ ...initialFilters });
+    setData([]);
+    setSearched(false);
+    setTotalElements(0);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number, size: number) => {
+    setCurrentPage(page);
+    setPageSize(size);
+    fetchData(page, size);
+  };
 
   const handleCreate = async () => {
     try {
@@ -67,7 +95,7 @@ const DispatchPage: React.FC = () => {
       message.success('배차가 등록되었습니다.');
       setCreateModalOpen(false);
       createForm.resetFields();
-      fetchData();
+      if (searched) fetchData(currentPage, pageSize);
     } catch { /* validation error */ }
   };
 
@@ -96,7 +124,7 @@ const DispatchPage: React.FC = () => {
       setEditModalOpen(false);
       setEditingRecord(null);
       editForm.resetFields();
-      fetchData();
+      if (searched) fetchData(currentPage, pageSize);
     } catch { /* validation error */ }
   };
 
@@ -104,32 +132,10 @@ const DispatchPage: React.FC = () => {
     try {
       await apiClient.delete(`/dispatches/${record.dispatchId}`);
       message.success('배차가 삭제되었습니다.');
-      fetchData();
+      if (searched) fetchData(currentPage, pageSize);
     } catch {
       message.error('삭제에 실패했습니다.');
     }
-  };
-
-  const handleDateRangeChange = (_: unknown, dateStrings: [string, string]) => {
-    const updated: FilterParams = {
-      ...filters,
-      startDate: dateStrings[0] || undefined,
-      endDate: dateStrings[1] || undefined,
-    };
-    setFilters(updated);
-    fetchData(updated);
-  };
-
-  const handleItemTypeChange = (value: string | undefined) => {
-    const updated: FilterParams = { ...filters, itemType: value };
-    setFilters(updated);
-    fetchData(updated);
-  };
-
-  const handleStatusChange = (value: string | undefined) => {
-    const updated: FilterParams = { ...filters, dispatchStatus: value };
-    setFilters(updated);
-    fetchData(updated);
   };
 
   const columns: ColumnsType<Dispatch> = [
@@ -187,32 +193,95 @@ const DispatchPage: React.FC = () => {
   return (
     <>
       <Typography.Title level={4}>배차 관리</Typography.Title>
-      <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>배차 등록</Button>
-        <Button icon={<ReloadOutlined />} onClick={() => fetchData()}>새로고침</Button>
-      </Space>
 
-      <Space style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        <RangePicker
-          onChange={handleDateRangeChange}
-          placeholder={['시작일', '종료일']}
-          style={{ minWidth: 240 }}
-        />
-        <Select
-          allowClear
-          placeholder="품목유형"
-          options={itemTypeOptions}
-          onChange={handleItemTypeChange}
-          style={{ minWidth: 140 }}
-        />
-        <Select
-          allowClear
-          placeholder="배차상태"
-          options={statusOptions}
-          onChange={handleStatusChange}
-          style={{ minWidth: 140 }}
-        />
-      </Space>
+      {/* Search Condition Card */}
+      <Card
+        size="small"
+        style={{ marginBottom: 16 }}
+        styles={{ body: { padding: '16px 24px' } }}
+      >
+        <Row gutter={[16, 12]} align="middle">
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+                기간
+              </Typography.Text>
+              <RangePicker
+                value={filters.dateRange}
+                onChange={(dates) => setFilters((prev) => ({ ...prev, dateRange: dates }))}
+                placeholder={['시작일', '종료일']}
+                allowClear
+                style={{ width: 260 }}
+              />
+            </Space>
+          </Col>
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 60, display: 'inline-block' }}>
+                품목유형
+              </Typography.Text>
+              <Select
+                value={filters.itemType}
+                onChange={(value) => setFilters((prev) => ({ ...prev, itemType: value }))}
+                placeholder="전체"
+                allowClear
+                style={{ width: 140 }}
+                options={itemTypeOptions}
+              />
+            </Space>
+          </Col>
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 60, display: 'inline-block' }}>
+                배차상태
+              </Typography.Text>
+              <Select
+                value={filters.dispatchStatus}
+                onChange={(value) => setFilters((prev) => ({ ...prev, dispatchStatus: value }))}
+                placeholder="전체"
+                allowClear
+                style={{ width: 130 }}
+                options={statusOptions}
+              />
+            </Space>
+          </Col>
+        </Row>
+
+        <Row style={{ marginTop: 12 }} justify="end">
+          <Space>
+            <Button icon={<ClearOutlined />} onClick={handleReset}>
+              초기화
+            </Button>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={handleSearch}
+              loading={loading}
+            >
+              조회
+            </Button>
+          </Space>
+        </Row>
+      </Card>
+
+      {/* Results header */}
+      <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Space>
+          {searched && (
+            <Typography.Text type="secondary">
+              조회 결과: <strong>{totalElements.toLocaleString()}</strong>건
+            </Typography.Text>
+          )}
+          {searched && (
+            <Button size="small" icon={<ReloadOutlined />} onClick={() => fetchData(currentPage, pageSize)}>
+              새로고침
+            </Button>
+          )}
+        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
+          배차 등록
+        </Button>
+      </div>
 
       <SortableTable
         columns={columns}
@@ -221,7 +290,27 @@ const DispatchPage: React.FC = () => {
         loading={loading}
         size="middle"
         tableKey="dispatch"
+        pagination={false}
+        locale={{
+          emptyText: searched
+            ? '조회 결과가 없습니다.'
+            : '검색 조건을 설정한 후 조회 버튼을 클릭하세요.',
+        }}
       />
+
+      {searched && totalElements > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalElements}
+            onChange={handlePageChange}
+            showSizeChanger
+            showTotal={(total) => `총 ${total.toLocaleString()}건`}
+            pageSizeOptions={['10', '20', '50', '100']}
+          />
+        </div>
+      )}
 
       <Modal
         title="배차 등록"

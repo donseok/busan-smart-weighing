@@ -9,5 +9,6 @@ public record WeighingSearchCondition(
     LocalDate dateFrom,
     LocalDate dateTo,
     WeighingMode weighingMode,
-    WeighingStatus status
+    WeighingStatus status,
+    String lprPlateNumber
 ) {}

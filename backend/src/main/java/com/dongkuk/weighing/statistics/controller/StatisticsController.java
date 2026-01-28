@@ -26,10 +26,10 @@ public class StatisticsController {
 
     @GetMapping("/daily")
     public ResponseEntity<ApiResponse<List<DailyStatisticsResponse>>> getDailyStatistics(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
-            @RequestParam(required = false) Long companyId,
-            @RequestParam(required = false) ItemType itemType) {
+            @RequestParam("date_from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam("date_to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            @RequestParam(value = "company_id", required = false) Long companyId,
+            @RequestParam(value = "item_type", required = false) ItemType itemType) {
         List<DailyStatisticsResponse> response = statisticsService.getDailyStatistics(
                 dateFrom, dateTo, companyId, itemType);
         return ResponseEntity.ok(ApiResponse.ok(response));
@@ -37,10 +37,10 @@ public class StatisticsController {
 
     @GetMapping("/monthly")
     public ResponseEntity<ApiResponse<List<MonthlyStatisticsResponse>>> getMonthlyStatistics(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
-            @RequestParam(required = false) Long companyId,
-            @RequestParam(required = false) ItemType itemType) {
+            @RequestParam("date_from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam("date_to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            @RequestParam(value = "company_id", required = false) Long companyId,
+            @RequestParam(value = "item_type", required = false) ItemType itemType) {
         List<MonthlyStatisticsResponse> response = statisticsService.getMonthlyStatistics(
                 dateFrom, dateTo, companyId, itemType);
         return ResponseEntity.ok(ApiResponse.ok(response));
@@ -48,10 +48,10 @@ public class StatisticsController {
 
     @GetMapping("/summary")
     public ResponseEntity<ApiResponse<StatisticsSummaryResponse>> getSummary(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
-            @RequestParam(required = false) Long companyId,
-            @RequestParam(required = false) ItemType itemType) {
+            @RequestParam("date_from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam("date_to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            @RequestParam(value = "company_id", required = false) Long companyId,
+            @RequestParam(value = "item_type", required = false) ItemType itemType) {
         StatisticsSummaryResponse response = statisticsService.getSummary(
                 dateFrom, dateTo, companyId, itemType);
         return ResponseEntity.ok(ApiResponse.ok(response));
@@ -59,10 +59,10 @@ public class StatisticsController {
 
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportToExcel(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
-            @RequestParam(required = false) Long companyId,
-            @RequestParam(required = false) ItemType itemType,
+            @RequestParam("date_from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam("date_to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
+            @RequestParam(value = "company_id", required = false) Long companyId,
+            @RequestParam(value = "item_type", required = false) ItemType itemType,
             @RequestParam(defaultValue = "all") String type) throws IOException {
 
         byte[] excelBytes = statisticsService.exportToExcel(dateFrom, dateTo, companyId, itemType, type);
