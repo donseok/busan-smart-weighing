@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Table, Button, Space, Typography, Modal, Form, Input, InputNumber, Popconfirm, message } from 'antd';
+import { Button, Space, Typography, Modal, Form, Input, InputNumber, Popconfirm, message } from 'antd';
+import SortableTable from '../../components/SortableTable';
 import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
@@ -133,7 +134,7 @@ const MasterVehiclePage: React.FC = () => {
           prefix={<SearchOutlined />}
         />
       </Space>
-      <Table columns={columns} dataSource={data} rowKey="vehicleId" loading={loading} size="middle" />
+      <SortableTable columns={columns} dataSource={data} rowKey="vehicleId" loading={loading} size="middle" tableKey="masterVehicle" />
 
       <Modal
         title="차량 등록"

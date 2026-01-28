@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Space, Typography, Tag, Modal, Input, message, Popconfirm } from 'antd';
+import { Button, Space, Typography, Tag, Modal, Input, message, Popconfirm } from 'antd';
+import SortableTable from '../components/SortableTable';
 import { CheckOutlined, CloseOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
@@ -84,7 +85,7 @@ const GatePassPage: React.FC = () => {
       <Space style={{ marginBottom: 16 }}>
         <Button icon={<ReloadOutlined />} onClick={fetchData}>새로고침</Button>
       </Space>
-      <Table columns={columns} dataSource={data} rowKey="gatePassId" loading={loading} size="middle" />
+      <SortableTable columns={columns} dataSource={data} rowKey="gatePassId" loading={loading} size="middle" tableKey="gatePass" />
 
       <Modal title="출문 반려" open={rejectModalOpen} onOk={handleReject} onCancel={() => { setRejectModalOpen(false); setRejectReason(''); }} okText="반려" cancelText="취소">
         <Input.TextArea rows={3} placeholder="반려 사유를 입력하세요" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />

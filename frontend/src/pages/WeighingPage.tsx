@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Table,
   Typography,
   Tag,
   Button,
@@ -10,6 +9,7 @@ import {
   Modal,
   Descriptions,
 } from 'antd';
+import SortableTable from '../components/SortableTable';
 import { ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
@@ -184,12 +184,13 @@ const WeighingPage: React.FC = () => {
         </Button>
       </Space>
 
-      <Table
+      <SortableTable
         columns={columns}
         dataSource={data}
         rowKey="weighingId"
         loading={loading}
         size="middle"
+        tableKey="weighing"
         onRow={(record) => ({
           onClick: () => openDetail(record),
           style: { cursor: 'pointer' },

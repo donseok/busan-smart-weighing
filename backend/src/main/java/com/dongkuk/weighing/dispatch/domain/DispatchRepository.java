@@ -32,4 +32,6 @@ public interface DispatchRepository extends JpaRepository<Dispatch, Long> {
             "AND d.dispatchStatus IN ('REGISTERED', 'IN_PROGRESS') " +
             "ORDER BY d.dispatchDate DESC")
     java.util.List<Dispatch> findActiveByVehicleIds(@Param("vehicleIds") java.util.List<Long> vehicleIds);
+
+    long countByDispatchDateAndDispatchStatus(LocalDate dispatchDate, DispatchStatus status);
 }

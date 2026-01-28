@@ -1,30 +1,74 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <title>부산 스마트 계량 시스템</title>
+    <title>동국씨엠 스마트 계량 시스템</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body {
-        background-color: #0B1120;
-        color: #F8FAFC;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+      /* 다크 테마 변수 (기본값) */
+      :root, [data-theme="dark"] {
+        --bg-base: #0B1120;
+        --bg-surface: #1E293B;
+        --text-primary: #F8FAFC;
+        --text-secondary: #94A3B8;
+        --border-color: #334155;
+        --scrollbar-track: #0B1120;
+        --scrollbar-thumb: #334155;
+        --scrollbar-thumb-hover: #475569;
+        --message-bg: #1E293B;
       }
+
+      /* 라이트 테마 변수 */
+      [data-theme="light"] {
+        --bg-base: #F8FAFC;
+        --bg-surface: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #64748B;
+        --border-color: #E2E8F0;
+        --scrollbar-track: #F1F5F9;
+        --scrollbar-thumb: #CBD5E1;
+        --scrollbar-thumb-hover: #94A3B8;
+        --message-bg: #FFFFFF;
+      }
+
+      body {
+        background-color: var(--bg-base);
+        color: var(--text-primary);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
       #root { min-height: 100vh; }
-      /* 스크롤바 다크 테마 */
+
+      /* 스크롤바 테마 적용 */
       ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: #0B1120; }
-      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: #475569; }
-      /* Ant Design 메시지/알림 다크 오버라이드 */
+      ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+      ::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+      /* Ant Design 메시지/알림 테마 오버라이드 */
       .ant-message .ant-message-notice-content {
-        background: #1E293B !important;
-        border: 1px solid #334155 !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+        background: var(--message-bg) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+      }
+
+      /* 테마 전환 애니메이션 */
+      .ant-layout,
+      .ant-layout-sider,
+      .ant-layout-header,
+      .ant-card,
+      .ant-table,
+      .ant-modal-content {
+        transition: background-color 0.3s ease, border-color 0.3s ease;
       }
     </style>
   </head>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Table, Button, Space, Typography, Modal, Form, Input, Popconfirm, message } from 'antd';
+import { Button, Space, Typography, Modal, Form, Input, Popconfirm, message } from 'antd';
+import SortableTable from '../../components/SortableTable';
 import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
@@ -132,7 +133,7 @@ const MasterCompanyPage: React.FC = () => {
           prefix={<SearchOutlined />}
         />
       </Space>
-      <Table columns={columns} dataSource={data} rowKey="companyId" loading={loading} size="middle" />
+      <SortableTable columns={columns} dataSource={data} rowKey="companyId" loading={loading} size="middle" tableKey="masterCompany" />
 
       <Modal
         title="운송사 등록"

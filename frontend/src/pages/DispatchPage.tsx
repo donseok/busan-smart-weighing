@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Table, Button, Space, Typography, Tag, DatePicker, Select, Modal, Form, Input, Popconfirm, message } from 'antd';
+import { Button, Space, Typography, Tag, DatePicker, Select, Modal, Form, Input, Popconfirm, message } from 'antd';
 import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import type { Dispatch } from '../types';
 import dayjs from 'dayjs';
 import { colors } from '../theme/themeConfig';
+import SortableTable from '../components/SortableTable';
 
 const { RangePicker } = DatePicker;
 
@@ -213,7 +214,14 @@ const DispatchPage: React.FC = () => {
         />
       </Space>
 
-      <Table columns={columns} dataSource={data} rowKey="dispatchId" loading={loading} size="middle" />
+      <SortableTable
+        columns={columns}
+        dataSource={data}
+        rowKey="dispatchId"
+        loading={loading}
+        size="middle"
+        tableKey="dispatch"
+      />
 
       <Modal
         title="배차 등록"

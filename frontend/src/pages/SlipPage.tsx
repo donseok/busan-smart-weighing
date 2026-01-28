@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Table,
   Button,
   Space,
   Typography,
@@ -11,6 +10,7 @@ import {
   Descriptions,
   message,
 } from 'antd';
+import SortableTable from '../components/SortableTable';
 import { ReloadOutlined, ShareAltOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
@@ -168,13 +168,14 @@ const SlipPage: React.FC = () => {
         </Button>
       </Space>
 
-      <Table
+      <SortableTable
         columns={columns}
         dataSource={data}
         rowKey="slipId"
         loading={loading}
         size="middle"
         scroll={{ x: 1000 }}
+        tableKey="slip"
         onRow={(record) => ({
           onClick: () => openDetail(record),
           style: { cursor: 'pointer' },

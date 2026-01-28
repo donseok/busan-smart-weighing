@@ -54,4 +54,44 @@ public interface WeighingRepository extends JpaRepository<WeighingRecord, Long> 
             "AND w.createdAt >= :from AND w.createdAt <= :to " +
             "GROUP BY CAST(w.createdAt AS LocalDate) ORDER BY CAST(w.createdAt AS LocalDate)")
     List<Object[]> findDailyStatistics(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT d.companyId, COUNT(w), COALESCE(SUM(w.netWeight), 0) " +
+            "FROM WeighingRecord w " +
+            "JOIN com.dongkuk.weighing.dispatch.domain.Dispatch d ON w.dispatchId = d.dispatchId " +
+            "WHERE w.weighingStatus = 'COMPLETED' " +
+            "AND w.createdAt >= :from AND w.createdAt <= :to " +
+            "GROUP BY d.companyId ORDER BY COUNT(w) DESC")
+    List<Object[]> countGroupByCompany(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    List<WeighingRecord> findByWeighingStatusOrderByCreatedAtDesc(WeighingStatus status);
+
+    @Query("SELECT CAST(w.createdAt AS LocalDate), d.companyId, d.itemType, COUNT(w), COALESCE(SUM(w.netWeight), 0) " +
+            "FROM WeighingRecord w " +
+            "JOIN com.dongkuk.weighing.dispatch.domain.Dispatch d ON w.dispatchId = d.dispatchId " +
+            "WHERE w.weighingStatus = 'COMPLETED' " +
+            "AND w.createdAt >= :from AND w.createdAt <= :to " +
+            "AND (:companyId IS NULL OR d.companyId = :companyId) " +
+            "AND (:itemType IS NULL OR d.itemType = :itemType) " +
+            "GROUP BY CAST(w.createdAt AS LocalDate), d.companyId, d.itemType " +
+            "ORDER BY CAST(w.createdAt AS LocalDate), d.companyId")
+    List<Object[]> findDailyStatisticsDetailed(
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            @Param("companyId") Long companyId,
+            @Param("itemType") String itemType);
+
+    @Query("SELECT YEAR(w.createdAt), MONTH(w.createdAt), d.companyId, d.itemType, COUNT(w), COALESCE(SUM(w.netWeight), 0) " +
+            "FROM WeighingRecord w " +
+            "JOIN com.dongkuk.weighing.dispatch.domain.Dispatch d ON w.dispatchId = d.dispatchId " +
+            "WHERE w.weighingStatus = 'COMPLETED' " +
+            "AND w.createdAt >= :from AND w.createdAt <= :to " +
+            "AND (:companyId IS NULL OR d.companyId = :companyId) " +
+            "AND (:itemType IS NULL OR d.itemType = :itemType) " +
+            "GROUP BY YEAR(w.createdAt), MONTH(w.createdAt), d.companyId, d.itemType " +
+            "ORDER BY YEAR(w.createdAt), MONTH(w.createdAt), d.companyId")
+    List<Object[]> findMonthlyStatisticsDetailed(
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            @Param("companyId") Long companyId,
+            @Param("itemType") String itemType);
 }

@@ -44,6 +44,15 @@ public class User extends BaseEntity {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
+    @Column(name = "email", length = 100)
+    private String email;
+
+    @Column(name = "push_enabled", nullable = false)
+    private boolean pushEnabled = true;
+
+    @Column(name = "email_notification_enabled", nullable = false)
+    private boolean emailNotificationEnabled = false;
+
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
@@ -104,5 +113,43 @@ public class User extends BaseEntity {
 
     public void deactivate() {
         this.isActive = false;
+    }
+
+    public void changeRole(UserRole newRole) {
+        this.userRole = newRole;
+    }
+
+    public void resetPassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+        this.failedLoginCount = 0;
+        this.lockedUntil = null;
+    }
+
+    public void unlockAccount() {
+        this.failedLoginCount = 0;
+        this.lockedUntil = null;
+    }
+
+    public void updateProfile(String userName, String phoneNumber, String email) {
+        this.userName = userName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+    }
+
+    public void updateNotificationSettings(boolean pushEnabled, boolean emailNotificationEnabled) {
+        this.pushEnabled = pushEnabled;
+        this.emailNotificationEnabled = emailNotificationEnabled;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public boolean isPushEnabled() {
+        return pushEnabled;
+    }
+
+    public boolean isEmailNotificationEnabled() {
+        return emailNotificationEnabled;
     }
 }

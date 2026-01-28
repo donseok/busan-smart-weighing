@@ -4,8 +4,11 @@ import com.dongkuk.weighing.global.common.exception.BusinessException;
 import com.dongkuk.weighing.global.common.exception.ErrorCode;
 import com.dongkuk.weighing.user.domain.User;
 import com.dongkuk.weighing.user.domain.UserRepository;
+import com.dongkuk.weighing.user.domain.UserRole;
+import com.dongkuk.weighing.user.dto.PasswordResetRequest;
 import com.dongkuk.weighing.user.dto.UserCreateRequest;
 import com.dongkuk.weighing.user.dto.UserResponse;
+import com.dongkuk.weighing.user.dto.UserRoleChangeRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -92,5 +95,56 @@ public class UserService {
 
         user.resetFailedLogin();
         log.info("계정 잠금 해제: userId={}", userId);
+    }
+
+    /**
+     * 사용자 역할 변경.
+     * @throws BusinessException ADMIN_003 자기 자신 역할 변경 시도
+     */
+    @Transactional
+    public UserResponse changeRole(Long userId, UserRoleChangeRequest request, Long currentUserId) {
+        if (userId.equals(currentUserId)) {
+            throw new BusinessException(ErrorCode.ADMIN_003);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_001));
+
+        UserRole oldRole = user.getUserRole();
+        user.changeRole(request.userRole());
+
+        log.info("사용자 역할 변경: userId={}, oldRole={}, newRole={}",
+                userId, oldRole, request.userRole());
+
+        return UserResponse.from(user, null);
+    }
+
+    /**
+     * 비밀번호 초기화.
+     */
+    @Transactional
+    public void resetPassword(Long userId, PasswordResetRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_001));
+
+        user.resetPassword(passwordEncoder.encode(request.newPassword()));
+        log.info("비밀번호 초기화: userId={}", userId);
+    }
+
+    /**
+     * 사용자 삭제.
+     * @throws BusinessException ADMIN_004 자기 자신 삭제 시도
+     */
+    @Transactional
+    public void deleteUser(Long userId, Long currentUserId) {
+        if (userId.equals(currentUserId)) {
+            throw new BusinessException(ErrorCode.ADMIN_004);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_001));
+
+        userRepository.delete(user);
+        log.info("사용자 삭제: userId={}, loginId={}", userId, user.getLoginId());
     }
 }

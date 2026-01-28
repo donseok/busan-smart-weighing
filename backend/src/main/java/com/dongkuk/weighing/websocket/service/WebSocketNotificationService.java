@@ -1,5 +1,6 @@
 package com.dongkuk.weighing.websocket.service;
 
+import com.dongkuk.weighing.monitoring.dto.DeviceStatusResponse;
 import com.dongkuk.weighing.websocket.dto.ScaleStatusMessage;
 import com.dongkuk.weighing.websocket.dto.WeighingUpdateMessage;
 import lombok.RequiredArgsConstructor;
@@ -22,5 +23,11 @@ public class WebSocketNotificationService {
     public void notifyScaleStatus(ScaleStatusMessage message) {
         messagingTemplate.convertAndSend("/topic/scale-status", message);
         log.debug("WebSocket 계근대 상태 발송: scaleId={}", message.scaleId());
+    }
+
+    public void notifyDeviceStatusChange(DeviceStatusResponse message) {
+        messagingTemplate.convertAndSend("/topic/device-status", message);
+        log.debug("WebSocket 장비 상태 변경 발송: deviceId={}, status={}",
+                message.deviceId(), message.connectionStatus());
     }
 }

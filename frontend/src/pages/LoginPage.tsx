@@ -3,10 +3,14 @@ import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/client';
-import { colors } from '../theme/themeConfig';
+import { darkColors, lightColors } from '../theme/themeConfig';
+import { useTheme } from '../context/ThemeContext';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { themeMode } = useTheme();
+  const colors = themeMode === 'dark' ? darkColors : lightColors;
+  const isDark = themeMode === 'dark';
 
   const onFinish = async (values: { loginId: string; password: string }) => {
     try {
@@ -30,17 +34,22 @@ const LoginPage: React.FC = () => {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        background: `radial-gradient(ellipse at 50% 0%, rgba(6, 182, 212, 0.08) 0%, ${colors.bgBase} 70%)`,
+        background: isDark
+          ? `radial-gradient(ellipse at 50% 0%, rgba(6, 182, 212, 0.08) 0%, ${colors.bgBase} 70%)`
+          : `radial-gradient(ellipse at 50% 0%, rgba(8, 145, 178, 0.06) 0%, ${colors.bgBase} 70%)`,
+        transition: 'background 0.3s ease',
       }}
     >
       <Card
         style={{
           width: 420,
-          background: 'rgba(30, 41, 59, 0.7)',
+          background: isDark ? 'rgba(30, 41, 59, 0.7)' : 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(20px)',
           border: `1px solid ${colors.border}`,
           borderRadius: 16,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+          boxShadow: isDark
+            ? '0 8px 32px rgba(0, 0, 0, 0.4)'
+            : '0 8px 32px rgba(0, 0, 0, 0.1)',
         }}
       >
         {/* 로고 */}
@@ -50,24 +59,26 @@ const LoginPage: React.FC = () => {
               width: 56,
               height: 56,
               borderRadius: 16,
-              background: `linear-gradient(135deg, ${colors.primary}, #0891B2)`,
+              background: `linear-gradient(135deg, ${colors.primary}, ${isDark ? '#0891B2' : '#06B6D4'})`,
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: 700,
               color: '#fff',
               marginBottom: 16,
-              boxShadow: `0 4px 16px rgba(6, 182, 212, 0.3)`,
+              boxShadow: isDark
+                ? '0 4px 16px rgba(6, 182, 212, 0.3)'
+                : '0 4px 16px rgba(8, 145, 178, 0.25)',
             }}
           >
-            B
+            DK
           </div>
           <Typography.Title
             level={3}
             style={{ margin: 0, color: colors.textPrimary, letterSpacing: '-0.02em' }}
           >
-            부산 스마트 계량
+            동국씨엠 스마트 계량
           </Typography.Title>
           <Typography.Text style={{ color: colors.textSecondary, fontSize: 13 }}>
             Smart Weighing System

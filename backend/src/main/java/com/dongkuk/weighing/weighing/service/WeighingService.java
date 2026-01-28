@@ -160,6 +160,13 @@ public class WeighingService {
         return WeighingResponse.from(saved);
     }
 
+    public List<WeighingResponse> getInProgressWeighings() {
+        return weighingRepository.findByWeighingStatusOrderByCreatedAtDesc(WeighingStatus.IN_PROGRESS)
+                .stream()
+                .map(WeighingResponse::from)
+                .toList();
+    }
+
     public WeighingStatisticsResponse getStatistics() {
         LocalDate today = LocalDate.now();
         LocalDateTime todayStart = today.atStartOfDay();

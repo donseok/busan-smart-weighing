@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Table, Button, Space, Typography, Modal, Form, Input, InputNumber, Tag, Popconfirm, message } from 'antd';
+import { Button, Space, Typography, Modal, Form, Input, InputNumber, Tag, Popconfirm, message } from 'antd';
+import SortableTable from '../../components/SortableTable';
 import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
@@ -136,7 +137,7 @@ const MasterScalePage: React.FC = () => {
           prefix={<SearchOutlined />}
         />
       </Space>
-      <Table columns={columns} dataSource={filteredData} rowKey="scaleId" loading={loading} size="middle" />
+      <SortableTable columns={columns} dataSource={filteredData} rowKey="scaleId" loading={loading} size="middle" tableKey="masterScale" />
 
       <Modal
         title="계량대 등록"

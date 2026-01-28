@@ -6,6 +6,10 @@ import com.dongkuk.weighing.master.dto.CommonCodeResponse;
 import com.dongkuk.weighing.master.service.CommonCodeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,10 +32,38 @@ public class CommonCodeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
-    @GetMapping("/{codeGroup}")
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<CommonCodeResponse>>> getAllCodes(
+            @RequestParam(required = false) String codeGroup,
+            @RequestParam(required = false) String filter,
+            @PageableDefault(size = 50, sort = {"codeGroup", "sortOrder"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<CommonCodeResponse> response;
+        if (codeGroup != null && !codeGroup.isEmpty()) {
+            response = commonCodeService.getCodesByGroupPaged(codeGroup, pageable);
+        } else if (filter != null && !filter.isEmpty()) {
+            response = commonCodeService.searchCodes(filter, pageable);
+        } else {
+            response = commonCodeService.getAllCodes(pageable);
+        }
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @GetMapping("/groups")
+    public ResponseEntity<ApiResponse<List<String>>> getCodeGroups() {
+        List<String> response = commonCodeService.getCodeGroups();
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @GetMapping("/group/{codeGroup}")
     public ResponseEntity<ApiResponse<List<CommonCodeResponse>>> getCodesByGroup(
             @PathVariable String codeGroup) {
         List<CommonCodeResponse> response = commonCodeService.getCodesByGroup(codeGroup);
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+    @GetMapping("/{codeId}")
+    public ResponseEntity<ApiResponse<CommonCodeResponse>> getCode(@PathVariable Long codeId) {
+        CommonCodeResponse response = commonCodeService.getCode(codeId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
@@ -49,5 +81,12 @@ public class CommonCodeController {
     public ResponseEntity<ApiResponse<Void>> deleteCode(@PathVariable Long codeId) {
         commonCodeService.deleteCode(codeId);
         return ResponseEntity.ok(ApiResponse.ok(null, "공통코드가 비활성화되었습니다"));
+    }
+
+    @PutMapping("/{codeId}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<CommonCodeResponse>> activateCode(@PathVariable Long codeId) {
+        CommonCodeResponse response = commonCodeService.activateCode(codeId);
+        return ResponseEntity.ok(ApiResponse.ok(response));
     }
 }

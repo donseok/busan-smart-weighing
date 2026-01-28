@@ -46,9 +46,14 @@ dependencies {
     // Embedded Redis (dev profile)
     implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 
+    // Apache POI for Excel export
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     // Configuration Processor
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'

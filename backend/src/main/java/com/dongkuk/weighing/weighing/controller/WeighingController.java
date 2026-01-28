@@ -36,6 +36,12 @@ public class WeighingController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    @GetMapping("/in-progress")
+    public ResponseEntity<ApiResponse<List<WeighingResponse>>> getInProgressWeighings() {
+        List<WeighingResponse> response = weighingService.getInProgressWeighings();
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
     @GetMapping("/{weighingId}")
     public ResponseEntity<ApiResponse<WeighingResponse>> getWeighing(
             @PathVariable Long weighingId) {
