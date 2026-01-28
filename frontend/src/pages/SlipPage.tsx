@@ -11,7 +11,7 @@ import {
   message,
 } from 'antd';
 import SortableTable from '../components/SortableTable';
-import { ReloadOutlined, ShareAltOutlined } from '@ant-design/icons';
+import { SearchOutlined, ReloadOutlined, ShareAltOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import type { WeighingSlip } from '../types';
@@ -58,7 +58,11 @@ const SlipPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
+
+  const handleReset = () => {
+    setDateRange(null);
+  };
 
   const openShareModal = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -158,13 +162,17 @@ const SlipPage: React.FC = () => {
       <Typography.Title level={4}>전자계량표 관리</Typography.Title>
       <Space style={{ marginBottom: 16 }} wrap>
         <RangePicker
+          value={dateRange}
           placeholder={['시작일', '종료일']}
           onChange={handleDateRangeChange}
           allowClear
           style={{ width: 260 }}
         />
-        <Button icon={<ReloadOutlined />} onClick={fetchData}>
-          새로고침
+        <Button type="primary" icon={<SearchOutlined />} onClick={fetchData}>
+          조회
+        </Button>
+        <Button icon={<ReloadOutlined />} onClick={handleReset}>
+          초기화
         </Button>
       </Space>
 

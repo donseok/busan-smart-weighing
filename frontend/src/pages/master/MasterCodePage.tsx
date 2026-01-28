@@ -45,16 +45,13 @@ const MasterCodePage: React.FC = () => {
     fetchData();
   }, [fetchCodeGroups, fetchData]);
 
-  const handleSearch = (value: string) => {
-    setSearchKeyword(value);
-    setSelectedGroup(undefined);
-    fetchData(value, undefined);
+  const handleSearch = () => {
+    fetchData(searchKeyword, selectedGroup);
   };
 
-  const handleGroupFilter = (value: string | undefined) => {
-    setSelectedGroup(value);
+  const handleReset = () => {
     setSearchKeyword('');
-    fetchData(undefined, value);
+    setSelectedGroup(undefined);
   };
 
   const handleCreate = async () => {
@@ -172,7 +169,6 @@ const MasterCodePage: React.FC = () => {
       <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} align="center">
         <Space>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>코드 등록</Button>
-          <Button icon={<ReloadOutlined />} onClick={() => fetchData(searchKeyword, selectedGroup)}>새로고침</Button>
         </Space>
         <Space>
           <Select
@@ -180,17 +176,21 @@ const MasterCodePage: React.FC = () => {
             placeholder="코드그룹 필터"
             allowClear
             value={selectedGroup}
-            onChange={handleGroupFilter}
+            onChange={setSelectedGroup}
             options={codeGroups.map(g => ({ label: g, value: g }))}
             suffixIcon={<FilterOutlined />}
           />
-          <Input.Search
+          <Input
             placeholder="코드그룹/코드명 검색"
             allowClear
-            onSearch={handleSearch}
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onPressEnter={handleSearch}
             style={{ width: 250 }}
             prefix={<SearchOutlined />}
           />
+          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>조회</Button>
+          <Button icon={<ReloadOutlined />} onClick={handleReset}>초기화</Button>
         </Space>
       </Space>
       <SortableTable columns={columns} dataSource={data} rowKey="codeId" loading={loading} size="middle" tableKey="masterCode" />

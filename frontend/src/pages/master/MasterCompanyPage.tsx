@@ -31,9 +31,12 @@ const MasterCompanyPage: React.FC = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleSearch = (value: string) => {
-    setSearchKeyword(value);
-    fetchData(value);
+  const handleSearch = () => {
+    fetchData(searchKeyword);
+  };
+
+  const handleReset = () => {
+    setSearchKeyword('');
   };
 
   const handleCreate = async () => {
@@ -123,15 +126,20 @@ const MasterCompanyPage: React.FC = () => {
       <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} align="center">
         <Space>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>운송사 등록</Button>
-          <Button icon={<ReloadOutlined />} onClick={() => fetchData(searchKeyword)}>새로고침</Button>
         </Space>
-        <Input.Search
-          placeholder="운송사명 검색"
-          allowClear
-          onSearch={handleSearch}
-          style={{ width: 250 }}
-          prefix={<SearchOutlined />}
-        />
+        <Space>
+          <Input
+            placeholder="운송사명 검색"
+            allowClear
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onPressEnter={handleSearch}
+            style={{ width: 250 }}
+            prefix={<SearchOutlined />}
+          />
+          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>조회</Button>
+          <Button icon={<ReloadOutlined />} onClick={handleReset}>초기화</Button>
+        </Space>
       </Space>
       <SortableTable columns={columns} dataSource={data} rowKey="companyId" loading={loading} size="middle" tableKey="masterCompany" />
 

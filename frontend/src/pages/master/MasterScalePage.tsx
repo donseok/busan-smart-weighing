@@ -38,8 +38,8 @@ const MasterScalePage: React.FC = () => {
     return data.filter((item) => item.scaleName.toLowerCase().includes(keyword));
   }, [data, searchKeyword]);
 
-  const handleSearch = (value: string) => {
-    setSearchKeyword(value);
+  const handleReset = () => {
+    setSearchKeyword('');
   };
 
   const handleCreate = async () => {
@@ -126,16 +126,19 @@ const MasterScalePage: React.FC = () => {
       <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} align="center">
         <Space>
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>계량대 등록</Button>
-          <Button icon={<ReloadOutlined />} onClick={fetchData}>새로고침</Button>
         </Space>
-        <Input.Search
-          placeholder="계량대명 검색"
-          allowClear
-          onSearch={handleSearch}
-          onChange={(e) => { if (!e.target.value) setSearchKeyword(''); }}
-          style={{ width: 250 }}
-          prefix={<SearchOutlined />}
-        />
+        <Space>
+          <Input
+            placeholder="계량대명 검색"
+            allowClear
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            style={{ width: 250 }}
+            prefix={<SearchOutlined />}
+          />
+          <Button type="primary" icon={<SearchOutlined />} onClick={fetchData}>조회</Button>
+          <Button icon={<ReloadOutlined />} onClick={handleReset}>초기화</Button>
+        </Space>
       </Space>
       <SortableTable columns={columns} dataSource={filteredData} rowKey="scaleId" loading={loading} size="middle" tableKey="masterScale" />
 
