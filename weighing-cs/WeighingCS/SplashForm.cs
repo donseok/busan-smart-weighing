@@ -1,3 +1,5 @@
+using WeighingCS.Controls;
+
 namespace WeighingCS;
 
 /// <summary>
@@ -7,7 +9,7 @@ public class SplashForm : Form
 {
     private readonly Label lblTitle;
     private readonly Label lblSubtitle;
-    private readonly ProgressBar progressBar;
+    private readonly ModernProgressBar progressBar;
     private readonly Label lblStatus;
 
     public SplashForm()
@@ -16,9 +18,10 @@ public class SplashForm : Form
         this.FormBorderStyle = FormBorderStyle.None;
         this.StartPosition = FormStartPosition.CenterScreen;
         this.ClientSize = new Size(480, 300);
-        this.BackColor = Color.FromArgb(11, 17, 32);
+        this.BackColor = Theme.BgBase;
         this.ShowInTaskbar = false;
         this.TopMost = true;
+        this.DoubleBuffered = true;
 
         // Logo icon
         var lblLogo = new Label
@@ -26,7 +29,7 @@ public class SplashForm : Form
             Text = "DK",
             Font = new Font("Segoe UI", 24F, FontStyle.Bold),
             ForeColor = Color.White,
-            BackColor = Color.FromArgb(6, 182, 212),
+            BackColor = Theme.Primary,
             TextAlign = ContentAlignment.MiddleCenter,
             Size = new Size(60, 60),
             Location = new Point(210, 30),
@@ -41,7 +44,7 @@ public class SplashForm : Form
         {
             Text = "부산 스마트 계량 시스템",
             Font = new Font("Segoe UI", 18F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(248, 250, 252),
+            ForeColor = Theme.TextPrimary,
             AutoSize = false,
             TextAlign = ContentAlignment.MiddleCenter,
             Size = new Size(480, 40),
@@ -53,20 +56,20 @@ public class SplashForm : Form
         {
             Text = "BUSAN SMART WEIGHING SYSTEM",
             Font = new Font("Segoe UI", 9F),
-            ForeColor = Color.FromArgb(148, 163, 184),
+            ForeColor = Theme.TextSecondary,
             AutoSize = false,
             TextAlign = ContentAlignment.MiddleCenter,
             Size = new Size(480, 25),
             Location = new Point(0, 145),
         };
 
-        // Progress bar
-        progressBar = new ProgressBar
+        // Progress bar (modern)
+        progressBar = new ModernProgressBar
         {
             Minimum = 0,
             Maximum = 100,
             Value = 0,
-            Style = ProgressBarStyle.Continuous,
+            BarColor = Theme.Primary,
             Location = new Point(60, 200),
             Size = new Size(360, 6),
         };
@@ -76,7 +79,7 @@ public class SplashForm : Form
         {
             Text = "시스템을 초기화하는 중...",
             Font = new Font("Segoe UI", 9F),
-            ForeColor = Color.FromArgb(6, 182, 212),
+            ForeColor = Theme.Primary,
             AutoSize = false,
             TextAlign = ContentAlignment.MiddleCenter,
             Size = new Size(480, 25),
@@ -88,7 +91,7 @@ public class SplashForm : Form
         {
             Text = "v1.0.0",
             Font = new Font("Segoe UI", 8F),
-            ForeColor = Color.FromArgb(100, 116, 139),
+            ForeColor = Theme.TextMuted,
             AutoSize = false,
             TextAlign = ContentAlignment.MiddleCenter,
             Size = new Size(480, 20),

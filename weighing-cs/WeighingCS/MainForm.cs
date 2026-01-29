@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using WeighingCS.Controls;
 using WeighingCS.Interfaces;
 using WeighingCS.Models;
 using WeighingCS.Services;
@@ -34,18 +35,6 @@ public partial class MainForm : Form
     // -- History sort state ------------------------------------------------
     private int _lastSortColumn = -1;
     private SortOrder _lastSortOrder = SortOrder.None;
-
-    // -- Dark theme colors ------------------------------------------------
-    private static readonly Color ThemeBgBase = Color.FromArgb(11, 17, 32);       // #0B1120
-    private static readonly Color ThemeBgSurface = Color.FromArgb(30, 41, 59);    // #1E293B
-    private static readonly Color ThemeBgElevated = Color.FromArgb(15, 23, 42);   // #0F172A
-    private static readonly Color ThemePrimary = Color.FromArgb(6, 182, 212);     // #06B6D4
-    private static readonly Color ThemeSuccess = Color.FromArgb(16, 185, 129);    // #10B981
-    private static readonly Color ThemeWarning = Color.FromArgb(245, 158, 11);    // #F59E0B
-    private static readonly Color ThemeError = Color.FromArgb(244, 63, 94);       // #F43E5E
-    private static readonly Color ThemeTextPrimary = Color.FromArgb(248, 250, 252); // #F8FAFC
-    private static readonly Color ThemeTextSecondary = Color.FromArgb(148, 163, 184); // #94A3B8
-    private static readonly Color ThemeBorder = Color.FromArgb(51, 65, 85);       // #334155
 
     // -- Constructor -----------------------------------------------------------
 
@@ -144,18 +133,21 @@ public partial class MainForm : Form
         _indicator.WeightReceived += OnWeightReceived;
         _indicator.WeightStabilized += OnWeightStabilized;
         _indicator.CommunicationError += OnIndicatorError;
-        _indicator.ConnectionStateChanged += (_, connected) => InvokeUI(() => SetConnectionIndicator(indIndicator, connected));
+        _indicator.ConnectionStateChanged += (_, connected) => InvokeUI(() =>
+            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Indicator, connected));
 
-        _display.ConnectionStateChanged += (_, connected) => InvokeUI(() => SetConnectionIndicator(indDisplay, connected));
+        _display.ConnectionStateChanged += (_, connected) => InvokeUI(() =>
+            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Display, connected));
         _display.ErrorOccurred += (_, msg) => InvokeUI(() => AppendLog($"[전광판] {msg}"));
 
-        _barrier.ConnectionStateChanged += (_, connected) => InvokeUI(() => SetConnectionIndicator(indBarrier, connected));
+        _barrier.ConnectionStateChanged += (_, connected) => InvokeUI(() =>
+            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Barrier, connected));
         _barrier.BarrierStateChanged += (_, open) => InvokeUI(() => AppendLog($"[차단기] {(open ? "열림" : "닫힘")}"));
         _barrier.ErrorOccurred += (_, msg) => InvokeUI(() => AppendLog($"[차단기] {msg}"));
 
         _api.NetworkStatusChanged += (_, available) => InvokeUI(() =>
         {
-            SetConnectionIndicator(indNetwork, available);
+            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Network, available);
             AppendLog(available ? "[네트워크] 연결됨" : "[네트워크] 오프라인 - 캐시 활성화");
         });
         _api.ApiError += (_, msg) => InvokeUI(() => AppendLog($"[API 오류] {msg}"));
@@ -270,14 +262,14 @@ public partial class MainForm : Form
             if (_api is not null)
             {
                 bool loggedIn = await _api.LoginAsync();
-                SetConnectionIndicator(indNetwork, loggedIn);
+                connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Network, loggedIn);
                 AppendLog(loggedIn ? "API 인증 완료." : "API 인증 실패.");
             }
         }
         catch (Exception ex)
         {
             AppendLog($"API 로그인 오류: {ex.Message}");
-            SetConnectionIndicator(indNetwork, false);
+            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Network, false);
         }
 
         // Connect indicator
@@ -292,7 +284,7 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             AppendLog($"계량기 연결 실패: {ex.Message}");
-            SetConnectionIndicator(indIndicator, false);
+            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Indicator, false);
         }
 
         // Connect display board
@@ -308,7 +300,7 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             AppendLog($"전광판 연결 실패: {ex.Message}");
-            SetConnectionIndicator(indDisplay, false);
+            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Display, false);
         }
 
         // Connect barrier
@@ -323,7 +315,7 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             AppendLog($"차단기 연결 실패: {ex.Message}");
-            SetConnectionIndicator(indBarrier, false);
+            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Barrier, false);
         }
     }
 
@@ -331,8 +323,7 @@ public partial class MainForm : Form
 
     private void WireEvents()
     {
-        rbAuto.CheckedChanged += OnModeChanged;
-        rbManual.CheckedChanged += OnModeChanged;
+        modeToggle.ModeChanged += OnModeChanged;
         btnSearch.Click += OnSearchClick;
         btnConfirmWeight.Click += OnConfirmWeightClick;
         btnReWeigh.Click += OnReWeighClick;
@@ -345,15 +336,6 @@ public partial class MainForm : Form
 
     private void OnFormResize(object? sender, EventArgs e)
     {
-        // Adjust weight display font size based on form width
-        float scaleFactor = Math.Max(0.6f, Math.Min(1.2f, ClientSize.Width / 1200f));
-        float weightFontSize = Math.Max(40f, 80f * scaleFactor);
-
-        if (Math.Abs(lblWeight.Font.Size - weightFontSize) > 2f)
-        {
-            lblWeight.Font = new Font("Consolas", weightFontSize, FontStyle.Bold);
-        }
-
         // Adjust splitter proportionally
         if (splitMain.Width > 0)
         {
@@ -370,15 +352,15 @@ public partial class MainForm : Form
 
     private void OnModeChanged(object? sender, EventArgs e)
     {
-        if (rbAuto.Checked)
+        if (modeToggle.IsAutoMode)
         {
-            grpManual.Enabled = false;
+            cardManual.Enabled = false;
             _process?.SwitchMode(WeighingProcessService.WeighingMode.Auto);
             AppendLog("자동 모드로 전환되었습니다.");
         }
         else
         {
-            grpManual.Enabled = true;
+            cardManual.Enabled = true;
             _process?.SwitchMode(WeighingProcessService.WeighingMode.Manual);
             AppendLog("수동 모드로 전환되었습니다.");
         }
@@ -527,12 +509,12 @@ public partial class MainForm : Form
         if (IsValidPlateNumber(plate))
         {
             lblPlateValidation.Text = "✓ 유효한 형식";
-            lblPlateValidation.ForeColor = ThemeSuccess;
+            lblPlateValidation.ForeColor = Theme.Success;
         }
         else
         {
             lblPlateValidation.Text = "형식: 12가1234, 서울12가1234";
-            lblPlateValidation.ForeColor = ThemeWarning;
+            lblPlateValidation.ForeColor = Theme.Warning;
         }
     }
 
@@ -542,12 +524,11 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            lblWeight.Text = e.Weight.ToString("F1");
+            weightDisplay.WeightValue = e.Weight.ToString("F1");
 
             if (!e.IsStable)
             {
-                lblStability.Text = "불안정";
-                lblStability.BackColor = Color.Orange;
+                weightDisplay.Stability = WeightDisplayPanel.StabilityState.Unstable;
             }
         });
     }
@@ -556,29 +537,12 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            lblWeight.Text = e.Weight.ToString("F1");
-            lblStability.Text = "안정";
-            lblStability.BackColor = Color.Green;
+            weightDisplay.WeightValue = e.Weight.ToString("F1");
+            weightDisplay.Stability = WeightDisplayPanel.StabilityState.Stable;
 
             // Audio alert: system beep for weight stabilization
             System.Media.SystemSounds.Beep.Play();
-
-            // Visual flash effect on weight display
-            FlashWeightDisplay();
         });
-    }
-
-    private async void FlashWeightDisplay()
-    {
-        var originalColor = lblWeight.ForeColor;
-        for (int i = 0; i < 3; i++)
-        {
-            lblWeight.ForeColor = ThemeSuccess;
-            await Task.Delay(200);
-            lblWeight.ForeColor = originalColor;
-            await Task.Delay(200);
-        }
-        lblWeight.ForeColor = originalColor;
     }
 
     private void OnIndicatorError(object? sender, CommunicationErrorEventArgs e)
@@ -586,8 +550,7 @@ public partial class MainForm : Form
         InvokeUI(() =>
         {
             AppendLog($"[계량기] {e.Message}");
-            lblStability.Text = "오류";
-            lblStability.BackColor = Color.Red;
+            weightDisplay.Stability = WeightDisplayPanel.StabilityState.Error;
         });
     }
 
@@ -595,7 +558,28 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            lblProcessState.Text = $"상태: {e.NewState}";
+            // Map process state to step bar
+            int step = e.NewState switch
+            {
+                WeighingProcessService.ProcessState.Idle => 0,
+                WeighingProcessService.ProcessState.WaitingSensor or
+                WeighingProcessService.ProcessState.LprCapture or
+                WeighingProcessService.ProcessState.AiVerification or
+                WeighingProcessService.ProcessState.DispatchMatch or
+                WeighingProcessService.ProcessState.ManualSelect or
+                WeighingProcessService.ProcessState.ManualConfirm => 0,
+                WeighingProcessService.ProcessState.Weighing => 1,
+                WeighingProcessService.ProcessState.Stabilizing => 2,
+                WeighingProcessService.ProcessState.Saving or
+                WeighingProcessService.ProcessState.PrintingSlip or
+                WeighingProcessService.ProcessState.OpeningBarrier or
+                WeighingProcessService.ProcessState.Completed => 3,
+                WeighingProcessService.ProcessState.Error => -1,
+                _ => 0,
+            };
+
+            processStepBar.CurrentStep = step;
+            processStepBar.StatusTag = e.NewState.ToString();
             AppendLog($"프로세스 상태: {e.OldState} -> {e.NewState}");
 
             // Update vehicle info when dispatch is set.
@@ -641,24 +625,6 @@ public partial class MainForm : Form
         lblItemValue.Text = "-";
         lblDispatchValue.Text = "-";
         lblDriverValue.Text = "-";
-    }
-
-    private void SetConnectionIndicator(Panel indicator, bool connected)
-    {
-        indicator.BackColor = connected ? ThemeSuccess : ThemeError;
-
-        // Update associated text label
-        Label? textLabel = null;
-        if (indicator == indIndicator) textLabel = lblIndicatorText;
-        else if (indicator == indDisplay) textLabel = lblDisplayText;
-        else if (indicator == indBarrier) textLabel = lblBarrierText;
-        else if (indicator == indNetwork) textLabel = lblNetworkText;
-
-        if (textLabel is not null)
-        {
-            textLabel.Text = connected ? "연결됨" : "끊김";
-            textLabel.ForeColor = connected ? ThemeSuccess : ThemeError;
-        }
     }
 
     private void AddHistoryEntry(WeighingRecord record)
@@ -739,51 +705,8 @@ public partial class MainForm : Form
 
     private void AppendLog(string message)
     {
-        string line = $"[{DateTime.Now:HH:mm:ss}] {message}";
-
-        if (txtLog.InvokeRequired)
-        {
-            txtLog.BeginInvoke(() => AppendLogInternal(line, message));
-        }
-        else
-        {
-            AppendLogInternal(line, message);
-        }
-    }
-
-    private void AppendLogInternal(string line, string originalMessage)
-    {
-        // Determine color based on message content
-        Color color;
-        if (originalMessage.Contains("오류") || originalMessage.Contains("실패") || originalMessage.Contains("[오류]") || originalMessage.Contains("ERROR"))
-        {
-            color = ThemeError;      // Rose for errors
-        }
-        else if (originalMessage.Contains("경고") || originalMessage.Contains("WARNING") || originalMessage.Contains("오프라인"))
-        {
-            color = ThemeWarning;    // Amber for warnings
-        }
-        else if (originalMessage.Contains("완료") || originalMessage.Contains("연결됨") || originalMessage.Contains("성공"))
-        {
-            color = ThemeSuccess;    // Emerald for success
-        }
-        else
-        {
-            color = ThemeSuccess;    // Default: emerald green for info
-        }
-
-        txtLog.SelectionStart = txtLog.TextLength;
-        txtLog.SelectionLength = 0;
-        txtLog.SelectionColor = color;
-        txtLog.AppendText(line + Environment.NewLine);
-
-        // Keep log from growing unbounded.
-        if (txtLog.TextLength > 50000)
-        {
-            txtLog.Clear();
-            txtLog.SelectionColor = ThemeTextSecondary;
-            txtLog.AppendText("[로그가 정리되었습니다]" + Environment.NewLine);
-        }
+        var level = TerminalLogPanel.DetectLevel(message);
+        terminalLog.AppendLog(message, level);
     }
 
     /// <summary>
@@ -819,8 +742,8 @@ public partial class MainForm : Form
         form.FormBorderStyle = FormBorderStyle.FixedDialog;
         form.MaximizeBox = false;
         form.MinimizeBox = false;
-        form.BackColor = Color.FromArgb(11, 17, 32);
-        form.ForeColor = Color.FromArgb(248, 250, 252);
+        form.BackColor = Theme.BgBase;
+        form.ForeColor = Theme.TextPrimary;
 
         var label = new Label
         {
@@ -828,8 +751,8 @@ public partial class MainForm : Form
             Left = 20,
             Top = 20,
             AutoSize = true,
-            ForeColor = Color.FromArgb(148, 163, 184),
-            Font = new Font("Segoe UI", 10F),
+            ForeColor = Theme.TextSecondary,
+            Font = Theme.FontBody,
         };
 
         var textBox = new TextBox
@@ -838,45 +761,38 @@ public partial class MainForm : Form
             Top = 50,
             Width = 355,
             Height = 32,
-            Font = new Font("Segoe UI", 11F),
-            BackColor = Color.FromArgb(15, 23, 42),
-            ForeColor = Color.FromArgb(248, 250, 252),
+            Font = Theme.FontHeading,
+            BackColor = Theme.BgElevated,
+            ForeColor = Theme.TextPrimary,
             BorderStyle = BorderStyle.FixedSingle,
         };
 
-        var btnOk = new Button
+        var btnOk = new ModernButton
         {
             Text = "확인",
             Left = 190,
             Top = 100,
             Width = 90,
             Height = 36,
-            DialogResult = DialogResult.OK,
-            BackColor = Color.FromArgb(6, 182, 212),
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+            Variant = ModernButton.ButtonVariant.Primary,
+            Font = Theme.FontBodyBold,
         };
-        btnOk.FlatAppearance.BorderSize = 0;
+        btnOk.Click += (_, _) => { form.DialogResult = DialogResult.OK; form.Close(); };
 
-        var btnCancel = new Button
+        var btnCancel = new ModernButton
         {
             Text = "취소",
             Left = 290,
             Top = 100,
             Width = 85,
             Height = 36,
-            DialogResult = DialogResult.Cancel,
-            BackColor = Color.FromArgb(30, 41, 59),
-            ForeColor = Color.FromArgb(248, 250, 252),
-            FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 10F),
+            Variant = ModernButton.ButtonVariant.Secondary,
+            Font = Theme.FontBody,
         };
-        btnCancel.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+        btnCancel.Click += (_, _) => { form.DialogResult = DialogResult.Cancel; form.Close(); };
 
         form.Controls.AddRange(new Control[] { label, textBox, btnOk, btnCancel });
-        form.AcceptButton = btnOk;
-        form.CancelButton = btnCancel;
+        form.AcceptButton = null; // ModernButton is not a System.Windows.Forms.Button
 
         return form.ShowDialog() == DialogResult.OK ? textBox.Text : null;
     }
