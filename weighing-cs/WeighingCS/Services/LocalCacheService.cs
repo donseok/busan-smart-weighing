@@ -179,22 +179,45 @@ public sealed class LocalCacheService : IDisposable
         _cts = null;
     }
 
+    private const int BackoffBaseMs = 10000; // 10 seconds
+    private const int BackoffMaxMs = 120000; // 2 minutes
+
     private async Task SyncLoopAsync(CancellationToken ct)
     {
+        int consecutiveFailures = 0;
+
         while (!ct.IsCancellationRequested)
         {
             try
             {
-                await Task.Delay(SyncIntervalMs, ct);
+                int delay = consecutiveFailures == 0
+                    ? SyncIntervalMs
+                    : Math.Min(BackoffBaseMs * (1 << Math.Min(consecutiveFailures - 1, 10)), BackoffMaxMs);
+
+                await Task.Delay(delay, ct);
 
                 if (!_apiService.IsNetworkAvailable)
                 {
-                    // Periodically check if network is back.
                     await _apiService.CheckNetworkAsync();
-                    continue;
+                    if (!_apiService.IsNetworkAvailable)
+                    {
+                        consecutiveFailures++;
+                        continue;
+                    }
                 }
 
+                int pendingBefore = await GetPendingCountAsync();
                 await SyncPendingRecordsAsync();
+                int pendingAfter = await GetPendingCountAsync();
+
+                if (pendingAfter < pendingBefore || pendingBefore == 0)
+                {
+                    consecutiveFailures = 0;
+                }
+                else
+                {
+                    consecutiveFailures++;
+                }
             }
             catch (OperationCanceledException)
             {
@@ -202,6 +225,7 @@ public sealed class LocalCacheService : IDisposable
             }
             catch (Exception ex)
             {
+                consecutiveFailures++;
                 SyncError?.Invoke(this, $"Sync loop error: {ex.Message}");
             }
         }

@@ -56,6 +56,11 @@ public partial class MainForm : Form
         await ConnectServicesAsync();
     }
 
+    /// <remarks>
+    /// Service disposal is handled by <see cref="DisposeServices"/> called from
+    /// <c>MainForm.Designer.cs</c> Dispose(bool) to ensure deterministic cleanup
+    /// of serial ports, TCP connections, and HTTP clients.
+    /// </remarks>
     protected override async void OnFormClosing(FormClosingEventArgs e)
     {
         base.OnFormClosing(e);

@@ -246,7 +246,7 @@ public sealed class IndicatorService : IDisposable
     /// Parses a weight value from a raw indicator line.
     /// Typical format variations: "  +  1234.5 kg", "1234.5", "ST,GS,+001234.5 kg"
     /// </summary>
-    private static decimal ParseWeight(string raw)
+    internal static decimal ParseWeight(string raw)
     {
         // Strip common prefixes, status characters, and unit suffixes.
         string cleaned = raw

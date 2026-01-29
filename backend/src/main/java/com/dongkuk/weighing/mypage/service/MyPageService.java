@@ -35,7 +35,7 @@ public class MyPageService {
                 companyName,
                 user.isPushEnabled(),
                 user.isEmailNotificationEnabled(),
-                null  // lastLoginAt은 별도 구현 필요
+                user.getLastLoginAt()
         );
     }
 
@@ -52,7 +52,7 @@ public class MyPageService {
                 companyName,
                 user.isPushEnabled(),
                 user.isEmailNotificationEnabled(),
-                null
+                user.getLastLoginAt()
         );
     }
 
@@ -91,7 +91,7 @@ public class MyPageService {
                 companyName,
                 user.isPushEnabled(),
                 user.isEmailNotificationEnabled(),
-                null
+                user.getLastLoginAt()
         );
     }
 

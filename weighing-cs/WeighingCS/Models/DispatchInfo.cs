@@ -37,6 +37,9 @@ public class DispatchInfo
     [JsonProperty("expectedWeight")]
     public decimal? ExpectedWeight { get; set; }
 
+    [JsonProperty("tareWeight")]
+    public decimal? TareWeight { get; set; }
+
     [JsonProperty("dispatchStatus")]
     public string? DispatchStatus { get; set; }
 

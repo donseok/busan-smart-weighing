@@ -295,13 +295,30 @@ public sealed class ApiService : IDisposable
         throw lastException ?? new InvalidOperationException("API call failed.");
     }
 
-    private async Task<T?> HandleResponseAsync<T>(HttpResponseMessage response)
+    internal async Task<T?> HandleResponseAsync<T>(HttpResponseMessage response)
     {
         string content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
         {
-            ApiError?.Invoke(this, $"HTTP {(int)response.StatusCode}: {content}");
+            int statusCode = (int)response.StatusCode;
+            string errorDetail;
+
+            try
+            {
+                var errorResponse = JsonConvert.DeserializeObject<ApiResponse<object>>(content);
+                string errorCode = errorResponse?.Error?.Code ?? "";
+                string errorMessage = errorResponse?.Error?.Message ?? errorResponse?.Message ?? content;
+                errorDetail = !string.IsNullOrEmpty(errorCode)
+                    ? $"HTTP {statusCode} [{errorCode}]: {errorMessage}"
+                    : $"HTTP {statusCode}: {errorMessage}";
+            }
+            catch
+            {
+                errorDetail = $"HTTP {statusCode}: {content}";
+            }
+
+            ApiError?.Invoke(this, errorDetail);
             return default;
         }
 
@@ -314,8 +331,12 @@ public sealed class ApiService : IDisposable
 
         if (!apiResponse.Success)
         {
+            string errorCode = apiResponse.Error?.Code ?? "";
             string errorMsg = apiResponse.Error?.Message ?? apiResponse.Message ?? "Unknown API error";
-            ApiError?.Invoke(this, errorMsg);
+            string detail = !string.IsNullOrEmpty(errorCode)
+                ? $"[{errorCode}] {errorMsg}"
+                : errorMsg;
+            ApiError?.Invoke(this, detail);
             return default;
         }
 

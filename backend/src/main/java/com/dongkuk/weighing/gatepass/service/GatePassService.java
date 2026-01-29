@@ -45,18 +45,18 @@ public class GatePassService {
     }
 
     @Transactional
-    public GatePassResponse passGate(Long gatePassId) {
+    public GatePassResponse passGate(Long gatePassId, Long processedBy) {
         GatePass gatePass = findById(gatePassId);
-        gatePass.pass(null); // processedBy는 SecurityContext에서 추출 예정
-        log.info("출문 승인: gatePassId={}", gatePassId);
+        gatePass.pass(processedBy);
+        log.info("출문 승인: gatePassId={}, processedBy={}", gatePassId, processedBy);
         return GatePassResponse.from(gatePass);
     }
 
     @Transactional
-    public GatePassResponse rejectGate(Long gatePassId, String reason) {
+    public GatePassResponse rejectGate(Long gatePassId, String reason, Long processedBy) {
         GatePass gatePass = findById(gatePassId);
-        gatePass.reject(null, reason);
-        log.info("출문 거부: gatePassId={}, reason={}", gatePassId, reason);
+        gatePass.reject(processedBy, reason);
+        log.info("출문 거부: gatePassId={}, reason={}, processedBy={}", gatePassId, reason, processedBy);
         return GatePassResponse.from(gatePass);
     }
 

@@ -222,7 +222,16 @@ public sealed class WeighingProcessService : IDisposable
             SetState(ProcessState.ManualSelect);
 
             await _display.ShowWeighingAsync(dispatch.PlateNumber);
-            StatusMessage?.Invoke(this, $"Manual weighing: {dispatch.PlateNumber} / Dispatch: {dispatch.DispatchId}");
+
+            string expectedInfo = dispatch.ExpectedWeight.HasValue
+                ? $" (예상중량: {dispatch.ExpectedWeight.Value:F1} kg)"
+                : "";
+            StatusMessage?.Invoke(this, $"Manual weighing: {dispatch.PlateNumber} / Dispatch: {dispatch.DispatchId}{expectedInfo}");
+
+            if (dispatch.ExpectedWeight.HasValue)
+            {
+                await _display.DisplayStatusAsync($"예상중량: {dispatch.ExpectedWeight.Value:F1} kg");
+            }
 
             SetState(ProcessState.Weighing);
         }
@@ -345,14 +354,15 @@ public sealed class WeighingProcessService : IDisposable
     {
         SetState(ProcessState.Saving);
 
+        decimal tare = ActiveDispatch?.TareWeight ?? 0m;
         ActiveRecord = new WeighingRecord
         {
             DispatchId = ActiveDispatch?.DispatchId ?? 0,
             ScaleId = _scaleId,
             WeighingMode = mode,
             GrossWeight = weight,
-            TareWeight = 0, // Tare is typically set by a separate tare-weighing step.
-            NetWeight = weight,
+            TareWeight = tare,
+            NetWeight = weight - tare,
             Status = WeighingStatuses.Completed,
             PlateNumber = ActiveDispatch?.PlateNumber,
             VehicleId = ActiveDispatch?.VehicleId,
@@ -387,6 +397,9 @@ public sealed class WeighingProcessService : IDisposable
         }
     }
 
+    private const int GatePassMaxRetries = 3;
+    private const int GatePassRetryDelayMs = 1000;
+
     private async Task FinalizeWeighingAsync()
     {
         // Print slip / create gate pass.
@@ -395,13 +408,28 @@ public sealed class WeighingProcessService : IDisposable
 
         if (ActiveRecord?.WeighingId > 0)
         {
-            try
+            bool gatePassCreated = false;
+            for (int attempt = 1; attempt <= GatePassMaxRetries; attempt++)
             {
-                await _api.CreateGatePassAsync(ActiveRecord.WeighingId);
+                try
+                {
+                    gatePassCreated = await _api.CreateGatePassAsync(ActiveRecord.WeighingId);
+                    if (gatePassCreated) break;
+                }
+                catch (Exception ex)
+                {
+                    StatusMessage?.Invoke(this, $"Gate pass attempt {attempt}/{GatePassMaxRetries} failed: {ex.Message}");
+                }
+
+                if (attempt < GatePassMaxRetries)
+                {
+                    await Task.Delay(GatePassRetryDelayMs * attempt);
+                }
             }
-            catch (Exception ex)
+
+            if (!gatePassCreated)
             {
-                StatusMessage?.Invoke(this, $"Gate pass creation warning: {ex.Message}");
+                StatusMessage?.Invoke(this, "Gate pass creation failed after all retries. Proceeding with barrier.");
             }
         }
 

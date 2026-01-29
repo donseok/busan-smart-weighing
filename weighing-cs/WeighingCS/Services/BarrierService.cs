@@ -199,8 +199,14 @@ public sealed class BarrierService : IDisposable
         try
         {
             await SendCommandAsync(CmdStatus);
-            // In a real implementation, we would read the response and parse the status.
-            // For now, return the locally tracked state.
+            byte[] response = await ReadResponseAsync(TimeSpan.FromSeconds(3));
+            bool open = ParseBarrierStatus(response);
+            IsOpen = open;
+            return open;
+        }
+        catch (TimeoutException)
+        {
+            ErrorOccurred?.Invoke(this, "Barrier status query timed out.");
             return IsOpen;
         }
         catch (Exception ex)
@@ -219,6 +225,60 @@ public sealed class BarrierService : IDisposable
 
         await _stream.WriteAsync(command);
         await _stream.FlushAsync();
+    }
+
+    /// <summary>
+    /// Reads a STX/ETX framed response from the barrier TCP stream.
+    /// </summary>
+    private async Task<byte[]> ReadResponseAsync(TimeSpan timeout)
+    {
+        if (_stream is null)
+            throw new InvalidOperationException("Barrier stream is not available.");
+
+        using var cts = new CancellationTokenSource(timeout);
+        var buffer = new byte[256];
+        var result = new List<byte>();
+        bool started = false;
+
+        while (!cts.Token.IsCancellationRequested)
+        {
+            int bytesRead = await _stream.ReadAsync(buffer.AsMemory(0, buffer.Length), cts.Token);
+            if (bytesRead == 0) break;
+
+            for (int i = 0; i < bytesRead; i++)
+            {
+                byte b = buffer[i];
+
+                if (b == 0x02) // STX
+                {
+                    started = true;
+                    result.Clear();
+                    continue;
+                }
+
+                if (b == 0x03 && started) // ETX
+                {
+                    return result.ToArray();
+                }
+
+                if (started)
+                {
+                    result.Add(b);
+                }
+            }
+        }
+
+        throw new TimeoutException("No complete STX/ETX frame received within timeout.");
+    }
+
+    /// <summary>
+    /// Parses barrier status from the response payload bytes.
+    /// Expected: 'O' (0x4F) = open, 'C' (0x43) = closed.
+    /// </summary>
+    private static bool ParseBarrierStatus(byte[] payload)
+    {
+        if (payload.Length == 0) return false;
+        return payload[0] == 0x4F; // 'O' = open
     }
 
     // -- IDisposable -----------------------------------------------------------

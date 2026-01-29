@@ -29,9 +29,9 @@ public class DispatchController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<DispatchResponse>> createDispatch(
+            @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody DispatchCreateRequest request) {
-        // TODO: createdBy는 SecurityContext에서 추출 - 현재는 null 처리
-        DispatchResponse response = dispatchService.createDispatch(request, null);
+        DispatchResponse response = dispatchService.createDispatch(request, principal.getUserId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 

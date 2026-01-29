@@ -62,6 +62,9 @@ public class User extends BaseEntity {
     @Column(name = "locked_until")
     private LocalDateTime lockedUntil;
 
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
     @Builder
     public User(Long companyId, String userName, String phoneNumber,
                 UserRole userRole, String loginId, String passwordHash) {
@@ -139,6 +142,10 @@ public class User extends BaseEntity {
     public void updateNotificationSettings(boolean pushEnabled, boolean emailNotificationEnabled) {
         this.pushEnabled = pushEnabled;
         this.emailNotificationEnabled = emailNotificationEnabled;
+    }
+
+    public void recordLogin() {
+        this.lastLoginAt = LocalDateTime.now();
     }
 
     public String getEmail() {

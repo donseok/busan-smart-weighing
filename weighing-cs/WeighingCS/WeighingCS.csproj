@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <InternalsVisibleTo>WeighingCS.Tests</InternalsVisibleTo>
   </PropertyGroup>
 
   <ItemGroup>

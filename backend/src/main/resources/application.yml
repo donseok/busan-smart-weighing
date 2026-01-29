@@ -48,6 +48,10 @@ otp:
   ttl-seconds: 300
   max-failed-attempts: 3
 
+fcm:
+  enabled: ${FCM_ENABLED:false}
+  service-account-file: ${FCM_SERVICE_ACCOUNT_FILE:}
+
 api:
   internal-key: ${API_INTERNAL_KEY:test-internal-key}
 

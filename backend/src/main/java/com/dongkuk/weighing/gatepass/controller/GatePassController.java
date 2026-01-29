@@ -1,5 +1,6 @@
 package com.dongkuk.weighing.gatepass.controller;
 
+import com.dongkuk.weighing.auth.security.UserPrincipal;
 import com.dongkuk.weighing.gatepass.domain.GatePassStatus;
 import com.dongkuk.weighing.gatepass.dto.GatePassCreateRequest;
 import com.dongkuk.weighing.gatepass.dto.GatePassRejectRequest;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -49,17 +51,19 @@ public class GatePassController {
     @PutMapping("/{gatePassId}/pass")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<GatePassResponse>> passGate(
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long gatePassId) {
-        GatePassResponse response = gatePassService.passGate(gatePassId);
+        GatePassResponse response = gatePassService.passGate(gatePassId, principal.getUserId());
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
     @PutMapping("/{gatePassId}/reject")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<GatePassResponse>> rejectGate(
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long gatePassId,
             @Valid @RequestBody GatePassRejectRequest request) {
-        GatePassResponse response = gatePassService.rejectGate(gatePassId, request.reason());
+        GatePassResponse response = gatePassService.rejectGate(gatePassId, request.reason(), principal.getUserId());
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 }

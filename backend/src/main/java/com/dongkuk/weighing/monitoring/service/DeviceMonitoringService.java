@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,14 +110,23 @@ public class DeviceMonitoringService {
         );
     }
 
+    @Transactional
     public void checkDeviceHealth() {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
         List<DeviceStatus> devices = deviceStatusRepository.findByIsActiveTrueOrderByDeviceTypeAscDeviceNameAsc();
 
         for (DeviceStatus device : devices) {
-            // 실제 환경에서는 각 장비에 헬스 체크 수행
-            // 여기서는 로그만 기록
-            log.debug("헬스 체크: deviceCode={}, currentStatus={}",
-                    device.getDeviceCode(), device.getConnectionStatus());
+            if (device.getConnectionStatus() == ConnectionStatus.ONLINE
+                    && device.getLastConnectedAt() != null
+                    && device.getLastConnectedAt().isBefore(threshold)) {
+                log.warn("헬스 체크 타임아웃: deviceCode={}, lastConnectedAt={}",
+                        device.getDeviceCode(), device.getLastConnectedAt());
+                device.setOffline();
+                notifyDeviceStatusChange(device);
+            } else {
+                log.debug("헬스 체크: deviceCode={}, currentStatus={}",
+                        device.getDeviceCode(), device.getConnectionStatus());
+            }
         }
     }
 

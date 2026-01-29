@@ -4,6 +4,8 @@ import com.dongkuk.weighing.auth.config.JwtProperties;
 import com.dongkuk.weighing.auth.dto.*;
 import com.dongkuk.weighing.global.common.exception.BusinessException;
 import com.dongkuk.weighing.global.common.exception.ErrorCode;
+import com.dongkuk.weighing.master.domain.Company;
+import com.dongkuk.weighing.master.domain.CompanyRepository;
 import com.dongkuk.weighing.user.domain.User;
 import com.dongkuk.weighing.user.domain.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.time.Duration;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redisTemplate;
@@ -142,8 +145,19 @@ public class AuthService {
 
         storeRefreshToken(user.getUserId(), deviceType, refreshToken);
 
-        // TODO: companyName은 추후 Company 모듈 연동 시 조회로 대체
-        return LoginResponse.of(accessToken, refreshToken, expiresIn, user, null);
+        user.recordLogin();
+
+        String companyName = resolveCompanyName(user.getCompanyId());
+        return LoginResponse.of(accessToken, refreshToken, expiresIn, user, companyName);
+    }
+
+    private String resolveCompanyName(Long companyId) {
+        if (companyId == null) {
+            return null;
+        }
+        return companyRepository.findById(companyId)
+                .map(Company::getCompanyName)
+                .orElse(null);
     }
 
     private void storeRefreshToken(Long userId, DeviceType deviceType, String refreshToken) {
