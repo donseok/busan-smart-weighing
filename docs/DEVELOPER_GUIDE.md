@@ -1392,6 +1392,130 @@ var response = await httpClient.PostAsync(
 }
 ```
 
+### 6.4 모던 UI 시스템 (GDI+ 커스텀 컨트롤)
+
+데스크톱 프로그램은 웹 애플리케이션 수준의 시각적 품질을 위해 **GDI+ 기반 커스텀 컨트롤**을 전면 적용한다. 네이티브 WinForms 컨트롤 대신 `OnPaint`에서 직접 렌더링하여 다크 테마, 라운드 코너, 글로우 효과 등을 구현한다.
+
+#### 6.4.1 Theme 디자인 토큰 시스템
+
+`Controls/Theme.cs`에서 모든 시각적 속성을 중앙 관리한다. Tailwind CSS Slate 팔레트를 기반으로 5단계 배경 계층, 시맨틱 색상, 타이포그래피, 간격 상수를 정의한다.
+
+```csharp
+// 배경 계층 (어두운 순)
+BgDarkest  #060D1B  → 헤더/푸터
+BgBase     #0B1120  → 메인 배경
+BgElevated #0F172A  → 입력 필드
+BgSurface  #1E293B  → 카드
+BgHover    #283548  → 호버 상태
+
+// 폰트 (정적 캐시, Dispose 금지!)
+Theme.FontBody      → 9.5pt Segoe UI
+Theme.FontBodyBold  → 9.5pt Segoe UI Bold
+Theme.FontMono      → 10pt Consolas
+
+// 색상 유틸리티
+Theme.WithAlpha(color, alpha)  → 알파 투명도
+Theme.Lighten(color, factor)   → 밝게
+Theme.Darken(color, factor)    → 어둡게
+```
+
+> **주의**: `Theme.FontXxx` 속성은 정적 캐시된 공유 인스턴스이다. `using var font = Theme.FontBody`처럼 사용하면 Dispose 후 **전역적으로 폰트가 무효화**되어 모든 컨트롤에서 "Parameter is not valid" 예외가 발생한다. 반드시 `var font = Theme.FontBody`로 참조만 한다.
+
+#### 6.4.2 커스텀 컨트롤 구성
+
+| 컨트롤 | 설명 | 구현 방식 |
+|--------|------|-----------|
+| `HeaderBar` | 상단 헤더 (로고, 제목, 연결 LED, 시계) | Control 상속, Timer |
+| `StatusFooter` | 하단 상태바 (계량대, 모드, 동기화, 시간) | Control 상속, Timer |
+| `WeightDisplayPanel` | 대형 중량 표시 (글로우, 안정성 뱃지) | Control 상속 |
+| `CardPanel` | 카드 컨테이너 (유리 효과, 그림자, 액센트) | Panel 상속 |
+| `ModernButton` | 버튼 (Primary/Secondary/Danger 3종) | Control 상속 |
+| `ModernToggle` | 슬라이딩 토글 (자동/수동 전환, 애니메이션) | Control 상속, Timer |
+| `ModernTextBox` | 텍스트 입력 (글로우 테두리, 플레이스홀더) | Control 상속 + TextBox 위임 |
+| `ModernComboBox` | 드롭다운 (커스텀 아이템 렌더링) | Control 상속 + ComboBox 위임 |
+| `ModernCheckBox` | 체크박스 (커스텀 렌더링, 체크마크) | Control 상속 |
+| `ModernListView` | 리스트뷰 (교대 행, 상태 색상화) | ListView 상속 (OwnerDraw) |
+| `ProcessStepBar` | 4단계 프로세스 표시 (원형 인디케이터) | Control 상속 |
+| `TerminalLogPanel` | 터미널 스타일 로그 출력 | Control 상속 |
+| `ModernProgressBar` | 진행바 (스플래시 화면용) | Control 상속 |
+
+#### 6.4.3 레이아웃 구조
+
+메인 폼은 3단 레이아웃으로 구성된다:
+
+```
+┌─────────────────────────────────────────────────┐
+│  HeaderBar (Dock.Top, 56px)                     │
+│  [DK 로고] 부산 스마트 계량 시스템   ● 계량기 ... HH:mm│
+├────────────────────┬──┬─────────────────────────┤
+│  panelLeftCol      │÷ │  panelRightCol          │
+│  (Dock.Left,420px) │1p│  (Dock.Fill)            │
+│                    │x │                          │
+│  WeightDisplay     │  │  ModeToggle             │
+│  (220px)           │  │  ProcessStepBar (64px)  │
+│                    │  │  CardManual (185px)      │
+│  CardVehicle       │  │  CardActions (88px)     │
+│  (190px)           │  │  CardSimulator (90px)   │
+│                    │  │                          │
+│  CardHistory       │  │  TerminalLog            │
+│  (Fill)            │  │  (Fill)                 │
+├────────────────────┴──┴─────────────────────────┤
+│  StatusFooter (Dock.Bottom, 32px)               │
+│  계량대#1 · COM1  ● 자동 모드          v1.0.0 HH:mm:ss│
+└─────────────────────────────────────────────────┘
+```
+
+#### 6.4.4 렌더링 패턴
+
+모든 커스텀 컨트롤은 다음 패턴을 따른다:
+
+```csharp
+public class CustomControl : Control
+{
+    public CustomControl()
+    {
+        // 더블 버퍼링 필수
+        SetStyle(
+            ControlStyles.AllPaintingInWmPaint |
+            ControlStyles.UserPaint |
+            ControlStyles.OptimizedDoubleBuffer |
+            ControlStyles.ResizeRedraw, true);
+    }
+
+    // 배경 깜빡임 방지
+    protected override void OnPaintBackground(PaintEventArgs e) { }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        if (Width < 10 || Height < 10) return; // zero-size 방어
+
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+        // RoundedRectHelper로 라운드 사각형 생성
+        using var path = RoundedRectHelper.Create(bounds, Theme.RadiusMedium);
+        // ... GDI+ 렌더링
+    }
+}
+```
+
+**Wrapper 패턴** (ModernTextBox, ModernComboBox): 네이티브 컨트롤을 내부에 포함하되 외곽 테두리와 포커스 효과만 커스텀 렌더링한다.
+
+```csharp
+public class ModernTextBox : Control
+{
+    private readonly TextBox _inner;  // 내부 네이티브 컨트롤
+
+    // Text, Font 등 속성을 _inner에 위임
+    public override string Text
+    {
+        get => _inner.Text;
+        set => _inner.Text = value ?? "";
+    }
+}
+```
+
 ---
 
 ## 7. 인증과 보안 (JWT + Spring Security)

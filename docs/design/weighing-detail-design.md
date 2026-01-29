@@ -1241,7 +1241,148 @@ IDLE -> WEIGHING -> STABILIZING -> COMPLETE
 - Switch로 시뮬레이터 활성/비활성 토글
 - InputNumber로 중량값 직접 입력 (기본값: 15,000 kg, 범위: 0~100,000)
 
-### 9.6 REST API (weighingStationApi)
+### 9.6 데스크톱 클라이언트 (WeighingCS) UI 설계
+
+프론트엔드 WeighingStationPage와 동일한 계량소 관제 기능을 C# .NET 8 WinForms 데스크톱 프로그램으로 구현한다. GDI+ 커스텀 렌더링을 통해 웹 수준의 다크 테마 UI를 제공한다.
+
+#### 9.6.1 디자인 시스템
+
+**Theme 디자인 토큰** (`Controls/Theme.cs`)
+
+Tailwind CSS Slate 팔레트 기반의 다크 테마 디자인 토큰을 중앙 관리한다.
+
+| 카테고리 | 토큰 | 값 | 용도 |
+|----------|------|-----|------|
+| 배경 | `BgDarkest` | `#060D1B` | 헤더/푸터 |
+| 배경 | `BgBase` | `#0B1120` | 메인 배경 |
+| 배경 | `BgElevated` | `#0F172A` | 입력 필드 |
+| 배경 | `BgSurface` | `#1E293B` | 카드 |
+| 색상 | `Primary` | `#06B6D4` | 주 강조색 (시안) |
+| 색상 | `Success` | `#10B981` | 성공 (에메랄드) |
+| 색상 | `Warning` | `#F59E0B` | 경고 (앰버) |
+| 색상 | `Error` | `#F43E5E` | 오류 (로즈) |
+| 폰트 | `FontBody` | Segoe UI 9.5pt | 본문 |
+| 폰트 | `FontMono` | Consolas 10pt | 모노스페이스 |
+| 간격 | `SpacingSm/Md/Lg/Xl` | 8/12/16/24px | 여백 |
+| 반경 | `RadiusSmall/Medium/Large/Xl` | 6/8/12/16px | 라운드 코너 |
+
+**공통 유틸리티**: `WithAlpha(color, alpha)`, `Lighten(color, factor)`, `Darken(color, factor)`, `Blend(c1, c2, amount)`
+
+#### 9.6.2 레이아웃 구조
+
+```
+┌──────────────────────────────────────────────────────┐
+│  HeaderBar (Dock.Top, 56px)                          │
+│  [DK] 부산 스마트 계량 시스템   ●계량기 ●전광판 ... HH:mm│
+├───────────────────┬─┬────────────────────────────────┤
+│  panelLeftCol     │ │  panelRightCol (Dock.Fill)     │
+│  (420px)          │ │  ┌──────────────────────────┐  │
+│  ┌──────────────┐ │ │  │ ModeToggle (44px)        │  │
+│  │WeightDisplay │ │ │  │ ProcessStepBar (64px)    │  │
+│  │(220px, 글로우)│ │ │  │ CardManual (185px)       │  │
+│  ├──────────────┤ │ │  │ CardActions (88px)       │  │
+│  │CardVehicle   │ │ │  │ CardSimulator (90px)     │  │
+│  │(190px, 5행)  │ │ │  │ TerminalLog (Fill)       │  │
+│  ├──────────────┤ │ │  └──────────────────────────┘  │
+│  │CardHistory   │ │ │                                │
+│  │(Fill, 리스트) │ │ │                                │
+│  └──────────────┘ │ │                                │
+├───────────────────┴─┴────────────────────────────────┤
+│  StatusFooter (Dock.Bottom, 32px)                    │
+│  계량대#1 · COM1 · 9600bps  ● 자동 모드   v1.0.0 HH:mm:ss│
+└──────────────────────────────────────────────────────┘
+```
+
+- 좌우 컬럼은 `Panel` 기반 (`SplitContainer` 대신 1px 디바이더 패널 사용)
+- 각 섹션 간 `Spacer(8px)` 투명 패널로 간격 확보
+- 폼 리사이즈 시 `panelLeftCol.Width`를 전체 너비의 35% (360~520px) 비례 조정
+
+#### 9.6.3 커스텀 컨트롤 명세
+
+**HeaderBar** — 상단 헤더 바
+
+| 요소 | 위치 | 설명 |
+|------|------|------|
+| 로고 | 좌측 | 34px 원형, Primary→PrimaryDark 그라디언트 + "DK" 흰색 텍스트 |
+| 제목 | 좌측 | "부산 스마트 계량 시스템" (FontHeading) + 영문 부제 (FontCaption) |
+| 연결 상태 | 우측 | 4개 LED 도트 (계량기/전광판/차단기/네트워크), 연결 시 Success 글로우 |
+| 시계 | 우측 끝 | "HH:mm" Consolas 13pt Bold, 1초 Timer 갱신 |
+| 하단 보더 | 전체 | Primary→투명 그라디언트 라인 |
+
+**WeightDisplayPanel** — 대형 중량 표시
+
+| 요소 | 설명 |
+|------|------|
+| 배경 | BgElevated→BgSurface 수직 그라디언트 + 유리 오버레이 |
+| 중량 텍스트 | Consolas 32~72pt Bold (폭 비례 스케일) |
+| 글로우 효과 | Stable 시 4겹 Primary 글로우 |
+| 안정성 뱃지 | STABLE(초록)/UNSTABLE(노랑)/ERROR(빨강), 라운드 필 태그 |
+| 왼쪽 액센트 | 상태별 4px 세로 바 (Primary/Error/PrimaryDark) |
+
+**ProcessStepBar** — 4단계 프로세스 표시
+
+```
+○─────○─────○─────○
+대기   계량   안정화  완료     [상태 태그]
+```
+
+| 상태 | 표현 |
+|------|------|
+| 완료 단계 | Primary 채운 원 + 흰색 체크마크, 연결선 Primary |
+| 현재 단계 | Primary 테두리 + 중앙 도트 + 글로우, Bold 라벨 |
+| 미래 단계 | Border 테두리 원, TextMuted 라벨 |
+| 상태 태그 | 우측 라운드 필 태그 (완료=Success, 진행=Primary, 대기=TextMuted) |
+
+**CardPanel** — 카드 컨테이너
+
+- 유리 효과: 상단 40% White(6)→White(0) 그라디언트 오버레이
+- 외부 그림자: Black(25) 2px 오프셋
+- 타이틀 구분선: Border(60) 1px 수평선
+- 선택적 좌측 액센트 바 (3px, 클립 경로 적용)
+
+**ModernButton** — 3종 버튼
+
+| Variant | 배경 | 전경 | 특수 효과 |
+|---------|------|------|-----------|
+| Primary | Primary | White | 유리 하이라이트 + 그림자 |
+| Danger | Error | White | 유리 하이라이트 + 그림자 |
+| Secondary | BgSurface | TextPrimary | 호버 시 BorderLight 테두리 |
+
+**ModernTextBox / ModernComboBox** — Wrapper 패턴
+
+네이티브 `TextBox`/`ComboBox`를 내부에 배치하고, 외곽만 GDI+로 커스텀 렌더링한다.
+
+| 상태 | 테두리 | 효과 |
+|------|--------|------|
+| 기본 | Border 1px | — |
+| 포커스 | BorderFocus(Primary) 1.5px | Primary(25) 글로우 |
+| 비활성 | Border 1px | BgSurface 배경, TextDisabled |
+
+**ModernListView** — 소유자 그리기 리스트뷰
+
+- `OwnerDraw = true`로 `ListView` 상속
+- 헤더: BgSurface 배경, TextSecondary 텍스트, 컬럼 구분선
+- 행: BgElevated / BgSurface 교대 배경
+- 선택 행: Primary(30) 배경 + 좌측 3px Primary 액센트
+- 상태 컬럼 자동 색상화: 완료=Success, 진행=Warning, 오류=Error
+
+#### 9.6.4 프론트엔드 vs 데스크톱 컴포넌트 매핑
+
+| 프론트엔드 (React) | 데스크톱 (C# WinForms) | 비고 |
+|---------------------|------------------------|------|
+| `WeightDisplay` | `WeightDisplayPanel` | GDI+ 직접 렌더링 |
+| `VehicleInfoPanel` | `CardPanel` + `TableLayoutPanel` | 카드 내 5행 테이블 |
+| `ConnectionStatusBar` | `HeaderBar` (내장) | 헤더에 LED 통합 |
+| `ModeToggle` | `ModernToggle` | 슬라이딩 애니메이션 |
+| `ManualControls` | `CardPanel` + `ModernTextBox/ComboBox` | Wrapper 패턴 |
+| `ActionButtons` | `CardPanel` + `ModernButton` | 3종 버튼 |
+| `ProcessStateBar` | `ProcessStepBar` | 원형 인디케이터 |
+| `StatusLog` | `TerminalLogPanel` | macOS 트래픽 라이트 |
+| `SimulatorPanel` | `CardPanel` + `ModernCheckBox/Button` | 시뮬레이터 토글 |
+| `WeighingHistoryTable` | `ModernListView` | OwnerDraw ListView |
+| — | `StatusFooter` | 데스크톱 전용 하단 바 |
+
+### 9.7 REST API (weighingStationApi)
 
 | 함수 | 메서드 | 엔드포인트 | 설명 |
 |------|--------|-----------|------|

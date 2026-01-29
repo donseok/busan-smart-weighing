@@ -390,9 +390,27 @@ lib/
 ```
 WeighingCS/
 ├── Program.cs                   # 앱 진입점
-├── SplashForm.cs                # 스플래시 화면 (초기 로딩/연결 확인)
-├── MainForm.cs                  # 메인 폼 (계량 관제 UI)
-├── MainForm.Designer.cs         # WinForms 디자이너 코드
+├── SplashForm.cs                # 스플래시 화면 (그라디언트 배경, 방사형 글로우, 진행바)
+├── MainForm.cs                  # 메인 폼 (계량 관제 UI + 이벤트 처리)
+├── MainForm.Designer.cs         # 레이아웃 코드 (Header→Content→Footer 구조)
+├── Controls/
+│   ├── Theme.cs                 # 디자인 토큰 (색상/폰트/간격/유틸리티, Tailwind Slate 팔레트)
+│   ├── RoundedRectHelper.cs     # 라운드 사각형 GraphicsPath 유틸리티
+│   ├── HeaderBar.cs             # 상단 헤더 (로고, 제목, 연결 상태 LED, 실시간 시계)
+│   ├── StatusFooter.cs          # 하단 상태바 (계량대 정보, 모드, 동기화 상태, 시간)
+│   ├── WeightDisplayPanel.cs    # 대형 중량 디스플레이 (글로우 효과, 안정성 뱃지)
+│   ├── CardPanel.cs             # 카드 패널 (유리 효과, 그림자, 액센트 바)
+│   ├── ModernButton.cs          # 버튼 (Primary/Secondary/Danger, 유리 하이라이트)
+│   ├── ModernToggle.cs          # 슬라이딩 토글 (자동/수동 모드 전환, 애니메이션)
+│   ├── ModernTextBox.cs         # 텍스트 입력 (라운드 테두리, 포커스 글로우, 플레이스홀더)
+│   ├── ModernComboBox.cs        # 콤보박스 (커스텀 드롭다운 렌더링, 포커스 효과)
+│   ├── ModernCheckBox.cs        # 체크박스 (커스텀 GDI+ 렌더링, 호버 효과)
+│   ├── ModernListView.cs        # 리스트뷰 (교대 행 색상, 커스텀 헤더, 상태 색상)
+│   ├── ModernProgressBar.cs     # 진행바 (스플래시 화면용)
+│   ├── ProcessStepBar.cs        # 프로세스 단계 표시 (원형 인디케이터, 체크마크)
+│   ├── TerminalLogPanel.cs      # 터미널 스타일 로그 패널
+│   ├── ConnectionStatusPanel.cs # [레거시] 연결 상태 패널 (HeaderBar로 대체)
+│   └── LedIndicator.cs          # [레거시] LED 인디케이터 (HeaderBar로 대체)
 ├── Interfaces/
 │   ├── ILprCamera.cs            # LPR 카메라 인터페이스
 │   ├── IVehicleDetector.cs      # 차량 감지기 인터페이스
@@ -418,13 +436,19 @@ WeighingCS/
 
 ### 주요 패턴
 
+- **GDI+ 커스텀 UI 시스템**: 모든 컨트롤을 `OnPaint`에서 직접 렌더링 (AntiAlias, ClearTypeGridFit)
+- **Theme 디자인 토큰**: Tailwind CSS Slate 팔레트 기반 다크 테마 (색상/폰트/간격/유틸리티 중앙 관리)
+- **3단 레이아웃**: HeaderBar(Top) → panelContent(Fill: Left+Divider+Right) → StatusFooter(Bottom)
+- **Wrapper 패턴**: ModernTextBox/ModernComboBox가 네이티브 컨트롤을 감싸며 커스텀 테두리/글로우 렌더링
+- **카드 기반 UI**: CardPanel로 모든 섹션을 유리 효과 + 그림자 + 액센트 바 카드에 배치
 - 인터페이스 기반 하드웨어 추상화 (ILprCamera, IVehicleDetector, IVehicleSensor)
 - Simulator 클래스로 하드웨어 없이 개발/테스트 가능
 - WeighingProcessService가 전체 계량 프로세스 오케스트레이션
 - 계량대와 시리얼 포트(COM) 통신으로 실시간 중량 데이터 수신 (IndicatorService)
 - 전광판/차단기와 TCP 네트워크 통신 (DisplayBoardService, BarrierService)
 - SQLite 로컬 캐시 (오프라인 대비, LocalCacheService)
-- 스플래시 폼으로 초기화 상태 표시 (SplashForm)
+- 스플래시 폼으로 초기화 상태 표시 (그라디언트 배경, 방사형 글로우)
+- **주의**: Theme 폰트는 정적 캐시이므로 `using var`로 참조 금지 (Dispose 시 전역 오류 발생)
 - xUnit 테스트: ApiServiceTests, IndicatorServiceTests, LocalCacheServiceTests
 
 ## 코드 컨벤션
