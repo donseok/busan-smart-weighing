@@ -1,3 +1,12 @@
+/**
+ * @fileoverview 마스터 데이터 생성/조회/수정/삭제 범용 페이지 컴포넌트
+ *
+ * 운송사, 차량, 품목, 코드 등 마스터 데이터 관리 페이지의 공통 레이아웃과
+ * CRUD 로직을 제공하는 제네릭 컴포넌트입니다.
+ * 각 마스터 페이지는 MasterCrudPageConfig를 통해 설정만 전달하면 됩니다.
+ *
+ * @module components/MasterCrudPage
+ */
 import React, { useEffect, useCallback, type ReactNode } from 'react';
 import { Button, Space, Typography, Modal, Form, Popconfirm, message, Input } from 'antd';
 import SortableTable from './SortableTable';
@@ -42,6 +51,16 @@ export interface MasterCrudPageConfig<T extends Record<string, unknown>> {
   filterData?: (data: T[], keyword: string) => T[];
 }
 
+/**
+ * 마스터 데이터 생성/조회/수정/삭제 범용 페이지 컴포넌트
+ *
+ * 테이블 조회, 검색, 등록/수정 모달, 삭제 확인 등 공통 CRUD UI를 제공합니다.
+ * 제네릭 타입 T를 통해 다양한 마스터 데이터 엔티티에 재사용할 수 있습니다.
+ *
+ * @template T - 마스터 데이터 레코드 타입
+ * @param config - 페이지 설정 (엔드포인트, 컬럼, 폼 필드 등)
+ * @returns 마스터 데이터 관리 페이지 JSX
+ */
 export default function MasterCrudPage<T extends Record<string, unknown>>({
   title,
   endpoint,

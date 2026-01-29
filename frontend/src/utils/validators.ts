@@ -50,22 +50,26 @@ export const businessNumberRule: RuleObject = {
   message: '사업자번호는 숫자 10자리를 입력하세요',
 };
 
+/** 비밀번호 강도 유효성 검증 규칙 (영문 + 숫자 필수 포함) */
 export const passwordStrengthRule: RuleObject = {
   pattern: PASSWORD_STRENGTH_PATTERN,
   message: '영문과 숫자를 모두 포함해야 합니다',
 };
 
+/** 차량번호 형식 유효성 검증 규칙 (예: 12가3456) */
 export const plateNumberRule: RuleObject = {
   pattern: PLATE_NUMBER_PATTERN,
   message: '올바른 차량번호 형식을 입력하세요 (예: 12가3456)',
 };
 
+/** 이메일 형식 유효성 검증 규칙 */
 export const emailRule: RuleObject = {
   pattern: EMAIL_PATTERN,
   message: '올바른 이메일 형식을 입력하세요',
 };
 
 // --- Number Rules ---
+/** 양수(0 이상) 유효성 검증 규칙 */
 export const positiveNumberRule: RuleObject = {
   type: 'number',
   min: 0,
@@ -73,6 +77,13 @@ export const positiveNumberRule: RuleObject = {
 };
 
 // --- Date Validators ---
+/**
+ * 오늘 또는 미래 날짜만 허용하는 유효성 검증기
+ *
+ * @param _ - 규칙 객체 (사용하지 않음)
+ * @param value - 검증 대상 날짜 값
+ * @returns 유효하면 resolve, 과거 날짜이면 reject
+ */
 export const futureOrPresentDateValidator = (_: RuleObject, value: unknown) => {
   if (!value) return Promise.resolve();
   const date = dayjs(value as string);
@@ -83,6 +94,13 @@ export const futureOrPresentDateValidator = (_: RuleObject, value: unknown) => {
 };
 
 // --- Cross-field Validators ---
+/**
+ * 지정된 필드 값보다 큰 값을 요구하는 교차 필드 유효성 검증기를 생성합니다.
+ *
+ * @param field - 비교 대상 필드명
+ * @param label - 비교 대상 필드의 표시 텍스트
+ * @returns Ant Design Form 의존성 검증기 팩토리
+ */
 export const mustBeGreaterThanField = (field: string, label: string) =>
   ({ getFieldValue }: { getFieldValue: (name: string) => unknown }) => ({
     validator(_: RuleObject, value: unknown) {
@@ -96,6 +114,13 @@ export const mustBeGreaterThanField = (field: string, label: string) =>
     },
   });
 
+/**
+ * 지정된 필드 값보다 작은 값을 요구하는 교차 필드 유효성 검증기를 생성합니다.
+ *
+ * @param field - 비교 대상 필드명
+ * @param label - 비교 대상 필드의 표시 텍스트
+ * @returns Ant Design Form 의존성 검증기 팩토리
+ */
 export const mustBeLessThanField = (field: string, label: string) =>
   ({ getFieldValue }: { getFieldValue: (name: string) => unknown }) => ({
     validator(_: RuleObject, value: unknown) {
