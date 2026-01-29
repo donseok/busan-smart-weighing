@@ -24,6 +24,16 @@ import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 통계 서비스
+ *
+ * 계량 데이터를 기반으로 일별/월별 통계를 집계하고 엑셀로 내보내는 비즈니스 로직.
+ * 업체별, 품목유형별 필터링과 요약 집계 기능을 제공하며,
+ * Apache POI를 사용하여 엑셀 파일을 생성한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,6 +43,10 @@ public class StatisticsService {
     private final WeighingRepository weighingRepository;
     private final CompanyRepository companyRepository;
 
+    /**
+     * 일별 계량 통계를 조회한다.
+     * 지정 기간 내 날짜별/업체별/품목별 계량 건수와 중량을 집계한다.
+     */
     public List<DailyStatisticsResponse> getDailyStatistics(LocalDate dateFrom, LocalDate dateTo,
                                                              Long companyId, ItemType itemType) {
         LocalDateTime from = dateFrom.atStartOfDay();
@@ -55,6 +69,10 @@ public class StatisticsService {
                 .toList();
     }
 
+    /**
+     * 월별 계량 통계를 조회한다.
+     * 지정 기간 내 연/월별/업체별/품목별 계량 건수와 중량을 집계한다.
+     */
     public List<MonthlyStatisticsResponse> getMonthlyStatistics(LocalDate dateFrom, LocalDate dateTo,
                                                                   Long companyId, ItemType itemType) {
         LocalDateTime from = dateFrom.atStartOfDay();
@@ -78,6 +96,10 @@ public class StatisticsService {
                 .toList();
     }
 
+    /**
+     * 통계 요약 정보를 조회한다.
+     * 총 계량 건수, 총 중량, 품목별/업체별 집계와 일별/월별 상세 데이터를 포함한다.
+     */
     public StatisticsSummaryResponse getSummary(LocalDate dateFrom, LocalDate dateTo,
                                                  Long companyId, ItemType itemType) {
         List<DailyStatisticsResponse> dailyStats = getDailyStatistics(dateFrom, dateTo, companyId, itemType);
@@ -86,6 +108,7 @@ public class StatisticsService {
         long totalCount = dailyStats.stream().mapToLong(DailyStatisticsResponse::totalCount).sum();
         double totalWeightKg = dailyStats.stream().mapToDouble(DailyStatisticsResponse::totalWeightKg).sum();
 
+        // 품목유형별 건수 집계
         Map<String, Long> countByItemType = dailyStats.stream()
                 .filter(d -> d.itemType() != null)
                 .collect(Collectors.groupingBy(
@@ -93,6 +116,7 @@ public class StatisticsService {
                         Collectors.summingLong(DailyStatisticsResponse::totalCount)
                 ));
 
+        // 품목유형별 중량 집계
         Map<String, Double> weightByItemType = dailyStats.stream()
                 .filter(d -> d.itemType() != null)
                 .collect(Collectors.groupingBy(
@@ -100,6 +124,7 @@ public class StatisticsService {
                         Collectors.summingDouble(DailyStatisticsResponse::totalWeightKg)
                 ));
 
+        // 업체별 건수 집계
         Map<String, Long> countByCompany = dailyStats.stream()
                 .filter(d -> d.companyName() != null && !d.companyName().equals("전체"))
                 .collect(Collectors.groupingBy(
@@ -114,6 +139,10 @@ public class StatisticsService {
         );
     }
 
+    /**
+     * 통계 데이터를 엑셀(xlsx) 파일로 내보낸다.
+     * Apache POI를 사용하여 일별/월별 시트를 생성한다.
+     */
     public byte[] exportToExcel(LocalDate dateFrom, LocalDate dateTo,
                                  Long companyId, ItemType itemType, String type) throws IOException {
         try (Workbook workbook = new XSSFWorkbook();
@@ -123,11 +152,13 @@ public class StatisticsService {
             CellStyle dataStyle = createDataStyle(workbook);
             CellStyle numberStyle = createNumberStyle(workbook);
 
+            // 일별 통계 시트 생성
             if ("daily".equals(type) || "all".equals(type)) {
                 List<DailyStatisticsResponse> dailyStats = getDailyStatistics(dateFrom, dateTo, companyId, itemType);
                 createDailySheet(workbook, dailyStats, headerStyle, dataStyle, numberStyle);
             }
 
+            // 월별 통계 시트 생성
             if ("monthly".equals(type) || "all".equals(type)) {
                 List<MonthlyStatisticsResponse> monthlyStats = getMonthlyStatistics(dateFrom, dateTo, companyId, itemType);
                 createMonthlySheet(workbook, monthlyStats, headerStyle, dataStyle, numberStyle);
@@ -138,6 +169,7 @@ public class StatisticsService {
         }
     }
 
+    /** 일별 통계 엑셀 시트를 생성한다. */
     private void createDailySheet(Workbook workbook, List<DailyStatisticsResponse> data,
                                    CellStyle headerStyle, CellStyle dataStyle, CellStyle numberStyle) {
         Sheet sheet = workbook.createSheet("일별 통계");
@@ -179,11 +211,13 @@ public class StatisticsService {
             weightTonCell.setCellStyle(numberStyle);
         }
 
+        // 컬럼 너비 자동 조정
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
     }
 
+    /** 월별 통계 엑셀 시트를 생성한다. */
     private void createMonthlySheet(Workbook workbook, List<MonthlyStatisticsResponse> data,
                                      CellStyle headerStyle, CellStyle dataStyle, CellStyle numberStyle) {
         Sheet sheet = workbook.createSheet("월별 통계");
@@ -224,11 +258,13 @@ public class StatisticsService {
             weightTonCell.setCellStyle(numberStyle);
         }
 
+        // 컬럼 너비 자동 조정
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
     }
 
+    /** 엑셀 헤더 행 스타일을 생성한다 (볼드, 회색 배경, 테두리, 가운데 정렬). */
     private CellStyle createHeaderStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         Font font = workbook.createFont();
@@ -244,6 +280,7 @@ public class StatisticsService {
         return style;
     }
 
+    /** 엑셀 데이터 셀 스타일을 생성한다 (테두리). */
     private CellStyle createDataStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         style.setBorderBottom(BorderStyle.THIN);
@@ -253,6 +290,7 @@ public class StatisticsService {
         return style;
     }
 
+    /** 엑셀 숫자 셀 스타일을 생성한다 (테두리, 소수점 포맷, 우측 정렬). */
     private CellStyle createNumberStyle(Workbook workbook) {
         CellStyle style = createDataStyle(workbook);
         DataFormat format = workbook.createDataFormat();
@@ -261,11 +299,13 @@ public class StatisticsService {
         return style;
     }
 
+    /** 전체 업체의 ID-이름 매핑을 조회한다. */
     private Map<Long, String> getCompanyNames() {
         return companyRepository.findAll().stream()
                 .collect(Collectors.toMap(Company::getCompanyId, Company::getCompanyName));
     }
 
+    /** 품목유형 코드를 한국어 이름으로 변환한다. */
     private String getItemTypeName(String itemType) {
         return switch (itemType) {
             case "BY_PRODUCT" -> "부산물";

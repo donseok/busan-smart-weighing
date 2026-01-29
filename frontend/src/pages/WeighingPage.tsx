@@ -117,17 +117,17 @@ const columns: ColumnsType<WeighingRecord> = [
 ];
 
 const WeighingPage: React.FC = () => {
-  const [data, setData] = useState<WeighingRecord[]>([]);
+  const [data, setData] = useState<WeighingRecord[]>([]);             // 계량 기록 목록
   const [loading, setLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>();
-  const [modeFilter, setModeFilter] = useState<string | undefined>();
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(); // 상태 필터
+  const [modeFilter, setModeFilter] = useState<string | undefined>();     // 계량방식 필터
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
-  >(null);
-  const [detailOpen, setDetailOpen] = useState(false);
+  >(null); // 기간 필터
+  const [detailOpen, setDetailOpen] = useState(false);                    // 상세 모달 표시
   const [selectedRecord, setSelectedRecord] = useState<WeighingRecord | null>(
     null,
-  );
+  ); // 상세 보기 대상 레코드
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -163,6 +163,7 @@ const WeighingPage: React.FC = () => {
     setDateRange(null);
   };
 
+  /** WebSocket 메시지 수신 시 목록 자동 갱신 */
   const handleWsMessage = useCallback(() => {
     fetchData();
   }, [fetchData]);

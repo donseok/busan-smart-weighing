@@ -27,11 +27,11 @@ const statusLabels: Record<string, string> = {
 };
 
 const GatePassPage: React.FC = () => {
-  const [data, setData] = useState<GatePass[]>([]);
+  const [data, setData] = useState<GatePass[]>([]);                    // 출문증 목록
   const [loading, setLoading] = useState(false);
-  const [rejectModalOpen, setRejectModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [rejectForm] = Form.useForm();
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);       // 반려 사유 입력 모달
+  const [selectedId, setSelectedId] = useState<number | null>(null);   // 반려 대상 출문증 ID
+  const [rejectForm] = Form.useForm();  // 반려 사유 폼
 
   const fetchData = async () => {
     setLoading(true);
@@ -44,6 +44,7 @@ const GatePassPage: React.FC = () => {
 
   useEffect(() => { fetchData(); }, []);
 
+  /** 출문 승인 처리 */
   const handlePass = async (id: number) => {
     try {
       await apiClient.put(`/gate-passes/${id}/pass`);
@@ -52,6 +53,7 @@ const GatePassPage: React.FC = () => {
     } catch { message.error('출문 승인에 실패했습니다.'); }
   };
 
+  /** 출문 반려 처리 (사유 필수 입력) */
   const handleReject = async (values: { reason: string }) => {
     if (!selectedId) return;
     try {

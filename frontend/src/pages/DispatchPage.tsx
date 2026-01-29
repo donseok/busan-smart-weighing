@@ -39,18 +39,18 @@ const initialFilters: FilterParams = {
 };
 
 const DispatchPage: React.FC = () => {
-  const [data, setData] = useState<Dispatch[]>([]);
+  const [data, setData] = useState<Dispatch[]>([]);                       // 배차 목록
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [totalElements, setTotalElements] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<Dispatch | null>(null);
-  const [filters, setFilters] = useState<FilterParams>({ ...initialFilters });
-  const [createForm] = Form.useForm();
-  const [editForm] = Form.useForm();
+  const [searched, setSearched] = useState(false);                        // 조회 실행 여부
+  const [totalElements, setTotalElements] = useState(0);                  // 전체 결과 수
+  const [currentPage, setCurrentPage] = useState(1);                      // 현재 페이지
+  const [pageSize, setPageSize] = useState(20);                           // 페이지당 건수
+  const [createModalOpen, setCreateModalOpen] = useState(false);          // 등록 모달
+  const [editModalOpen, setEditModalOpen] = useState(false);              // 수정 모달
+  const [editingRecord, setEditingRecord] = useState<Dispatch | null>(null); // 수정 대상
+  const [filters, setFilters] = useState<FilterParams>({ ...initialFilters }); // 검색 필터
+  const [createForm] = Form.useForm();  // 등록 폼
+  const [editForm] = Form.useForm();    // 수정 폼
 
   const fetchData = useCallback(async (page = 1, size = 20) => {
     setLoading(true);

@@ -34,18 +34,18 @@ import { colors } from '../theme/themeConfig';
 const { RangePicker } = DatePicker;
 
 const SlipPage: React.FC = () => {
-  const [data, setData] = useState<WeighingSlip[]>([]);
+  const [data, setData] = useState<WeighingSlip[]>([]);                   // 계량표 목록
   const [loading, setLoading] = useState(false);
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
-  >(null);
+  >(null); // 기간 필터
 
-  // Share modal state
+  // 계량표 공유 모달 상태
   const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [selectedSlipId, setSelectedSlipId] = useState<number | null>(null);
-  const [shareMethod, setShareMethod] = useState<string>('KAKAO');
+  const [selectedSlipId, setSelectedSlipId] = useState<number | null>(null); // 공유 대상 ID
+  const [shareMethod, setShareMethod] = useState<string>('KAKAO');          // 공유 방식
 
-  // Detail modal state
+  // 계량표 상세 모달 상태
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedSlip, setSelectedSlip] = useState<WeighingSlip | null>(null);
 
