@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OTP Login - Phone Input</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#07b6d5",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2023",
+                        "navy-start": "#0B1120",
+                        "navy-end": "#0F172A",
+                        "slate-card": "#1E293B",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Public Sans", sans-serif;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .shield-glow {
+            filter: drop-shadow(0 0 15px rgba(7, 182, 213, 0.4));
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-navy-start dark:bg-navy-start">
+<div class="relative flex h-full min-h-screen w-full flex-col bg-gradient-to-b from-navy-start to-navy-end text-white overflow-hidden">
+<!-- Status Bar Spacer (iOS Notch) -->
+<div class="h-12 w-full shrink-0"></div>
+<!-- Top App Bar -->
+<div class="flex items-center px-4 py-2 justify-between z-10">
+<button class="text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">안전 로그인</h2>
+</div>
+<!-- Main Content Scrollable Area -->
+<div class="flex-1 overflow-y-auto px-6 py-8 flex flex-col items-center">
+<!-- Header Section -->
+<div class="mb-10 text-center flex flex-col items-center">
+<div class="mb-6 relative">
+<!-- Shield Icon -->
+<span class="material-symbols-outlined text-primary text-[64px] shield-glow" style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48;">shield_lock</span>
+</div>
+<h1 class="text-white tracking-tight text-[28px] font-bold leading-tight text-center">
+                    휴대폰 번호로 안전하게<br/>로그인하세요
+                </h1>
+</div>
+<!-- Input Card (Glassmorphism) -->
+<div class="w-full glass-card rounded-xl p-6 shadow-xl">
+<!-- Phone Input Field -->
+<div class="mb-8">
+<label class="block text-sm font-medium text-slate-300 mb-2 sr-only">Phone Number</label>
+<div class="relative flex items-center group">
+<!-- Icon -->
+<div class="absolute left-4 flex items-center pointer-events-none text-primary">
+<span class="material-symbols-outlined text-[24px]">smartphone</span>
+</div>
+<!-- Input -->
+<input autofocus="" class="block w-full rounded-lg border-2 border-primary bg-[#0f172a] py-4 pl-12 pr-4 text-white placeholder-slate-500 focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-lg font-medium shadow-[0_0_0_1px_rgba(7,182,213,0.3)]" placeholder="010-0000-0000" type="tel" value=""/>
+</div>
+<p class="mt-2 text-xs text-slate-400 pl-1">
+                        본인 명의의 휴대폰 번호를 입력해주세요.
+                    </p>
+</div>
+<!-- Primary Action Button -->
+<button class="w-full bg-primary hover:bg-[#06a6c2] text-white font-bold py-4 px-6 rounded-lg transition-all shadow-[0_4px_14px_0_rgba(7,182,213,0.39)] hover:shadow-[0_6px_20px_rgba(7,182,213,0.23)] hover:-translate-y-0.5 active:translate-y-0 text-base">
+                    인증코드 요청
+                </button>
+</div>
+<!-- Footer Action -->
+<div class="mt-auto pt-8 pb-4">
+<button class="text-slate-400 text-sm font-medium hover:text-primary transition-colors border-b border-transparent hover:border-primary">
+                    기존 방식으로 로그인
+                </button>
+</div>
+</div>
+<!-- Simulated Keyboard Area / Bottom Spacer -->
+<div class="h-8 w-full shrink-0"></div>
+</div>
+</body></html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notices &amp; Support Tab 2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06b6d4",
+                        "background-dark": "#0B1120",
+                        "card-dark": "#1E293B",
+                        "inner-card": "#0F172A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    boxShadow: {
+                        "glow-cyan": "0 0 15px rgba(34, 211, 238, 0.3)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            -webkit-font-smoothing: antialiased;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display text-white min-h-screen flex flex-col antialiased selection:bg-cyan-500/30">
+<header class="sticky top-0 z-50 bg-inner-card border-b border-white/5 shadow-md">
+<div class="flex items-center justify-center py-3 bg-background-dark border-b border-white/5">
+<span class="text-lg font-bold tracking-tight text-white">고객지원</span>
+</div>
+<div class="flex items-center text-sm font-medium">
+<button class="flex-1 py-4 text-slate-400 hover:text-slate-200 transition-colors border-b-2 border-transparent relative">
+                공지사항
+            </button>
+<button class="flex-1 py-4 text-cyan-400 border-b-2 border-cyan-400 relative bg-cyan-500/5">
+                문의/전화
+                <span class="absolute bottom-0 left-0 right-0 h-[1px] bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]"></span>
+</button>
+</div>
+</header>
+<main class="flex-1 px-4 py-5 flex flex-col gap-6 pb-28 overflow-y-auto no-scrollbar">
+<section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 to-card-dark border border-white/10 p-5 shadow-lg">
+<div class="absolute top-0 right-0 p-4 opacity-5">
+<span class="material-symbols-outlined text-9xl text-white">schedule</span>
+</div>
+<div class="relative z-10">
+<h2 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                    고객센터 운영시간
+                </h2>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-slate-400 text-sm">평일 (월-금)</span>
+<span class="text-xl font-bold text-white font-mono tracking-tight">09:00 ~ 18:00</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-slate-400 text-sm">점심시간</span>
+<span class="text-base text-slate-300 font-mono tracking-tight">12:00 ~ 13:00</span>
+</div>
+<div class="h-px bg-white/10 my-3"></div>
+<div class="flex gap-2.5 items-start">
+<span class="material-symbols-outlined text-rose-400 text-[18px] shrink-0 mt-0.5">info</span>
+<p class="text-xs text-slate-400 leading-relaxed">
+                            주말 및 공휴일은 휴무입니다. <br/>
+                            긴급 장애 발생 시 아래 <span class="text-rose-400 font-medium">'시스템 장애'</span>로 문의해주세요.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-3">
+<h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest px-1 mb-1">문의 유형 선택</h3>
+<button class="w-full bg-card-dark rounded-[16px] p-4 flex items-center gap-4 border border-white/5 shadow-md active:scale-[0.98] transition-all group text-left">
+<div class="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center shrink-0 border border-cyan-500/20 group-hover:bg-cyan-500/20 transition-colors">
+<span class="material-symbols-outlined text-cyan-400 text-2xl">support_agent</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-base font-bold text-white mb-0.5 truncate">일반 문의</div>
+<div class="text-xs text-slate-400 truncate">앱 사용법, 계정 관리 및 안내</div>
+</div>
+<div class="w-11 h-11 rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 border border-slate-700 group-hover:bg-cyan-500 group-hover:text-white group-hover:border-cyan-400 transition-all shadow-lg">
+<span class="material-symbols-outlined text-xl">call</span>
+</div>
+</button>
+<button class="w-full bg-card-dark rounded-[16px] p-4 flex items-center gap-4 border border-white/5 shadow-md active:scale-[0.98] transition-all group text-left">
+<div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 border border-amber-500/20 group-hover:bg-amber-500/20 transition-colors">
+<span class="material-symbols-outlined text-amber-400 text-2xl">scale</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-base font-bold text-white mb-0.5 truncate">계량 관련</div>
+<div class="text-xs text-slate-400 truncate">중량 오차, 데이터 수정 요청</div>
+</div>
+<div class="w-11 h-11 rounded-full bg-slate-800 flex items-center justify-center text-amber-400 border border-slate-700 group-hover:bg-amber-500 group-hover:text-white group-hover:border-amber-400 transition-all shadow-lg">
+<span class="material-symbols-outlined text-xl">call</span>
+</div>
+</button>
+<button class="w-full bg-card-dark rounded-[16px] p-4 flex items-center gap-4 border border-white/5 shadow-md active:scale-[0.98] transition-all group text-left">
+<div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover:bg-emerald-500/20 transition-colors">
+<span class="material-symbols-outlined text-emerald-400 text-2xl">local_shipping</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-base font-bold text-white mb-0.5 truncate">배차 문의</div>
+<div class="text-xs text-slate-400 truncate">배차 일정 확인, 취소 및 변경</div>
+</div>
+<div class="w-11 h-11 rounded-full bg-slate-800 flex items-center justify-center text-emerald-400 border border-slate-700 group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-400 transition-all shadow-lg">
+<span class="material-symbols-outlined text-xl">call</span>
+</div>
+</button>
+<button class="w-full bg-card-dark rounded-[16px] p-4 flex items-center gap-4 border border-white/5 shadow-md active:scale-[0.98] transition-all group text-left">
+<div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0 border border-rose-500/20 group-hover:bg-rose-500/20 transition-colors">
+<span class="material-symbols-outlined text-rose-400 text-2xl">error_outline</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-base font-bold text-white mb-0.5 truncate">시스템 장애</div>
+<div class="text-xs text-slate-400 truncate">앱 접속 오류, 기능 고장 신고</div>
+</div>
+<div class="w-11 h-11 rounded-full bg-slate-800 flex items-center justify-center text-rose-400 border border-slate-700 group-hover:bg-rose-500 group-hover:text-white group-hover:border-rose-400 transition-all shadow-lg">
+<span class="material-symbols-outlined text-xl">call</span>
+</div>
+</button>
+<button class="w-full bg-card-dark rounded-[16px] p-4 flex items-center gap-4 border border-white/5 shadow-md active:scale-[0.98] transition-all group text-left">
+<div class="w-12 h-12 rounded-full bg-slate-700/30 flex items-center justify-center shrink-0 border border-slate-600/30 group-hover:bg-slate-700/50 transition-colors">
+<span class="material-symbols-outlined text-slate-400 text-2xl">more_horiz</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-base font-bold text-white mb-0.5 truncate">기타 문의</div>
+<div class="text-xs text-slate-400 truncate">제휴 제안, 기타 상담 업무</div>
+</div>
+<div class="w-11 h-11 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 border border-slate-700 group-hover:bg-slate-600 group-hover:text-white group-hover:border-slate-500 transition-all shadow-lg">
+<span class="material-symbols-outlined text-xl">call</span>
+</div>
+</button>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 h-[80px] bg-background-dark/95 backdrop-blur border-t border-white/5 flex items-center justify-around z-50 pb-4">
+<div class="flex flex-col items-center gap-1 opacity-50 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[26px]">home</span>
+<span class="text-[10px] font-medium">홈</span>
+</div>
+<div class="flex flex-col items-center gap-1 opacity-50 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[26px]">history</span>
+<span class="text-[10px] font-medium">이력조회</span>
+</div>
+<div class="flex flex-col items-center gap-1 opacity-50 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[26px]">local_shipping</span>
+<span class="text-[10px] font-medium">차량</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-cyan-400 active:scale-95 transition-transform">
+<div class="relative">
+<span class="material-symbols-outlined text-[26px] fill-1">grid_view</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
+</div>
+<span class="text-[10px] font-bold">더보기</span>
+</div>
+</nav>
+
+</body></html>

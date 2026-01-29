@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dispatch Details View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#07b6d5",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0B1120",
+                        "card-dark": "#1E293B",
+                        "nav-dark": "#0F172A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display text-white min-h-screen pb-28">
+<header class="sticky top-0 z-50 flex items-center justify-between px-4 h-[56px] bg-background-dark/90 backdrop-blur-md border-b border-white/5">
+<button class="p-2 -ml-2 text-slate-300 hover:text-white transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-[18px] font-semibold tracking-wide">배차 상세</h1>
+<button class="p-2 -mr-2 text-slate-300 hover:text-white transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</header>
+<main class="flex flex-col w-full max-w-md mx-auto">
+<div class="flex flex-col items-center py-8">
+<div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 ring-1 ring-primary/30 shadow-[0_0_20px_rgba(7,182,213,0.15)]">
+<span class="material-symbols-outlined text-primary text-[32px]">scale</span>
+</div>
+<h2 class="text-primary text-[20px] font-bold tracking-tight mb-1">진행중</h2>
+<p class="text-white text-sm font-medium tracking-wide opacity-90">D-2026-0142</p>
+</div>
+<div class="px-4 space-y-4">
+<div class="bg-card-dark rounded p-5 border border-white/5 shadow-lg">
+<div class="flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
+<span class="material-symbols-outlined text-primary text-[20px]">local_shipping</span>
+<h3 class="text-primary font-bold text-sm">차량 정보</h3>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-slate-400 text-sm">차량번호</span>
+<span class="text-white font-medium text-sm">경기 88아 1234</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-400 text-sm">차종</span>
+<span class="text-white font-medium text-sm">25t 윙바디</span>
+</div>
+<div class="flex justify-between items-center pt-1">
+<span class="text-slate-400 text-sm self-center">운전자</span>
+<div class="flex items-center gap-3">
+<span class="text-white font-medium text-sm">김운전</span>
+<button class="flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-bold active:scale-95 transition-transform hover:bg-primary/20">
+<span class="material-symbols-outlined text-[14px]">call</span>
+                                연락처
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-card-dark rounded p-5 border border-white/5 shadow-lg">
+<div class="flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
+<span class="material-symbols-outlined text-primary text-[20px]">inventory_2</span>
+<h3 class="text-primary font-bold text-sm">화물 정보</h3>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-slate-400 text-sm">업체명</span>
+<span class="text-white font-medium text-sm">(주)대한물류</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-400 text-sm">품목</span>
+<span class="text-white font-medium text-sm">수입 가전 자재</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-400 text-sm">수량</span>
+<span class="text-white font-medium text-sm">15 Pallet</span>
+</div>
+</div>
+</div>
+<div class="bg-card-dark rounded p-5 border border-white/5 shadow-lg">
+<div class="flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
+<span class="material-symbols-outlined text-primary text-[20px]">route</span>
+<h3 class="text-primary font-bold text-sm">운송 경로</h3>
+</div>
+<div class="relative pl-2 py-1">
+<div class="absolute left-[7px] top-2 bottom-8 w-0.5 bg-gradient-to-b from-primary/50 to-slate-700"></div>
+<div class="relative flex gap-4 mb-8">
+<div class="flex-none relative z-10 w-4 h-4 rounded-full bg-background-dark border-2 border-primary mt-1 shadow-[0_0_8px_rgba(7,182,213,0.5)]"></div>
+<div>
+<p class="text-slate-400 text-xs mb-0.5">출발지</p>
+<p class="text-white font-medium text-[15px]">인천항 제2부두</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="flex-none relative z-10 w-4 h-4 rounded-full bg-background-dark border-2 border-slate-500 mt-1"></div>
+<div>
+<p class="text-slate-400 text-xs mb-0.5">도착지</p>
+<p class="text-white font-medium text-[15px]">용인 물류센터</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-card-dark rounded p-5 border border-white/5 shadow-lg">
+<div class="flex items-center gap-2 mb-4 border-b border-white/5 pb-3">
+<span class="material-symbols-outlined text-primary text-[20px]">calendar_month</span>
+<h3 class="text-primary font-bold text-sm">일정 정보</h3>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-background-dark/30 p-3 rounded-md border border-white/5">
+<p class="text-slate-400 text-xs mb-1">배차일시</p>
+<p class="text-white text-sm font-medium tracking-wide">01.29 <span class="text-slate-300">|</span> 08:30</p>
+</div>
+<div class="bg-background-dark/30 p-3 rounded-md border border-white/5">
+<p class="text-slate-400 text-xs mb-1">예상도착</p>
+<p class="text-white text-sm font-medium tracking-wide">01.29 <span class="text-slate-300">|</span> 10:30</p>
+</div>
+</div>
+</div>
+<div class="h-4"></div>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 right-0 bg-background-dark/95 backdrop-blur-xl border-t border-white/5 p-4 z-50 pb-8 safe-area-bottom">
+<button class="w-full flex items-center justify-center gap-2 py-3.5 rounded border border-primary text-primary font-bold text-[16px] hover:bg-primary/5 active:bg-primary/10 active:scale-[0.98] transition-all shadow-[0_0_15px_rgba(7,182,213,0.1)]">
+<span class="material-symbols-outlined">monitor_weight</span>
+            계량 진행 보기
+        </button>
+</div>
+
+</body></html>

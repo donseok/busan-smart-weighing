@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smart Weighing Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#07b6d5",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0B1120",
+                        "card-dark": "#1E293B",
+                        "nav-dark": "#0F172A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .pulse-dot {
+            box-shadow: 0 0 0 0 rgba(7, 182, 213, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(7, 182, 213, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(7, 182, 213, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(7, 182, 213, 0); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 h-[56px] justify-between border-b border-white/5">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-white text-2xl cursor-pointer">menu</span>
+<h1 class="text-white text-[18px] font-semibold tracking-tight">배차</h1>
+</div>
+<div class="bg-[#1E293B] px-3 py-1.5 rounded-full border border-white/10">
+<p class="text-primary text-xs font-medium tracking-wide">김운전 | 기사</p>
+</div>
+</header>
+<main class="p-4 space-y-6">
+<!-- Status Glassmorphism Card -->
+<section>
+<div class="glass-card rounded-xl p-5 relative overflow-hidden">
+<div class="flex items-center gap-2 mb-2">
+<span class="pulse-dot w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-primary/80 text-xs font-medium tracking-widest uppercase">Live</span>
+</div>
+<p class="text-slate-400 text-sm mb-1">현재 상태</p>
+<h2 class="text-white text-2xl font-bold">계량 대기중</h2>
+<!-- Decorative element -->
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+</div>
+</section>
+<!-- SectionHeader -->
+<div class="flex items-center justify-between px-1">
+<h3 class="text-white text-lg font-bold tracking-tight">Quick Actions</h3>
+<span class="text-primary text-xs font-medium">전체보기</span>
+</div>
+<!-- TextGrid (Action Grid) -->
+<section class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-3 rounded-2xl border border-white/5 bg-card-dark p-4 transition-all active:scale-95">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-2xl">crop_auto</span>
+</div>
+<h2 class="text-white text-base font-bold">배차 조회</h2>
+</div>
+<div class="flex flex-col gap-3 rounded-2xl border border-white/5 bg-card-dark p-4 transition-all active:scale-95">
+<div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-amber-500 text-2xl">scale</span>
+</div>
+<h2 class="text-white text-base font-bold">계량 진행</h2>
+</div>
+<div class="flex flex-col gap-3 rounded-2xl border border-white/5 bg-card-dark p-4 transition-all active:scale-95">
+<div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-500 text-2xl">receipt_long</span>
+</div>
+<h2 class="text-white text-base font-bold">계량표</h2>
+</div>
+<div class="flex flex-col gap-3 rounded-2xl border border-white/5 bg-card-dark p-4 transition-all active:scale-95 relative">
+<div class="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-rose-500 text-2xl">notifications</span>
+</div>
+<h2 class="text-white text-base font-bold">알림</h2>
+<div class="absolute top-4 right-4 bg-rose-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-background-dark">
+                    3
+                </div>
+</div>
+</section>
+<!-- SectionHeader -->
+<div class="flex items-center justify-between px-1 pt-2">
+<h3 class="text-white text-lg font-bold tracking-tight">최근 활동</h3>
+</div>
+<!-- Recent Activity Feed -->
+<section class="space-y-3">
+<!-- Activity Card 1 -->
+<div class="flex items-center gap-4 bg-card-dark/50 border border-white/5 p-4 rounded-2xl">
+<div class="w-2 h-12 bg-emerald-500 rounded-full"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<span class="text-white font-bold text-sm">경기 88아 1234</span>
+<span class="text-slate-500 text-[10px]">10분 전</span>
+</div>
+<div class="flex justify-between items-end">
+<p class="text-slate-400 text-xs">계량 완료 | 총 중량 24.5t</p>
+<span class="text-emerald-500 text-[10px] font-bold px-2 py-0.5 bg-emerald-500/10 rounded-full">완료</span>
+</div>
+</div>
+</div>
+<!-- Activity Card 2 -->
+<div class="flex items-center gap-4 bg-card-dark/50 border border-white/5 p-4 rounded-2xl">
+<div class="w-2 h-12 bg-amber-500 rounded-full"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<span class="text-white font-bold text-sm">서울 70가 5678</span>
+<span class="text-slate-500 text-[10px]">45분 전</span>
+</div>
+<div class="flex justify-between items-end">
+<p class="text-slate-400 text-xs">1차 계량 대기중</p>
+<span class="text-amber-500 text-[10px] font-bold px-2 py-0.5 bg-amber-500/10 rounded-full">진행중</span>
+</div>
+</div>
+</div>
+<!-- Activity Card 3 -->
+<div class="flex items-center gap-4 bg-card-dark/50 border border-white/5 p-4 rounded-2xl opacity-80">
+<div class="w-2 h-12 bg-slate-500 rounded-full"></div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<span class="text-white font-bold text-sm">부산 99나 9012</span>
+<span class="text-slate-500 text-[10px]">2시간 전</span>
+</div>
+<div class="flex justify-between items-end">
+<p class="text-slate-400 text-xs">계량 완료 | 총 중량 18.2t</p>
+<span class="text-slate-400 text-[10px] font-bold px-2 py-0.5 bg-slate-500/10 rounded-full">종료</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 h-[80px] bg-nav-dark/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-2 z-[60]">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-2xl font-light">home</span>
+<span class="text-[10px] font-medium">배차</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined text-2xl font-light">monitor_weight</span>
+<span class="text-[10px] font-medium">계량</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined text-2xl font-light">description</span>
+<span class="text-[10px] font-medium">계량표</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined text-2xl font-light">history</span>
+<span class="text-[10px] font-medium">이력</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined text-2xl font-light">more_horiz</span>
+<span class="text-[10px] font-medium">더보기</span>
+</button>
+</nav>
+</body></html>

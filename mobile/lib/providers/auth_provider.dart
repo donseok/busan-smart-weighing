@@ -21,6 +21,20 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider(this._authService);
 
+  /// 웹 테스트용: 로그인 없이 인증 상태로 진입
+  void setMockAuthenticated() {
+    _user = User(
+      id: '1',
+      loginId: 'admin',
+      name: '관리자',
+      role: UserRole.manager,
+      companyName: '동국운송',
+      phoneNumber: '010-0000-0000',
+    );
+    _status = AuthStatus.authenticated;
+    notifyListeners();
+  }
+
   AuthStatus get status => _status;
   User? get user => _user;
   String? get errorMessage => _errorMessage;

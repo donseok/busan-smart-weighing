@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// useNavigate no longer needed — navigation handled by openTab
 import { List, Button, Empty, Spin, Tag, Popconfirm, message } from 'antd';
+import { useTab } from '../context/TabContext';
 import {
   StarFilled,
   DeleteOutlined,
@@ -60,7 +61,7 @@ interface MappedFavorite {
 const FavoritesList: React.FC<FavoritesListProps> = ({ onNavigate }) => {
   const [favorites, setFavorites] = useState<MappedFavorite[]>([]);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const { openTab } = useTab();
 
   const fetchFavorites = async () => {
     setLoading(true);
@@ -86,22 +87,22 @@ const FavoritesList: React.FC<FavoritesListProps> = ({ onNavigate }) => {
 
   const handleClick = (favorite: MappedFavorite) => {
     if (favorite.favoriteType === 'MENU' && favorite.targetPath) {
-      navigate(favorite.targetPath);
+      openTab(favorite.targetPath);
       onNavigate?.();
     } else if (favorite.targetId) {
-      // 데이터 타입에 따른 상세 페이지 이동
+      // 데이터 타입에 따른 상세 페이지 이동 (탭으로 열기)
       switch (favorite.favoriteType) {
         case 'DISPATCH':
-          navigate(`/dispatch?id=${favorite.targetId}`);
+          openTab('/dispatch');
           break;
         case 'VEHICLE':
-          navigate(`/master/vehicles?id=${favorite.targetId}`);
+          openTab('/master/vehicles');
           break;
         case 'COMPANY':
-          navigate(`/master/companies?id=${favorite.targetId}`);
+          openTab('/master/companies');
           break;
         case 'SCALE':
-          navigate(`/master/scales?id=${favorite.targetId}`);
+          openTab('/master/scales');
           break;
       }
       onNavigate?.();

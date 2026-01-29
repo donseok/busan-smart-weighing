@@ -13,6 +13,7 @@ import {
   Space,
   Badge,
   Progress,
+  Modal,
 } from 'antd';
 import {
   CalendarOutlined,
@@ -87,6 +88,22 @@ const DashboardPage: React.FC = () => {
   const [pinnedNotices, setPinnedNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [noticeModalVisible, setNoticeModalVisible] = useState(false);
+  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+  const [noticeLoading, setNoticeLoading] = useState(false);
+
+  const handleNoticeClick = useCallback(async (noticeId: number) => {
+    setNoticeLoading(true);
+    setNoticeModalVisible(true);
+    try {
+      const res = await apiClient.get<ApiResponse<Notice>>(`/notices/${noticeId}`);
+      setSelectedNotice(res.data.data);
+    } catch {
+      setSelectedNotice(null);
+    } finally {
+      setNoticeLoading(false);
+    }
+  }, []);
 
   const fetchStatistics = useCallback(async () => {
     try {
@@ -441,12 +458,13 @@ const DashboardPage: React.FC = () => {
           showIcon
           icon={<NotificationOutlined />}
           message={
-            <Space>
+            <Space style={{ cursor: 'pointer' }}>
               <Tag color="red">공지</Tag>
               {pinnedNotices[0].title}
             </Space>
           }
-          style={{ marginBottom: 16, borderRadius: 8 }}
+          style={{ marginBottom: 16, borderRadius: 8, cursor: 'pointer' }}
+          onClick={() => handleNoticeClick(pinnedNotices[0].noticeId)}
         />
       )}
 
@@ -701,6 +719,48 @@ const DashboardPage: React.FC = () => {
           style={{ marginBottom: 24 }}
         />
       </Spin>
+
+      {/* 공지사항 상세 팝업 */}
+      <Modal
+        title={
+          <Space>
+            <NotificationOutlined />
+            {selectedNotice?.title}
+          </Space>
+        }
+        open={noticeModalVisible}
+        onCancel={() => {
+          setNoticeModalVisible(false);
+          setSelectedNotice(null);
+        }}
+        footer={null}
+        width={600}
+      >
+        <Spin spinning={noticeLoading}>
+          {selectedNotice ? (
+            <div>
+              <div style={{ marginBottom: 12, color: colors.textSecondary, fontSize: 13 }}>
+                {selectedNotice.publishedAt
+                  ? new Date(selectedNotice.publishedAt).toLocaleString('ko-KR')
+                  : new Date(selectedNotice.createdAt).toLocaleString('ko-KR')}
+              </div>
+              <Card
+                style={{
+                  background: colors.bgElevated,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: 8,
+                }}
+              >
+                <div style={{ whiteSpace: 'pre-wrap', color: colors.textPrimary, lineHeight: 1.7 }}>
+                  {selectedNotice.content}
+                </div>
+              </Card>
+            </div>
+          ) : (
+            !noticeLoading && <div style={{ textAlign: 'center', color: colors.textSecondary, padding: 24 }}>내용을 불러올 수 없습니다.</div>
+          )}
+        </Spin>
+      </Modal>
     </>
   );
 };

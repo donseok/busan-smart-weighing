@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dispatch List View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#07b6d5",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0B1120",
+                        "card-dark": "#1E293B",
+                        "nav-dark": "#0F172A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }.no-scrollbar {
+            -ms-overflow-style: none;scrollbar-width: none;}
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen pb-24">
+<header class="sticky top-0 z-50 flex items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 h-[56px] justify-between border-b border-white/5">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-white text-2xl cursor-pointer">menu</span>
+<h1 class="text-white text-[18px] font-semibold tracking-tight">배차 목록</h1>
+</div>
+<div class="bg-[#1E293B] px-3 py-1.5 rounded-full border border-white/10">
+<p class="text-primary text-xs font-medium tracking-wide">김운전 | 기사</p>
+</div>
+</header>
+<main class="flex flex-col">
+<div class="sticky top-[56px] z-40 bg-background-dark/95 backdrop-blur-md border-b border-white/5 pb-2 pt-2">
+<div class="flex overflow-x-auto gap-2 px-4 py-3 no-scrollbar">
+<button class="flex-none px-4 py-1.5 rounded-full bg-primary text-background-dark text-sm font-bold shadow-[0_0_10px_rgba(7,182,213,0.3)] transition-transform active:scale-95">전체</button>
+<button class="flex-none px-4 py-1.5 rounded-full bg-card-dark border border-white/10 text-slate-400 text-sm font-medium hover:border-white/30 transition-all active:scale-95">대기</button>
+<button class="flex-none px-4 py-1.5 rounded-full bg-card-dark border border-white/10 text-slate-400 text-sm font-medium hover:border-white/30 transition-all active:scale-95">진행중</button>
+<button class="flex-none px-4 py-1.5 rounded-full bg-card-dark border border-white/10 text-slate-400 text-sm font-medium hover:border-white/30 transition-all active:scale-95">완료</button>
+</div>
+<div class="flex items-center justify-between px-4 py-2">
+<span class="text-white text-sm font-bold">오늘 배차 <span class="text-primary">5</span>건</span>
+<button class="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[16px]">sort</span>
+                    최신순
+                </button>
+</div>
+</div>
+<div class="p-4 space-y-4">
+<div class="relative bg-card-dark rounded-2xl overflow-hidden border border-white/5 shadow-lg active:scale-[0.99] transition-transform">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="p-4 pl-5">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-400 text-sm font-medium tracking-wide">D-2026-0142</span>
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded border border-primary/20">
+                            운송중
+                        </span>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">local_shipping</span>
+<div>
+<p class="text-white text-sm font-medium">경기 88아 1234</p>
+<p class="text-slate-500 text-xs">25t 윙바디</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">route</span>
+<div>
+<p class="text-white text-sm font-medium">인천항 제2부두 <span class="text-slate-500 mx-1">→</span> 용인 물류센터</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">inventory_2</span>
+<div>
+<p class="text-white text-sm font-medium">수입 가전 자재</p>
+</div>
+</div>
+</div>
+<div class="h-px bg-white/5 my-3"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="text-xs font-mono">2026-01-29 08:30</span>
+</div>
+<span class="material-symbols-outlined text-slate-500 text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="relative bg-card-dark rounded-2xl overflow-hidden border border-white/5 shadow-lg active:scale-[0.99] transition-transform">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-500"></div>
+<div class="p-4 pl-5">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-400 text-sm font-medium tracking-wide">D-2026-0145</span>
+<span class="px-2 py-1 bg-slate-700/30 text-slate-300 text-[10px] font-bold rounded border border-slate-600/30">
+                            배차 대기
+                        </span>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">local_shipping</span>
+<div>
+<p class="text-white text-sm font-medium">서울 99나 5678</p>
+<p class="text-slate-500 text-xs">11t 카고</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">route</span>
+<div>
+<p class="text-white text-sm font-medium">부산항만공사 <span class="text-slate-500 mx-1">→</span> 대전 제3공장</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">package_2</span>
+<div>
+<p class="text-white text-sm font-medium">건축용 철강재</p>
+</div>
+</div>
+</div>
+<div class="h-px bg-white/5 my-3"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="text-xs font-mono">2026-01-29 10:00</span>
+</div>
+<span class="material-symbols-outlined text-slate-500 text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="relative bg-card-dark rounded-2xl overflow-hidden border border-white/5 opacity-80 shadow-lg active:scale-[0.99] transition-transform">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
+<div class="p-4 pl-5">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-400 text-sm font-medium tracking-wide">D-2026-0130</span>
+<span class="px-2 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold rounded border border-emerald-500/20">
+                            운송 완료
+                        </span>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">local_shipping</span>
+<div>
+<p class="text-white text-sm font-medium">경기 70다 9012</p>
+<p class="text-slate-500 text-xs">25t 윙바디</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">route</span>
+<div>
+<p class="text-white text-sm font-medium">평택항 물류센터 <span class="text-slate-500 mx-1">→</span> 이천 하이닉스</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">inventory_2</span>
+<div>
+<p class="text-white text-sm font-medium">반도체 설비</p>
+</div>
+</div>
+</div>
+<div class="h-px bg-white/5 my-3"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="text-xs font-mono">2026-01-29 07:15</span>
+</div>
+<span class="material-symbols-outlined text-slate-500 text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="relative bg-card-dark rounded-2xl overflow-hidden border border-white/5 shadow-lg active:scale-[0.99] transition-transform">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-500"></div>
+<div class="p-4 pl-5">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-400 text-sm font-medium tracking-wide">D-2026-0158</span>
+<span class="px-2 py-1 bg-slate-700/30 text-slate-300 text-[10px] font-bold rounded border border-slate-600/30">
+                            배차 대기
+                        </span>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">local_shipping</span>
+<div>
+<p class="text-white text-sm font-medium">인천 82가 3344</p>
+<p class="text-slate-500 text-xs">5t 탑차</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">route</span>
+<div>
+<p class="text-white text-sm font-medium">인천공항 화물청사 <span class="text-slate-500 mx-1">→</span> 구로 디지털단지</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">package_2</span>
+<div>
+<p class="text-white text-sm font-medium">정밀 전자기기</p>
+</div>
+</div>
+</div>
+<div class="h-px bg-white/5 my-3"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="text-xs font-mono">2026-01-29 13:00</span>
+</div>
+<span class="material-symbols-outlined text-slate-500 text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="relative bg-card-dark rounded-2xl overflow-hidden border border-white/5 shadow-lg active:scale-[0.99] transition-transform">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-500"></div>
+<div class="p-4 pl-5">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-400 text-sm font-medium tracking-wide">D-2026-0160</span>
+<span class="px-2 py-1 bg-slate-700/30 text-slate-300 text-[10px] font-bold rounded border border-slate-600/30">
+                            배차 대기
+                        </span>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">local_shipping</span>
+<div>
+<p class="text-white text-sm font-medium">전남 91호 8822</p>
+<p class="text-slate-500 text-xs">25t 트레일러</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">route</span>
+<div>
+<p class="text-white text-sm font-medium">광양항 <span class="text-slate-500 mx-1">→</span> 청주 산업단지</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-slate-500 text-[18px] mt-0.5">package_2</span>
+<div>
+<p class="text-white text-sm font-medium">화학 원료</p>
+</div>
+</div>
+</div>
+<div class="h-px bg-white/5 my-3"></div>
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="text-xs font-mono">2026-01-29 15:30</span>
+</div>
+<span class="material-symbols-outlined text-slate-500 text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 h-[80px] bg-nav-dark/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-2 z-[60]">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-2xl font-light">home</span>
+<span class="text-[10px] font-medium">배차</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl font-light">monitor_weight</span>
+<span class="text-[10px] font-medium">계량</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl font-light">description</span>
+<span class="text-[10px] font-medium">계량표</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl font-light">history</span>
+<span class="text-[10px] font-medium">이력</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl font-light">more_horiz</span>
+<span class="text-[10px] font-medium">더보기</span>
+</button>
+</nav>
+
+</body></html>

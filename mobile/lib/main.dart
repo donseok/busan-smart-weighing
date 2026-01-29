@@ -50,8 +50,12 @@ void main() async {
   final authProvider = AuthProvider(authService);
   final dispatchProvider = DispatchProvider(apiService);
 
-  // Try auto-login
-  await authProvider.tryAutoLogin();
+  // 웹 테스트: 로그인 우회하여 바로 홈 화면 진입
+  if (kIsWeb) {
+    authProvider.setMockAuthenticated();
+  } else {
+    await authProvider.tryAutoLogin();
+  }
 
   runApp(
     MultiProvider(

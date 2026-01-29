@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Typography, Button, Tooltip, Switch, Popover } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Layout, Menu, Typography, Button, Tooltip, Switch, Popover, Tabs, Dropdown } from 'antd';
+import type { MenuProps } from 'antd';
 import {
   DashboardOutlined,
   CarOutlined,
@@ -23,9 +24,11 @@ import {
   BarChartOutlined,
   MonitorOutlined,
   QuestionCircleOutlined,
+  DesktopOutlined,
 } from '@ant-design/icons';
 import { darkColors, lightColors } from '../theme/themeConfig';
 import { useTheme } from '../context/ThemeContext';
+import { useTab, clearTabSession } from '../context/TabContext';
 import FavoritesList from '../components/FavoritesList';
 import FavoriteButton from '../components/FavoriteButton';
 
@@ -33,6 +36,7 @@ const { Header, Sider, Content } = Layout;
 
 const menuItems = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '대시보드' },
+  { key: '/weighing-station', icon: <DesktopOutlined />, label: '계량소 관제' },
   { key: '/dispatch', icon: <CarOutlined />, label: '배차 관리' },
   { key: '/weighing', icon: <ExperimentOutlined />, label: '계량 현황' },
   { key: '/inquiry', icon: <FileSearchOutlined />, label: '계량 조회' },
@@ -69,8 +73,9 @@ const MainLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const { themeMode, toggleTheme } = useTheme();
+  const { tabs, activeKey, openTab, closeTab, closeOtherTabs, closeAllClosable, closeRightTabs, setActiveTab, moveTab } = useTab();
+  const dragKeyRef = useRef<string | null>(null);
 
   // 현재 경로에 따라 열려야 할 서브메뉴 계산
   const getOpenKeys = () => {
@@ -78,7 +83,7 @@ const MainLayout: React.FC = () => {
     for (const item of menuItems) {
       if ('children' in item && item.children) {
         for (const child of item.children) {
-          if (child.key === location.pathname) {
+          if (child.key === activeKey) {
             keys.push(item.key);
           }
         }
@@ -92,7 +97,7 @@ const MainLayout: React.FC = () => {
     return pathKeys.length > 0 ? pathKeys : ['master'];
   });
 
-  // 경로 변경 시 해당 서브메뉴 자동 열기
+  // 활성 탭 변경 시 해당 서브메뉴 자동 열기
   useEffect(() => {
     const pathKeys = getOpenKeys();
     if (pathKeys.length > 0) {
@@ -101,12 +106,12 @@ const MainLayout: React.FC = () => {
         return Array.from(merged);
       });
     }
-  }, [location.pathname]);
+  }, [activeKey]);
 
-  // 현재 페이지 정보
+  // 현재 페이지 정보 (즐겨찾기 버튼용)
   const currentPageInfo = menuItems.flatMap(item =>
     'children' in item && item.children ? item.children : [item]
-  ).find(item => item?.key === location.pathname);
+  ).find(item => item?.key === activeKey);
 
   // 현재 테마에 맞는 색상 선택
   const colors = themeMode === 'dark' ? darkColors : lightColors;
@@ -115,7 +120,18 @@ const MainLayout: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    clearTabSession();
     navigate('/login');
+  };
+
+  // 탭 편집 (닫기) 핸들러
+  const handleTabEdit = (
+    targetKey: React.MouseEvent | React.KeyboardEvent | string,
+    action: 'add' | 'remove',
+  ) => {
+    if (action === 'remove' && typeof targetKey === 'string') {
+      closeTab(targetKey);
+    }
   };
 
   return (
@@ -135,7 +151,7 @@ const MainLayout: React.FC = () => {
       >
         {/* 로고 영역 */}
         <div
-          onClick={() => navigate('/dashboard')}
+          onClick={() => openTab('/dashboard')}
           style={{
             height: 80,
             display: 'flex',
@@ -185,12 +201,12 @@ const MainLayout: React.FC = () => {
         <div style={{ flex: 1, overflow: 'auto' }}>
           <Menu
             theme={isDark ? 'dark' : 'light'}
-            selectedKeys={[location.pathname]}
+            selectedKeys={[activeKey]}
             openKeys={openKeys}
             onOpenChange={(keys) => setOpenKeys(keys)}
             mode="inline"
             items={menuItems}
-            onClick={({ key }) => navigate(key)}
+            onClick={({ key }) => openTab(key)}
             style={{
               marginTop: 8,
               border: 'none',
@@ -217,7 +233,7 @@ const MainLayout: React.FC = () => {
           {currentPageInfo && (
             <FavoriteButton
               favoriteType="MENU"
-              targetPath={location.pathname}
+              targetPath={activeKey}
               displayName={currentPageInfo.label as string}
               icon={currentPageInfo.key}
             />
@@ -278,7 +294,7 @@ const MainLayout: React.FC = () => {
           <Button
             type="text"
             icon={<UserOutlined />}
-            onClick={() => navigate('/mypage')}
+            onClick={() => openTab('/mypage')}
             style={{ color: colors.textSecondary }}
             size="small"
           >
@@ -295,6 +311,89 @@ const MainLayout: React.FC = () => {
           </Button>
         </Header>
 
+        {/* 탭 바 */}
+        <div style={{
+          background: isDark ? colors.bgSider : '#fafafa',
+          borderBottom: `1px solid ${colors.border}`,
+          paddingLeft: 8,
+          paddingRight: 8,
+        }}>
+          <Tabs
+            type="editable-card"
+            hideAdd
+            activeKey={activeKey}
+            onChange={(key) => setActiveTab(key)}
+            onEdit={handleTabEdit}
+            size="small"
+            items={tabs.map(tab => {
+              const contextMenuItems: MenuProps['items'] = [
+                ...(tab.closable ? [{
+                  key: 'close',
+                  label: '탭 닫기',
+                }] : []),
+                {
+                  key: 'closeOthers',
+                  label: '다른 탭 모두 닫기',
+                },
+                {
+                  key: 'closeRight',
+                  label: '오른쪽 탭 닫기',
+                },
+                { type: 'divider' as const },
+                {
+                  key: 'closeAll',
+                  label: '닫을 수 있는 탭 모두 닫기',
+                },
+              ];
+              return {
+                key: tab.key,
+                label: (
+                  <Dropdown
+                    menu={{
+                      items: contextMenuItems,
+                      onClick: ({ key: action }) => {
+                        switch (action) {
+                          case 'close': closeTab(tab.key); break;
+                          case 'closeOthers': closeOtherTabs(tab.key); break;
+                          case 'closeRight': closeRightTabs(tab.key); break;
+                          case 'closeAll': closeAllClosable(); break;
+                        }
+                      },
+                    }}
+                    trigger={['contextMenu']}
+                  >
+                    <span
+                      draggable
+                      onDragStart={(e) => {
+                        dragKeyRef.current = tab.key;
+                        e.dataTransfer.effectAllowed = 'move';
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (dragKeyRef.current && dragKeyRef.current !== tab.key) {
+                          moveTab(dragKeyRef.current, tab.key);
+                        }
+                        dragKeyRef.current = null;
+                      }}
+                      onDragEnd={() => { dragKeyRef.current = null; }}
+                      style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, cursor: 'grab' }}
+                    >
+                      {tab.icon}
+                      {tab.title}
+                    </span>
+                  </Dropdown>
+                ),
+                closable: tab.closable,
+              };
+            })}
+            style={{ marginBottom: 0 }}
+          />
+        </div>
+
         <Content style={{ margin: 16, overflow: 'auto' }}>
           <div
             style={{
@@ -305,7 +404,15 @@ const MainLayout: React.FC = () => {
               border: `1px solid ${colors.border}`,
             }}
           >
-            <Outlet />
+            {/* 모든 탭 컴포넌트를 동시 렌더링 — display로 전환하여 unmount 방지 */}
+            {tabs.map(tab => (
+              <div
+                key={tab.key}
+                style={{ display: tab.key === activeKey ? 'block' : 'none' }}
+              >
+                {tab.component}
+              </div>
+            ))}
           </div>
         </Content>
       </Layout>

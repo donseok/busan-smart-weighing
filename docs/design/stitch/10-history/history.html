@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weighing History View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06b6d4",
+                        "background-dark": "#0B1120",
+                        "card-dark": "#1E293B",
+                        "inner-card": "#0F172A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    boxShadow: {
+                        "glow-cyan": "0 0 15px rgba(34, 211, 238, 0.3)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            -webkit-font-smoothing: antialiased;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display text-white min-h-screen flex flex-col antialiased selection:bg-cyan-500/30">
+<header class="sticky top-0 z-50 bg-inner-card border-b border-white/5 shadow-md">
+<div class="flex items-center text-sm font-medium">
+<button class="flex-1 py-4 text-cyan-400 border-b-2 border-cyan-400 relative">
+                월별
+                <span class="absolute inset-0 bg-cyan-500/5"></span>
+</button>
+<button class="flex-1 py-4 text-slate-400 hover:text-slate-200 transition-colors">
+                기간별
+            </button>
+</div>
+<div class="flex items-center justify-between px-6 py-4 bg-background-dark/50 backdrop-blur-sm">
+<button class="p-2 rounded-full hover:bg-white/5 text-slate-400 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+</button>
+<span class="text-lg font-bold tracking-tight text-white font-mono flex items-center gap-2">
+<span class="material-symbols-outlined text-cyan-500">calendar_month</span>
+                2026년 01월
+            </span>
+<button class="p-2 rounded-full hover:bg-white/5 text-slate-400 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</button>
+</div>
+</header>
+<main class="flex-1 px-4 py-4 flex flex-col gap-5 pb-28 overflow-y-auto no-scrollbar">
+<section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-950/40 to-slate-900/40 border border-cyan-500/20 p-5 shadow-[0_4px_20px_-4px_rgba(6,182,212,0.1)]">
+<div class="absolute top-0 right-0 p-3 opacity-10">
+<span class="material-symbols-outlined text-8xl text-cyan-400">analytics</span>
+</div>
+<div class="relative z-10">
+<h2 class="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                    Monthly Summary
+                </h2>
+<div class="flex items-center justify-between divide-x divide-white/10">
+<div class="pr-4">
+<div class="text-[11px] text-slate-400 mb-0.5">전체</div>
+<div class="text-lg font-bold text-white font-mono">45<span class="text-xs font-normal text-slate-500 ml-0.5">건</span></div>
+</div>
+<div class="px-4">
+<div class="text-[11px] text-slate-400 mb-0.5">완료</div>
+<div class="text-lg font-bold text-emerald-400 font-mono">42<span class="text-xs font-normal text-slate-500 ml-0.5">건</span></div>
+</div>
+<div class="pl-4 flex-1 text-right">
+<div class="text-[11px] text-slate-400 mb-0.5">총 순중량</div>
+<div class="text-xl font-bold text-cyan-300 font-mono">156.2<span class="text-sm font-normal text-cyan-500/70 ml-1">ton</span></div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="sticky top-[128px] z-30 flex items-center gap-3 mb-3 pl-1 bg-background-dark/95 backdrop-blur py-2 -mx-4 px-4 border-y border-white/5 shadow-sm">
+<span class="text-sm font-bold text-slate-200 font-mono">2026-01-29</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">5건</span>
+<div class="flex-1 h-px bg-slate-800"></div>
+<span class="text-[10px] text-slate-500">목요일</span>
+</div>
+<div class="flex flex-col gap-3">
+<article class="bg-card-dark rounded-[12px] p-4 border border-white/5 shadow-lg active:scale-[0.99] transition-transform duration-200">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-lg">local_shipping</span>
+</div>
+<div>
+<div class="text-[10px] text-slate-500">배차번호</div>
+<div class="text-sm font-bold text-white font-mono tracking-wide">DSP-260129-01</div>
+</div>
+</div>
+<div class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400">
+                            완료
+                        </div>
+</div>
+<div class="space-y-2 mb-4 pl-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">directions_car</span>
+<span class="text-slate-300 text-xs">82가 1234 (11톤 윙바디)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">factory</span>
+<span class="text-slate-300 text-xs">(주)대한물류 <span class="text-slate-600 mx-1">→</span> 부산항만</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">category</span>
+<span class="text-slate-300 text-xs">재활용 고철</span>
+</div>
+</div>
+<div class="bg-inner-card rounded-lg p-3 flex items-center justify-between border border-cyan-500/20 relative overflow-hidden group">
+<div class="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors"></div>
+<div class="relative z-10 flex flex-col">
+<span class="text-[10px] text-cyan-600 font-medium">계량시간 14:12</span>
+</div>
+<div class="relative z-10 flex items-baseline gap-2">
+<span class="text-xs text-cyan-500 font-medium">순중량:</span>
+<span class="text-lg font-bold text-cyan-400 font-mono">16,380 <span class="text-xs font-normal opacity-70">kg</span></span>
+</div>
+</div>
+</article>
+<article class="bg-card-dark rounded-[12px] p-4 border border-white/5 shadow-lg active:scale-[0.99] transition-transform duration-200">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-lg">local_shipping</span>
+</div>
+<div>
+<div class="text-[10px] text-slate-500">배차번호</div>
+<div class="text-sm font-bold text-white font-mono tracking-wide">DSP-260129-02</div>
+</div>
+</div>
+<div class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400">
+                            완료
+                        </div>
+</div>
+<div class="space-y-2 mb-4 pl-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">directions_car</span>
+<span class="text-slate-300 text-xs">91나 5678 (25톤 덤프)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">factory</span>
+<span class="text-slate-300 text-xs">(주)미래건설 <span class="text-slate-600 mx-1">→</span> 수도권매립지</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">category</span>
+<span class="text-slate-300 text-xs">혼합 폐기물</span>
+</div>
+</div>
+<div class="bg-inner-card rounded-lg p-3 flex items-center justify-between border border-cyan-500/20 relative overflow-hidden group">
+<div class="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors"></div>
+<div class="relative z-10 flex flex-col">
+<span class="text-[10px] text-cyan-600 font-medium">계량시간 11:45</span>
+</div>
+<div class="relative z-10 flex items-baseline gap-2">
+<span class="text-xs text-cyan-500 font-medium">순중량:</span>
+<span class="text-lg font-bold text-cyan-400 font-mono">18,600 <span class="text-xs font-normal opacity-70">kg</span></span>
+</div>
+</div>
+</article>
+<article class="bg-card-dark rounded-[12px] p-4 border border-white/5 shadow-lg active:scale-[0.99] transition-transform duration-200">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-lg">local_shipping</span>
+</div>
+<div>
+<div class="text-[10px] text-slate-500">배차번호</div>
+<div class="text-sm font-bold text-white font-mono tracking-wide">DSP-260129-03</div>
+</div>
+</div>
+<div class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400">
+                            완료
+                        </div>
+</div>
+<div class="space-y-2 mb-4 pl-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">directions_car</span>
+<span class="text-slate-300 text-xs">73다 9901 (5톤 카고)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">factory</span>
+<span class="text-slate-300 text-xs">(주)한성자원 <span class="text-slate-600 mx-1">→</span> 인천공장</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[16px]">category</span>
+<span class="text-slate-300 text-xs">비철 금속</span>
+</div>
+</div>
+<div class="bg-inner-card rounded-lg p-3 flex items-center justify-between border border-cyan-500/20 relative overflow-hidden group">
+<div class="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition-colors"></div>
+<div class="relative z-10 flex flex-col">
+<span class="text-[10px] text-cyan-600 font-medium">계량시간 09:15</span>
+</div>
+<div class="relative z-10 flex items-baseline gap-2">
+<span class="text-xs text-cyan-500 font-medium">순중량:</span>
+<span class="text-lg font-bold text-cyan-400 font-mono">10,900 <span class="text-xs font-normal opacity-70">kg</span></span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<section class="mt-6 opacity-60">
+<div class="sticky top-[128px] z-30 flex items-center gap-3 mb-3 pl-1 bg-background-dark/95 backdrop-blur py-2 -mx-4 px-4 border-y border-white/5">
+<span class="text-sm font-bold text-slate-200 font-mono">2026-01-28</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">3건</span>
+<div class="flex-1 h-px bg-slate-800"></div>
+<span class="text-[10px] text-slate-500">수요일</span>
+</div>
+<div class="flex flex-col gap-3">
+<article class="bg-card-dark rounded-[12px] p-4 border border-white/5 shadow-lg grayscale-[0.3]">
+<div class="flex justify-between items-start mb-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-lg">local_shipping</span>
+</div>
+<div>
+<div class="text-[10px] text-slate-500">배차번호</div>
+<div class="text-sm font-bold text-white font-mono tracking-wide">DSP-260128-09</div>
+</div>
+</div>
+<div class="px-2 py-0.5 rounded bg-slate-700/30 border border-slate-600/30 text-[10px] font-bold text-slate-400">
+                            마감
+                        </div>
+</div>
+<div class="bg-inner-card rounded-lg p-3 flex items-center justify-between border border-cyan-900/20 relative overflow-hidden">
+<div class="relative z-10 flex flex-col">
+<span class="text-[10px] text-slate-500 font-medium">계량시간 17:30</span>
+</div>
+<div class="relative z-10 flex items-baseline gap-2">
+<span class="text-xs text-slate-500 font-medium">순중량:</span>
+<span class="text-lg font-bold text-cyan-500/70 font-mono">14,200 <span class="text-xs font-normal opacity-70">kg</span></span>
+</div>
+</div>
+</article>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 h-[80px] bg-background-dark/95 backdrop-blur border-t border-white/5 flex items-center justify-around z-50 pb-4">
+<div class="flex flex-col items-center gap-1 opacity-50 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[26px]">home</span>
+<span class="text-[10px] font-medium">홈</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-cyan-400 active:scale-95 transition-transform">
+<div class="relative">
+<span class="material-symbols-outlined text-[26px] fill-1">history</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
+</div>
+<span class="text-[10px] font-bold">이력조회</span>
+</div>
+<div class="flex flex-col items-center gap-1 opacity-50 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[26px]">local_shipping</span>
+<span class="text-[10px] font-medium">차량</span>
+</div>
+<div class="flex flex-col items-center gap-1 opacity-50 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[26px]">settings</span>
+<span class="text-[10px] font-medium">설정</span>
+</div>
+</nav>
+
+</body></html>

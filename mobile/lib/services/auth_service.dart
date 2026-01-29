@@ -22,6 +22,7 @@ class AuthService {
       data: {
         'loginId': loginId,
         'password': password,
+        'deviceType': 'MOBILE',
       },
       fromData: (data) =>
           LoginResponse.fromJson(data as Map<String, dynamic>),
@@ -45,7 +46,7 @@ class AuthService {
   }) async {
     final response = await _apiService.post<LoginResponse>(
       ApiConfig.otpLoginUrl,
-      data: {'phoneNumber': phoneNumber, 'otpCode': otpCode},
+      data: {'phoneNumber': phoneNumber, 'authCode': otpCode, 'deviceType': 'MOBILE'},
       fromData: (data) =>
           LoginResponse.fromJson(data as Map<String, dynamic>),
     );

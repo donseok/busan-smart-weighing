@@ -25,7 +25,7 @@ partial class MainForm
         // =====================================================================
         this.splitMain = new SplitContainer();
         this.splitMain.Dock = DockStyle.Fill;
-        this.splitMain.SplitterDistance = 730;
+        this.splitMain.SplitterDistance = 400;
         this.splitMain.FixedPanel = FixedPanel.Panel1;
 
         // =====================================================================
@@ -368,6 +368,7 @@ partial class MainForm
         this.Text = "부산 스마트 계량 시스템";
         this.MinimumSize = new Size(1100, 700);
         this.StartPosition = FormStartPosition.CenterScreen;
+        this.WindowState = FormWindowState.Maximized;
         this.Font = new Font("Segoe UI", 9F);
     }
 

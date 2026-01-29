@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OTP Verification</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#07b6d5",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2023",
+                        "navy-start": "#0B1120",
+                        "navy-end": "#0F172A",
+                        "card-dark": "#1E293B",
+                        "input-dark": "#334155",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom styles to hide number input spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased">
+<!-- Main Container with Gradient Background -->
+<div class="relative flex min-h-screen w-full flex-col bg-gradient-to-b from-[#0B1120] to-[#0F172A] overflow-hidden">
+<!-- Header -->
+<header class="flex items-center p-4 justify-between z-10">
+<button class="text-white hover:text-primary transition-colors flex size-12 shrink-0 items-center justify-center rounded-full active:bg-white/10">
+<span class="material-symbols-outlined text-[24px]">arrow_back_ios_new</span>
+</button>
+<div class="text-white font-medium text-lg tracking-wide opacity-80">보안 로그인</div>
+<div class="size-12"></div> <!-- Spacer for centering -->
+</header>
+<!-- Content Area -->
+<main class="flex-1 flex flex-col items-center justify-start px-4 pt-4 pb-8 w-full max-w-md mx-auto z-10">
+<!-- Headline Section -->
+<div class="w-full mb-8 text-center">
+<h1 class="text-white tracking-tight text-[28px] md:text-[32px] font-bold leading-tight mb-2">인증 코드 입력</h1>
+<p class="text-slate-400 text-sm md:text-base font-normal leading-normal">
+                    전송된 6자리 인증 코드를 입력해주세요.
+                </p>
+</div>
+<!-- OTP Card -->
+<div class="w-full bg-card-dark/50 backdrop-blur-sm border border-white/5 rounded-2xl p-6 shadow-xl">
+<!-- Timer -->
+<div class="flex justify-center mb-8">
+<div class="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
+<span class="material-symbols-outlined text-primary text-[20px]">timer</span>
+<span class="text-primary text-base font-bold tracking-wider font-mono">04:32</span>
+</div>
+</div>
+<!-- Input Fields -->
+<div class="flex justify-center mb-8">
+<fieldset class="flex gap-2 sm:gap-3">
+<input autofocus="" class="flex h-12 w-10 sm:h-14 sm:w-12 text-center bg-input-dark/50 text-white rounded-lg border border-primary ring-2 ring-primary/20 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/30 text-xl font-bold transition-all duration-200 caret-primary" maxlength="1" type="number" value="5"/>
+<input class="flex h-12 w-10 sm:h-14 sm:w-12 text-center bg-input-dark/50 text-white rounded-lg border border-slate-600 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-xl font-bold transition-all duration-200 caret-primary placeholder-slate-500" maxlength="1" placeholder="" type="number"/>
+<input class="flex h-12 w-10 sm:h-14 sm:w-12 text-center bg-input-dark/50 text-white rounded-lg border border-slate-600 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-xl font-bold transition-all duration-200 caret-primary placeholder-slate-500" maxlength="1" placeholder="" type="number"/>
+<input class="flex h-12 w-10 sm:h-14 sm:w-12 text-center bg-input-dark/50 text-white rounded-lg border border-slate-600 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-xl font-bold transition-all duration-200 caret-primary placeholder-slate-500" maxlength="1" placeholder="" type="number"/>
+<input class="flex h-12 w-10 sm:h-14 sm:w-12 text-center bg-input-dark/50 text-white rounded-lg border border-slate-600 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-xl font-bold transition-all duration-200 caret-primary placeholder-slate-500" maxlength="1" placeholder="" type="number"/>
+<input class="flex h-12 w-10 sm:h-14 sm:w-12 text-center bg-input-dark/50 text-white rounded-lg border border-slate-600 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-xl font-bold transition-all duration-200 caret-primary placeholder-slate-500" maxlength="1" placeholder="" type="number"/>
+</fieldset>
+</div>
+<!-- Action Button -->
+<button class="w-full flex items-center justify-center rounded-xl h-12 px-5 bg-primary hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary/20">
+<span class="text-white text-base font-bold leading-normal tracking-wide">인증하기</span>
+</button>
+<!-- Resend Link -->
+<div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 text-sm">
+<span class="text-slate-400">인증코드가 오지 않나요?</span>
+<button class="text-primary hover:text-primary/80 font-medium underline decoration-primary/50 underline-offset-4 transition-colors">
+                        재요청
+                    </button>
+</div>
+</div>
+<!-- Spacer -->
+<div class="flex-1"></div>
+<!-- Footer Link -->
+<div class="mt-auto pt-6 pb-2">
+<button class="text-slate-400 hover:text-white text-sm font-medium transition-colors flex items-center gap-2 group">
+<span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">login</span>
+                    기존 방식으로 로그인
+                </button>
+</div>
+</main>
+<!-- Decorative Background Elements -->
+<div class="absolute top-[-10%] right-[-5%] w-[300px] h-[300px] bg-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[250px] h-[250px] bg-blue-600/10 blur-[80px] rounded-full pointer-events-none"></div>
+</div>
+<!-- Script for Input Logic (Visual only) -->
+<script>
+        // Simple logic to move focus to next input
+        const inputs = document.querySelectorAll('input[type="number"]');
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key >= 0 && e.key <= 9) {
+                    input.value = ''; // clear current before adding new
+                    setTimeout(() => {
+                        if (index < inputs.length - 1) inputs[index + 1].focus();
+                    }, 10);
+                } else if (e.key === 'Backspace') {
+                    if (input.value === '' && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                }
+            });
+
+            // Prevent non-numeric input for visual cleanliness
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+    </script>
+</body></html>

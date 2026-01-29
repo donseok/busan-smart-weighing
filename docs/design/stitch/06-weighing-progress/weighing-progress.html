@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weighing Progress Monitoring</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#07b6d5",
+                        "background-dark": "#0B1120",
+                        "card-dark": "#1E293B",
+                        "inner-card": "#0F172A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    boxShadow: {
+                        "glow-cyan": "0 0 15px rgba(34, 211, 238, 0.3)",
+                        "glow-emerald": "0 0 10px rgba(16, 185, 129, 0.4)",
+                    }
+                },
+            },
+        }
+</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display text-white min-h-screen pb-32 antialiased selection:bg-cyan-500/30">
+<header class="sticky top-0 z-50 flex items-center justify-between px-4 h-[56px] bg-background-dark/90 backdrop-blur-md border-b border-white/5">
+<button class="p-2 -ml-2 text-slate-300 hover:text-white transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-[18px] font-semibold tracking-wide">계량 현황</h1>
+<button class="p-2 -mr-2 text-slate-300 hover:text-white transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</header>
+<main class="flex flex-col w-full max-w-md mx-auto px-4 py-6">
+<div class="bg-card-dark rounded-[20px] border border-white/5 shadow-2xl relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16"></div>
+<div class="p-6 relative z-10">
+<div class="flex items-start justify-between mb-8">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="flex h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"></span>
+<span class="text-[10px] font-bold text-cyan-400 tracking-wider uppercase">Live Measuring</span>
+</div>
+<h2 class="text-white text-xl font-bold tracking-tight">D-2026-0142</h2>
+</div>
+<div class="text-right">
+<p class="text-slate-400 text-[11px] mb-0.5 uppercase tracking-wide">Vehicle Info</p>
+<p class="text-slate-200 font-semibold text-sm">경기 88아 1234</p>
+</div>
+</div>
+<div class="flex items-center justify-center mb-10">
+<div class="relative w-[180px] h-[180px]">
+<svg class="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
+<circle cx="50" cy="50" fill="transparent" r="44" stroke="#334155" stroke-width="6"></circle>
+<circle class="drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]" cx="50" cy="50" fill="transparent" r="44" stroke="#22d3ee" stroke-dasharray="276.46" stroke-dashoffset="69" stroke-linecap="round" stroke-width="6"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-[32px] font-mono font-bold text-white tracking-tighter drop-shadow-lg leading-none">24,580</span>
+<span class="text-slate-400 text-sm font-medium mt-1">kg</span>
+</div>
+</div>
+</div>
+<div class="mb-8">
+<div class="relative flex items-center justify-between px-2">
+<div class="absolute left-4 right-4 h-[2px] bg-slate-700 -z-10 top-[11px]"></div>
+<div class="absolute left-4 right-1/4 h-[2px] bg-gradient-to-r from-emerald-500 via-emerald-500 to-cyan-400 -z-10 top-[11px]"></div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-emerald-500 text-background-dark flex items-center justify-center shadow-glow-emerald border border-emerald-400">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</div>
+<span class="text-[11px] font-medium text-emerald-500">대기</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-emerald-500 text-background-dark flex items-center justify-center shadow-glow-emerald border border-emerald-400">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</div>
+<span class="text-[11px] font-medium text-emerald-500">1차 계량</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-card-dark border-[2px] border-cyan-400 flex items-center justify-center shadow-glow-cyan relative">
+<div class="w-2.5 h-2.5 rounded-full bg-cyan-400"></div>
+</div>
+<span class="text-[11px] font-bold text-cyan-400">2차 계량</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center">
+</div>
+<span class="text-[11px] font-medium text-slate-500">완료</span>
+</div>
+</div>
+</div>
+<div class="bg-inner-card rounded-xl p-4 mb-6 border border-white/5 shadow-lg">
+<div class="grid grid-cols-3 divide-x divide-white/10">
+<div class="flex flex-col items-center gap-1.5 px-1">
+<span class="text-[10px] text-slate-400 font-medium">총중량</span>
+<span class="text-[15px] font-mono font-bold text-white tracking-tight">40,500</span>
+</div>
+<div class="flex flex-col items-center gap-1.5 px-1">
+<span class="text-[10px] text-slate-400 font-medium">공차중량</span>
+<span class="text-[15px] font-mono font-bold text-white tracking-tight">15,920</span>
+</div>
+<div class="flex flex-col items-center gap-1.5 px-1 relative">
+<div class="absolute inset-y-[-8px] inset-x-1 bg-cyan-500/5 rounded -z-10"></div>
+<span class="text-[10px] text-cyan-400 font-bold">순중량</span>
+<span class="text-[15px] font-mono font-bold text-cyan-400 tracking-tight drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]">24,580</span>
+</div>
+</div>
+</div>
+<div class="space-y-0.5">
+<div class="flex gap-4 pb-5 border-l-2 border-slate-700/50 ml-2 pl-6 relative">
+<span class="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-card-dark"></span>
+<div class="flex-1 flex justify-between items-center">
+<span class="text-sm text-slate-300 font-medium">입차 (Gate In)</span>
+<span class="text-xs font-mono text-slate-500">08:25:10</span>
+</div>
+</div>
+<div class="flex gap-4 pb-5 border-l-2 border-slate-700/50 ml-2 pl-6 relative">
+<span class="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-card-dark"></span>
+<div class="flex-1 flex justify-between items-center">
+<span class="text-sm text-slate-300 font-medium">1차 계량 (Tare)</span>
+<span class="text-xs font-mono text-slate-500">08:42:33</span>
+</div>
+</div>
+<div class="flex gap-4 border-l-2 border-slate-700/50 ml-2 pl-6 relative">
+<span class="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-cyan-400 ring-4 ring-card-dark shadow-glow-cyan"></span>
+<div class="flex-1 flex justify-between items-center">
+<span class="text-sm font-bold text-cyan-400">2차 계량 진행중...</span>
+<span class="text-xs font-mono text-cyan-400/80 font-bold bg-cyan-950/50 px-1.5 py-0.5 rounded border border-cyan-400/20">LIVE</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 right-0 bg-background-dark/80 backdrop-blur-xl border-t border-white/5 p-4 z-50 pb-8 safe-area-bottom">
+<button class="w-full flex items-center justify-center gap-3 py-4 rounded-xl border border-cyan-900/50 bg-card-dark/50 text-slate-400 font-bold text-[16px] cursor-not-allowed shadow-[0_0_25px_rgba(34,211,238,0.05)] relative overflow-hidden group">
+<div class="absolute inset-0 bg-cyan-400/5"></div>
+<span class="flex h-2.5 w-2.5 relative">
+<span class="absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-20"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500 shadow-[0_0_8px_rgba(34,211,238,0.8)]"></span>
+</span>
+<span class="text-cyan-400/70 tracking-wide">계량 진행중...</span>
+</button>
+</div>
+
+</body></html>

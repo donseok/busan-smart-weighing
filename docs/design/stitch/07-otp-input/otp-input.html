@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OTP Verification Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#07b6d5",
+                        "background-dark": "#0B1120",
+                        "card-dark": "#1E293B",
+                        "inner-card": "#0F172A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    boxShadow: {
+                        "glow-cyan": "0 0 15px rgba(34, 211, 238, 0.3)",
+                        "glow-emerald": "0 0 10px rgba(16, 185, 129, 0.4)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            touch-action: manipulation;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display text-white min-h-screen flex flex-col antialiased selection:bg-cyan-500/30">
+<header class="sticky top-0 z-50 flex items-center justify-between px-4 h-[56px] bg-background-dark/90 backdrop-blur-md border-b border-white/5">
+<button class="p-2 -ml-2 text-slate-300 hover:text-white transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-[17px] font-semibold tracking-wide text-slate-200">보안 인증</h1>
+<div class="w-10"></div>
+</header>
+<main class="flex-1 flex flex-col w-full max-w-md mx-auto px-6 py-6 h-full relative">
+<div class="flex flex-col items-center justify-center mt-2 mb-8">
+<div class="relative mb-5">
+<div class="absolute inset-0 bg-cyan-500 blur-xl opacity-20 rounded-full"></div>
+<span class="material-symbols-outlined text-[48px] text-cyan-400 relative z-10 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">shield</span>
+</div>
+<h2 class="text-2xl font-bold tracking-tight text-white mb-2">D-2026-0142</h2>
+<p class="text-slate-400 text-sm font-medium mb-6">OTP 코드 6자리를 입력하세요</p>
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card-dark border border-cyan-900/30 shadow-[0_0_15px_rgba(34,211,238,0.05)]">
+<span class="material-symbols-outlined text-[18px] text-cyan-400 animate-pulse">timer</span>
+<span class="font-mono text-cyan-400 font-bold tracking-widest text-lg">04:32</span>
+</div>
+</div>
+<div class="flex justify-between gap-2 mb-8 px-1">
+<div class="w-full aspect-[48/60] max-w-[48px] h-[60px] bg-card-dark rounded-lg border border-slate-600 flex items-center justify-center shadow-lg">
+<span class="text-2xl font-bold font-mono text-white">4</span>
+</div>
+<div class="w-full aspect-[48/60] max-w-[48px] h-[60px] bg-card-dark rounded-lg border border-slate-600 flex items-center justify-center shadow-lg">
+<span class="text-2xl font-bold font-mono text-white">9</span>
+</div>
+<div class="w-full aspect-[48/60] max-w-[48px] h-[60px] bg-card-dark rounded-lg border border-slate-600 flex items-center justify-center shadow-lg">
+<span class="text-2xl font-bold font-mono text-white">1</span>
+</div>
+<div class="w-full aspect-[48/60] max-w-[48px] h-[60px] bg-card-dark rounded-lg border-[1.5px] border-cyan-400 shadow-glow-cyan flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 bg-cyan-400/5 animate-pulse"></div>
+<div class="w-0.5 h-6 bg-cyan-400 animate-pulse rounded-full"></div>
+</div>
+<div class="w-full aspect-[48/60] max-w-[48px] h-[60px] bg-card-dark/40 rounded-lg border border-white/5 flex items-center justify-center"></div>
+<div class="w-full aspect-[48/60] max-w-[48px] h-[60px] bg-card-dark/40 rounded-lg border border-white/5 flex items-center justify-center"></div>
+</div>
+<div class="flex-grow"></div>
+<div class="grid grid-cols-3 gap-3 mb-6">
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">1</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">2</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">3</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">4</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">5</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">6</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">7</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">8</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">9</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center group">
+<span class="text-[24px] font-bold text-rose-500 group-active:text-rose-400">C</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center">
+<span class="text-[28px] font-medium text-white font-mono">0</span>
+</button>
+<button class="h-[64px] bg-card-dark hover:bg-slate-700 active:bg-slate-800 rounded-lg shadow-md border-b-[3px] border-slate-900 active:border-b-0 active:translate-y-[3px] transition-all duration-75 flex items-center justify-center group">
+<span class="material-symbols-outlined text-[26px] text-white group-active:text-slate-300">backspace</span>
+</button>
+</div>
+<div class="safe-area-bottom pb-2">
+<button class="w-full py-4 rounded-xl border border-white/10 bg-slate-800/50 text-slate-500 font-bold text-[18px] cursor-not-allowed flex items-center justify-center gap-2 shadow-inner" disabled="">
+<span>인증하기</span>
+</button>
+</div>
+</main>
+
+</body></html>

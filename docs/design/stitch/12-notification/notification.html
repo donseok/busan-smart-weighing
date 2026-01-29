@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notification Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06b6d4",
+                        "background-dark": "#0B1120",
+                        "card-dark": "#1E293B",
+                        "inner-card": "#0F172A",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    boxShadow: {
+                        "glow-cyan": "0 0 15px rgba(34, 211, 238, 0.3)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            -webkit-font-smoothing: antialiased;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display text-white min-h-screen flex flex-col antialiased selection:bg-cyan-500/30">
+<header class="sticky top-0 z-50 bg-background-dark/95 backdrop-blur-md border-b border-white/5 shadow-sm">
+<div class="flex items-center justify-between px-4 h-14 relative">
+<button class="w-10 h-10 flex items-center justify-center -ml-2 rounded-full hover:bg-white/5 active:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-white text-[26px]">arrow_back</span>
+</button>
+<h1 class="text-[17px] font-bold tracking-tight text-white absolute left-1/2 -translate-x-1/2">알림</h1>
+<button class="text-[13px] font-medium text-cyan-400 hover:text-cyan-300 active:text-cyan-500 transition-colors py-2 -mr-1">
+            모두 읽음
+        </button>
+</div>
+</header>
+<main class="flex-1 px-4 py-4 flex flex-col gap-3 overflow-y-auto no-scrollbar pb-10">
+<article class="relative w-full rounded-[16px] bg-cyan-500/[0.08] border border-cyan-500/30 p-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer">
+<div class="absolute top-[24px] left-4 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]"></div>
+<div class="pl-3.5 flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-cyan-500/10 px-2 py-[3px] rounded-md border border-cyan-500/20">
+<span class="material-symbols-outlined text-[14px] text-cyan-400">scale</span>
+<span class="text-[11px] font-bold text-cyan-400 leading-none pt-[1px]">계량</span>
+</div>
+<span class="text-[11px] font-medium text-cyan-200/60">방금 전</span>
+</div>
+<div>
+<h3 class="text-[15px] font-semibold text-white mb-1.5">계량이 완료되었습니다</h3>
+<p class="text-[13px] text-slate-300 leading-snug line-clamp-2">
+                    차량 82가1234의 2차 계량이 정상적으로 처리되었습니다. 총 중량 25,400kg.
+                </p>
+</div>
+</div>
+</article>
+<article class="relative w-full rounded-[16px] bg-cyan-500/[0.08] border border-cyan-500/30 p-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer">
+<div class="absolute top-[24px] left-4 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]"></div>
+<div class="pl-3.5 flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-cyan-500/10 px-2 py-[3px] rounded-md border border-cyan-500/20">
+<span class="material-symbols-outlined text-[14px] text-cyan-400">local_shipping</span>
+<span class="text-[11px] font-bold text-cyan-400 leading-none pt-[1px]">배차</span>
+</div>
+<span class="text-[11px] font-medium text-cyan-200/60">15분 전</span>
+</div>
+<div>
+<h3 class="text-[15px] font-semibold text-white mb-1.5">배차 확정 알림</h3>
+<p class="text-[13px] text-slate-300 leading-snug line-clamp-2">
+                    요청하신 [부산신항] → [양산물류센터] 건 배차가 확정되었습니다. 운송 지시서를 확인해주세요.
+                </p>
+</div>
+</div>
+</article>
+<article class="relative w-full rounded-[16px] bg-cyan-500/[0.08] border border-cyan-500/30 p-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer">
+<div class="absolute top-[24px] left-4 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.8)]"></div>
+<div class="pl-3.5 flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-cyan-500/10 px-2 py-[3px] rounded-md border border-cyan-500/20">
+<span class="material-symbols-outlined text-[14px] text-cyan-400">dns</span>
+<span class="text-[11px] font-bold text-cyan-400 leading-none pt-[1px]">시스템</span>
+</div>
+<span class="text-[11px] font-medium text-cyan-200/60">45분 전</span>
+</div>
+<div>
+<h3 class="text-[15px] font-semibold text-white mb-1.5">서버 점검 예정 안내</h3>
+<p class="text-[13px] text-slate-300 leading-snug line-clamp-2">
+                    오늘 밤 02:00 ~ 04:00 시스템 안정화를 위한 정기 점검이 진행될 예정입니다.
+                </p>
+</div>
+</div>
+</article>
+<article class="relative w-full rounded-[16px] bg-card-dark border border-slate-700/50 p-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer">
+<div class="flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-slate-800 px-2 py-[3px] rounded-md border border-slate-700">
+<span class="material-symbols-outlined text-[14px] text-cyan-500/70">scale</span>
+<span class="text-[11px] font-bold text-cyan-500/70 leading-none pt-[1px]">계량</span>
+</div>
+<span class="text-[11px] font-medium text-slate-500">2시간 전</span>
+</div>
+<div>
+<h3 class="text-[15px] font-semibold text-white mb-1.5">1차 계량 시작</h3>
+<p class="text-[13px] text-slate-400 leading-snug line-clamp-2">
+                    입고 차량의 1차 계량이 시작되었습니다. 차량 번호판을 확인해주세요.
+                </p>
+</div>
+</div>
+</article>
+<article class="relative w-full rounded-[16px] bg-card-dark border border-slate-700/50 p-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer">
+<div class="flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-slate-800 px-2 py-[3px] rounded-md border border-slate-700">
+<span class="material-symbols-outlined text-[14px] text-cyan-500/70">campaign</span>
+<span class="text-[11px] font-bold text-cyan-500/70 leading-none pt-[1px]">공지</span>
+</div>
+<span class="text-[11px] font-medium text-slate-500">어제</span>
+</div>
+<div>
+<h3 class="text-[15px] font-semibold text-white mb-1.5">안전 운전 캠페인</h3>
+<p class="text-[13px] text-slate-400 leading-snug line-clamp-2">
+                    장마철 빗길 안전 운전에 유의하시기 바랍니다. 타이어 상태 점검 필수.
+                </p>
+</div>
+</div>
+</article>
+<article class="relative w-full rounded-[16px] bg-card-dark border border-slate-700/50 p-4 active:scale-[0.98] transition-transform duration-150 cursor-pointer">
+<div class="flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 bg-slate-800 px-2 py-[3px] rounded-md border border-slate-700">
+<span class="material-symbols-outlined text-[14px] text-cyan-500/70">info</span>
+<span class="text-[11px] font-bold text-cyan-500/70 leading-none pt-[1px]">안내</span>
+</div>
+<span class="text-[11px] font-medium text-slate-500">2일 전</span>
+</div>
+<div>
+<h3 class="text-[15px] font-semibold text-white mb-1.5">앱 버전 업데이트 안내</h3>
+<p class="text-[13px] text-slate-400 leading-snug line-clamp-2">
+                    새로운 기능이 추가된 v2.1.0 버전이 출시되었습니다. 스토어에서 업데이트해주세요.
+                </p>
+</div>
+</div>
+</article>
+</main>
+
+</body></html>
