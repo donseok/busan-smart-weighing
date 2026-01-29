@@ -1,3 +1,15 @@
+/**
+ * 계량소 관제 페이지 컴포넌트
+ *
+ * 계량소의 실시간 관제 화면으로, 중량 표시, 차량 정보,
+ * 장치 연결 상태, 계량 이력 등의 표시 패널과
+ * 모드 전환, 수동 계량, 차단기 제어, 시뮬레이터 등의
+ * 제어 패널로 구성됩니다.
+ * WebSocket을 통해 실시간 계량 데이터를 수신하며,
+ * useWeighingStation 훅으로 상태 관리를 수행합니다.
+ *
+ * @returns 계량소 관제 페이지 JSX
+ */
 import React, { useEffect } from 'react';
 import { Row, Col, Typography, theme } from 'antd';
 import { useWeighingStation } from '../hooks/useWeighingStation';

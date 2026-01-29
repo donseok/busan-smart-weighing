@@ -1,3 +1,13 @@
+/**
+ * 마이페이지 컴포넌트
+ *
+ * 사용자 개인 설정을 관리하는 페이지입니다.
+ * 프로필 정보 조회/수정, 비밀번호 변경, 알림 설정 등
+ * 3개 탭으로 구성되어 있으며,
+ * 현재 로그인된 사용자의 정보를 표시하고 수정할 수 있습니다.
+ *
+ * @returns 마이페이지 JSX
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Typography,

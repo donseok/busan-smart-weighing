@@ -15,6 +15,9 @@ public sealed class WeighingProcessService : IDisposable
     private readonly LocalCacheService _cache;
     private readonly int _scaleId;
 
+    private const int AutoWeighTimeoutSeconds = 30;
+    private const int ReWeighTimeoutSeconds = 60;
+
     private bool _disposed;
 
     // -- Public state ---------------------------------------------------------
@@ -165,7 +168,7 @@ public sealed class WeighingProcessService : IDisposable
             SetState(ProcessState.Weighing);
             StatusMessage?.Invoke(this, $"Weighing vehicle: {plateNumber} / Dispatch: {ActiveDispatch.DispatchId}");
 
-            decimal stableWeight = await WaitForStableWeightAsync(TimeSpan.FromSeconds(30));
+            decimal stableWeight = await WaitForStableWeightAsync(TimeSpan.FromSeconds(AutoWeighTimeoutSeconds));
 
             // Step 5: Save weighing record
             await SaveWeighingRecordAsync(stableWeight, WeighingModes.Auto);
@@ -306,7 +309,7 @@ public sealed class WeighingProcessService : IDisposable
             }
 
             StatusMessage?.Invoke(this, "Waiting for stable weight for re-weighing...");
-            decimal stableWeight = await WaitForStableWeightAsync(TimeSpan.FromSeconds(60));
+            decimal stableWeight = await WaitForStableWeightAsync(TimeSpan.FromSeconds(ReWeighTimeoutSeconds));
 
             // Create new re-weigh record.
             var reWeighRecord = new WeighingRecord

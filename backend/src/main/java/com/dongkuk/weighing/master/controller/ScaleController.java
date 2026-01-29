@@ -13,6 +13,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 계량대 관리 컨트롤러
+ *
+ * 계량대(Scale) 등록, 조회, 수정, 상태 변경 기능을 제공하는 REST API 컨트롤러.
+ * 모든 엔드포인트는 관리자(ADMIN) 권한이 필요하다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @RestController
 @RequestMapping("/api/v1/master/scales")
 @RequiredArgsConstructor
@@ -21,6 +30,7 @@ public class ScaleController {
 
     private final ScaleService scaleService;
 
+    /** 계량대 등록 */
     @PostMapping
     public ResponseEntity<ApiResponse<ScaleResponse>> createScale(
             @Valid @RequestBody ScaleRequest request) {
@@ -28,18 +38,21 @@ public class ScaleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
+    /** 계량대 단건 조회 */
     @GetMapping("/{scaleId}")
     public ResponseEntity<ApiResponse<ScaleResponse>> getScale(@PathVariable Long scaleId) {
         ScaleResponse response = scaleService.getScale(scaleId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /** 활성 계량대 목록 조회 */
     @GetMapping
     public ResponseEntity<ApiResponse<List<ScaleResponse>>> getActiveScales() {
         List<ScaleResponse> response = scaleService.getActiveScales();
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /** 계량대 정보 수정 */
     @PutMapping("/{scaleId}")
     public ResponseEntity<ApiResponse<ScaleResponse>> updateScale(
             @PathVariable Long scaleId,
@@ -48,6 +61,7 @@ public class ScaleController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /** 계량대 상태 변경 */
     @PutMapping("/{scaleId}/status")
     public ResponseEntity<ApiResponse<Void>> updateScaleStatus(
             @PathVariable Long scaleId,

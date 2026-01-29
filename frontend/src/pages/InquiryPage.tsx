@@ -1,3 +1,13 @@
+/**
+ * 계량 조회 페이지 컴포넌트
+ *
+ * 과거 계량 기록을 상세 검색하고 조회하는 페이지입니다.
+ * 기간, 차량번호, 품목유형, 업체, 계량상태 등
+ * 다양한 조건의 필터 검색과 페이지네이션을 지원하며,
+ * 행 클릭 시 계량 상세정보 모달을 통해 전체 데이터를 확인할 수 있습니다.
+ *
+ * @returns 계량 조회 페이지 JSX
+ */
 import React, { useState, useCallback } from 'react';
 import {
   Typography,
@@ -28,6 +38,7 @@ import { colors } from '../theme/themeConfig';
 
 const { RangePicker } = DatePicker;
 
+/** 계량 상태별 태그 색상 매핑 */
 const statusColors: Record<string, string> = {
   IN_PROGRESS: colors.warning,
   COMPLETED: colors.success,
@@ -80,15 +91,15 @@ const initialFilters: SearchFilters = {
 };
 
 const InquiryPage: React.FC = () => {
-  const [filters, setFilters] = useState<SearchFilters>({ ...initialFilters });
-  const [data, setData] = useState<WeighingRecord[]>([]);
+  const [filters, setFilters] = useState<SearchFilters>({ ...initialFilters }); // 검색 필터
+  const [data, setData] = useState<WeighingRecord[]>([]);       // 조회 결과 목록
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [totalElements, setTotalElements] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [searched, setSearched] = useState(false);               // 조회 실행 여부
+  const [totalElements, setTotalElements] = useState(0);         // 전체 결과 수
+  const [currentPage, setCurrentPage] = useState(1);             // 현재 페이지 번호
+  const [pageSize, setPageSize] = useState(20);                  // 페이지당 건수
 
-  // Detail modal
+  // 계량 상세정보 모달 상태
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<WeighingRecord | null>(
     null,
@@ -156,6 +167,7 @@ const InquiryPage: React.FC = () => {
     setDetailOpen(true);
   };
 
+  /** 검색 입력 필드에서 Enter 키 누를 시 조회 실행 */
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();

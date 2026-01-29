@@ -8,22 +8,41 @@ import {
 } from '@ant-design/icons';
 import type { DeviceConnectionState, ConnectionStatus } from '../../types/weighingStation';
 
+/**
+ * 연결 상태 바 컴포넌트의 속성 인터페이스
+ *
+ * @property devices - 각 장비(계량기, 전광판, 차단기, 네트워크)의 연결 상태
+ */
 interface ConnectionStatusBarProps {
   devices: DeviceConnectionState;
 }
 
+/**
+ * 연결 상태별 색상 매핑
+ *
+ * ONLINE=초록색, OFFLINE=회색, ERROR=빨간색
+ */
 const STATUS_COLORS: Record<ConnectionStatus, string> = {
   ONLINE: '#10B981',
   OFFLINE: '#64748B',
   ERROR: '#F43F5E',
 };
 
+/**
+ * 연결 상태별 한국어 라벨 매핑
+ */
 const STATUS_LABELS: Record<ConnectionStatus, string> = {
   ONLINE: '연결됨',
   OFFLINE: '미연결',
   ERROR: '오류',
 };
 
+/**
+ * 장비 항목 목록 정의
+ *
+ * 계량소에 연결된 4가지 장비(계량기, 전광판, 차단기, 네트워크)의
+ * 키, 라벨, 아이콘 정보를 정의합니다.
+ */
 const DEVICE_ITEMS: {
   key: keyof DeviceConnectionState;
   label: string;
@@ -35,6 +54,18 @@ const DEVICE_ITEMS: {
   { key: 'network', label: '네트워크', icon: <WifiOutlined /> },
 ];
 
+/**
+ * 연결 상태 바 컴포넌트
+ *
+ * 계량소에 연결된 장비들(계량기, 전광판, 차단기, 네트워크)의
+ * 실시간 연결 상태를 시각적으로 표시합니다.
+ * 각 장비는 아이콘, 상태 표시등(LED), 라벨로 구성되며,
+ * 툴팁으로 상세 상태를 확인할 수 있습니다.
+ *
+ * @param props - 컴포넌트 속성
+ * @param props.devices - 각 장비의 연결 상태 객체
+ * @returns 연결 상태 바 JSX
+ */
 const ConnectionStatusBar: React.FC<ConnectionStatusBarProps> = ({ devices }) => {
   const { token } = theme.useToken();
 
@@ -53,7 +84,9 @@ const ConnectionStatusBar: React.FC<ConnectionStatusBarProps> = ({ devices }) =>
       }}
     >
       {DEVICE_ITEMS.map((item) => {
+        /** 해당 장비의 현재 연결 상태 */
         const status = devices[item.key];
+        /** 상태에 따른 색상 */
         const color = STATUS_COLORS[status];
 
         return (
@@ -67,6 +100,7 @@ const ConnectionStatusBar: React.FC<ConnectionStatusBarProps> = ({ devices }) =>
                 cursor: 'default',
               }}
             >
+              {/* 장비 아이콘 (상태에 따른 배경/테두리 색상 적용) */}
               <div
                 style={{
                   width: 36,
@@ -84,7 +118,9 @@ const ConnectionStatusBar: React.FC<ConnectionStatusBarProps> = ({ devices }) =>
               >
                 {item.icon}
               </div>
+              {/* 상태 표시등(LED)과 장비 라벨 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                {/* ONLINE 상태일 때 글로우 효과가 적용되는 LED 점 */}
                 <div
                   style={{
                     width: 6,

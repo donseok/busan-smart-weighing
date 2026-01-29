@@ -1,3 +1,12 @@
+/**
+ * 배차 관리 페이지 컴포넌트
+ *
+ * 배차(Dispatch) 데이터의 CRUD 기능을 제공하는 관리 페이지입니다.
+ * 기간, 품목유형, 배차상태별 필터 검색과 페이지네이션을 지원하며,
+ * 배차 등록/수정/삭제 모달을 통해 데이터를 관리합니다.
+ *
+ * @returns 배차 관리 페이지 JSX
+ */
 import React, { useState, useCallback } from 'react';
 import { Button, Space, Typography, Tag, DatePicker, Select, Modal, Form, Input, Popconfirm, message, Card, Row, Col, Pagination } from 'antd';
 import { PlusOutlined, ReloadOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ClearOutlined } from '@ant-design/icons';
@@ -5,26 +14,17 @@ import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import type { Dispatch } from '../types';
 import dayjs, { type Dayjs } from 'dayjs';
-import { colors } from '../theme/themeConfig';
 import SortableTable from '../components/SortableTable';
 import { maxLengthRule, futureOrPresentDateValidator } from '../utils/validators';
+import {
+  ITEM_TYPE_LABELS,
+  ITEM_TYPE_OPTIONS,
+  DISPATCH_STATUS_LABELS,
+  DISPATCH_STATUS_OPTIONS,
+  DISPATCH_STATUS_COLORS,
+} from '../constants/labels';
 
 const { RangePicker } = DatePicker;
-
-const statusColors: Record<string, string> = {
-  REGISTERED: colors.primary, IN_PROGRESS: colors.warning, COMPLETED: colors.success, CANCELLED: colors.error,
-};
-
-const statusLabels: Record<string, string> = {
-  REGISTERED: '등록', IN_PROGRESS: '진행중', COMPLETED: '완료', CANCELLED: '취소',
-};
-
-const itemTypeLabels: Record<string, string> = {
-  BY_PRODUCT: '부산물', WASTE: '폐기물', SUB_MATERIAL: '부재료', EXPORT: '반출', GENERAL: '일반',
-};
-
-const statusOptions = Object.entries(statusLabels).map(([value, label]) => ({ value, label }));
-const itemTypeOptions = Object.entries(itemTypeLabels).map(([value, label]) => ({ value, label }));
 
 interface FilterParams {
   dateRange: [Dayjs | null, Dayjs | null] | null;
@@ -141,12 +141,12 @@ const DispatchPage: React.FC = () => {
 
   const columns: ColumnsType<Dispatch> = [
     { title: 'ID', dataIndex: 'dispatchId', width: 80 },
-    { title: '품목유형', dataIndex: 'itemType', width: 100, render: (v: string) => itemTypeLabels[v] || v },
+    { title: '품목유형', dataIndex: 'itemType', width: 100, render: (v: string) => ITEM_TYPE_LABELS[v] || v },
     { title: '품목명', dataIndex: 'itemName', width: 110 },
     { title: '배차일', dataIndex: 'dispatchDate', width: 110 },
     { title: '출발지', dataIndex: 'originLocation', width: 110 },
     { title: '도착지', dataIndex: 'destination', width: 110 },
-    { title: '상태', dataIndex: 'dispatchStatus', width: 90, render: (v: string) => <Tag color={statusColors[v]}>{statusLabels[v]}</Tag> },
+    { title: '상태', dataIndex: 'dispatchStatus', width: 90, render: (v: string) => <Tag color={DISPATCH_STATUS_COLORS[v]}>{DISPATCH_STATUS_LABELS[v]}</Tag> },
     { title: '등록일', dataIndex: 'createdAt', width: 160, render: (v: string) => dayjs(v).format('YYYY-MM-DD HH:mm') },
     {
       title: '작업',
@@ -181,7 +181,7 @@ const DispatchPage: React.FC = () => {
       <Form.Item name="vehicleId" label="차량 ID" rules={[{ required: true }]}><Input type="number" /></Form.Item>
       <Form.Item name="companyId" label="운송사 ID" rules={[{ required: true }]}><Input type="number" /></Form.Item>
       <Form.Item name="itemType" label="품목유형" rules={[{ required: true }]}>
-        <Select options={itemTypeOptions} />
+        <Select options={ITEM_TYPE_OPTIONS} />
       </Form.Item>
       <Form.Item name="itemName" label="품목명" rules={[{ required: true }, maxLengthRule(100)]}><Input /></Form.Item>
       <Form.Item name="dispatchDate" label="배차일" rules={[{ required: true }, { validator: futureOrPresentDateValidator }]}><DatePicker style={{ width: '100%' }} /></Form.Item>
@@ -227,7 +227,7 @@ const DispatchPage: React.FC = () => {
                 placeholder="전체"
                 allowClear
                 style={{ width: 140 }}
-                options={itemTypeOptions}
+                options={ITEM_TYPE_OPTIONS}
               />
             </Space>
           </Col>
@@ -242,7 +242,7 @@ const DispatchPage: React.FC = () => {
                 placeholder="전체"
                 allowClear
                 style={{ width: 130 }}
-                options={statusOptions}
+                options={DISPATCH_STATUS_OPTIONS}
               />
             </Space>
           </Col>

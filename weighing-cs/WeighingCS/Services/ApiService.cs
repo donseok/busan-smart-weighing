@@ -216,38 +216,20 @@ public sealed class ApiService : IDisposable
 
     // -- HTTP helpers with retry -----------------------------------------------
 
-    private async Task<T?> GetAsync<T>(string path, bool authenticated = true)
-    {
-        return await ExecuteWithRetryAsync<T>(async () =>
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, path);
-            if (authenticated) AttachAuth(request);
-            using var response = await _http.SendAsync(request);
-            return await HandleResponseAsync<T>(response);
-        });
-    }
+    private Task<T?> GetAsync<T>(string path, bool authenticated = true)
+        => SendAsync<T>(HttpMethod.Get, path, body: null, authenticated: authenticated);
 
-    private async Task<T?> PostAsync<T>(string path, object? body, bool authenticated = true)
-    {
-        return await ExecuteWithRetryAsync<T>(async () =>
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Post, path);
-            if (authenticated) AttachAuth(request);
-            if (body is not null)
-            {
-                string json = JsonConvert.SerializeObject(body);
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-            }
-            using var response = await _http.SendAsync(request);
-            return await HandleResponseAsync<T>(response);
-        });
-    }
+    private Task<T?> PostAsync<T>(string path, object? body, bool authenticated = true)
+        => SendAsync<T>(HttpMethod.Post, path, body, authenticated);
 
-    private async Task<T?> PutAsync<T>(string path, object? body, bool authenticated = true)
+    private Task<T?> PutAsync<T>(string path, object? body, bool authenticated = true)
+        => SendAsync<T>(HttpMethod.Put, path, body, authenticated);
+
+    private async Task<T?> SendAsync<T>(HttpMethod method, string path, object? body, bool authenticated = true)
     {
         return await ExecuteWithRetryAsync<T>(async () =>
         {
-            using var request = new HttpRequestMessage(HttpMethod.Put, path);
+            using var request = new HttpRequestMessage(method, path);
             if (authenticated) AttachAuth(request);
             if (body is not null)
             {

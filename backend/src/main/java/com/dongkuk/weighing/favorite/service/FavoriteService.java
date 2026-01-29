@@ -108,44 +108,22 @@ public class FavoriteService {
      */
     @Transactional
     public FavoriteResponse toggleFavorite(Long userId, FavoriteCreateRequest request) {
-        // 먼저 존재 여부 확인 후 삭제 또는 추가
+        Optional<Favorite> existing;
         if (request.favoriteType() == FavoriteType.MENU) {
-            // MENU 타입: targetPath로 검색
-            List<Favorite> existingFavorites = favoriteRepository.findByUserIdOrderBySortOrderAscCreatedAtDesc(userId)
-                    .stream()
-                    .filter(f -> f.getFavoriteType() == FavoriteType.MENU &&
-                                 request.targetPath() != null &&
-                                 request.targetPath().equals(f.getTargetPath()))
-                    .toList();
-
-            if (!existingFavorites.isEmpty()) {
-                Favorite favorite = existingFavorites.get(0);
-                favoriteRepository.delete(favorite);
-                favoriteRepository.flush();
-                log.info("즐겨찾기 토글(삭제): userId={}, path={}", userId, request.targetPath());
-                return null;
-            } else {
-                return addFavorite(userId, request);
-            }
+            existing = favoriteRepository.findByUserIdAndFavoriteTypeAndTargetPath(
+                    userId, request.favoriteType(), request.targetPath());
         } else {
-            // 비-MENU 타입: targetId로 검색
-            List<Favorite> existingFavorites = favoriteRepository.findByUserIdOrderBySortOrderAscCreatedAtDesc(userId)
-                    .stream()
-                    .filter(f -> f.getFavoriteType() == request.favoriteType() &&
-                                 request.targetId() != null &&
-                                 request.targetId().equals(f.getTargetId()))
-                    .toList();
-
-            if (!existingFavorites.isEmpty()) {
-                Favorite favorite = existingFavorites.get(0);
-                favoriteRepository.delete(favorite);
-                favoriteRepository.flush();
-                log.info("즐겨찾기 토글(삭제): userId={}, targetId={}", userId, request.targetId());
-                return null;
-            } else {
-                return addFavorite(userId, request);
-            }
+            existing = favoriteRepository.findByUserIdAndFavoriteTypeAndTargetId(
+                    userId, request.favoriteType(), request.targetId());
         }
+
+        if (existing.isPresent()) {
+            favoriteRepository.delete(existing.get());
+            favoriteRepository.flush();
+            log.info("즐겨찾기 토글(삭제): userId={}, type={}", userId, request.favoriteType());
+            return null;
+        }
+        return addFavorite(userId, request);
     }
 
     /**

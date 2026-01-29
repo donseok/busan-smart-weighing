@@ -1,181 +1,65 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Button, Space, Typography, Modal, Form, Input, InputNumber, Tag, Popconfirm, message } from 'antd';
-import SortableTable from '../../components/SortableTable';
-import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+/**
+ * 계량대(저울) 관리 페이지 컴포넌트 (기준정보)
+ *
+ * 계량소에 설치된 계량대(Scale) 장비 정보를 관리하는 페이지입니다.
+ * 계량대 등록/수정/삭제 기능과 목록 조회를 제공하며,
+ * 저울명, 위치, 최대용량, 최소감도, 검교정일, 활성 상태 등을 관리합니다.
+ * MasterCrudPage 공통 컴포넌트를 활용하여 CRUD를 구현합니다.
+ *
+ * @returns 계량대 관리 페이지 JSX
+ */
+import React from 'react';
+import { Input, InputNumber, Tag, Form } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import apiClient from '../../api/client';
 import type { Scale } from '../../types';
-import { colors } from '../../theme/themeConfig';
 import { maxLengthRule, positiveNumberRule, mustBeLessThanField } from '../../utils/validators';
+import { SCALE_STATUS_COLORS } from '../../constants/labels';
+import MasterCrudPage from '../../components/MasterCrudPage';
 
-const scaleStatusColors: Record<string, string> = {
-  IDLE: colors.textSecondary, WEIGHING: colors.warning, COMPLETED: colors.success, ERROR: colors.error,
-};
+const columns: ColumnsType<Scale> = [
+  { title: 'ID', dataIndex: 'scaleId', width: 80 },
+  { title: '계량대명', dataIndex: 'scaleName', width: 130 },
+  { title: '위치', dataIndex: 'location', width: 110 },
+  { title: '최대용량(kg)', dataIndex: 'maxCapacity', width: 130, align: 'right', render: (v?: number) => v?.toLocaleString() ?? '-' },
+  { title: '최소용량(kg)', dataIndex: 'minCapacity', width: 130, align: 'right', render: (v?: number) => v?.toLocaleString() ?? '-' },
+  { title: '상태', dataIndex: 'scaleStatus', width: 100, render: (v: string) => <Tag color={SCALE_STATUS_COLORS[v]}>{v}</Tag> },
+];
 
-const MasterScalePage: React.FC = () => {
-  const [data, setData] = useState<Scale[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingScale, setEditingScale] = useState<Scale | null>(null);
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [form] = Form.useForm();
-  const [editForm] = Form.useForm();
+const formFields = (
+  <>
+    <Form.Item name="scaleName" label="계량대명" rules={[{ required: true }, maxLengthRule(50)]}><Input /></Form.Item>
+    <Form.Item name="location" label="위치" rules={[maxLengthRule(100)]}><Input /></Form.Item>
+    <Form.Item name="maxCapacity" label="최대용량(kg)" rules={[positiveNumberRule]}><InputNumber style={{ width: '100%' }} /></Form.Item>
+    <Form.Item name="minCapacity" label="최소용량(kg)" dependencies={['maxCapacity']} rules={[positiveNumberRule, mustBeLessThanField('maxCapacity', '최대용량')]}><InputNumber style={{ width: '100%' }} /></Form.Item>
+  </>
+);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await apiClient.get('/master/scales');
-      setData(res.data.data || []);
-    } catch { /* ignore */ }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  const filteredData = useMemo(() => {
-    if (!searchKeyword) return data;
-    const keyword = searchKeyword.toLowerCase();
-    return data.filter((item) => item.scaleName.toLowerCase().includes(keyword));
-  }, [data, searchKeyword]);
-
-  const handleReset = () => {
-    setSearchKeyword('');
-  };
-
-  const handleCreate = async () => {
-    try {
-      const values = await form.validateFields();
-      await apiClient.post('/master/scales', values);
-      message.success('계량대가 등록되었습니다.');
-      setModalOpen(false);
-      form.resetFields();
-      fetchData();
-    } catch { /* validation error */ }
-  };
-
-  const handleEdit = (record: Scale) => {
-    setEditingScale(record);
-    editForm.setFieldsValue({
-      scaleName: record.scaleName,
-      location: record.location,
-      maxCapacity: record.maxCapacity,
-      minCapacity: record.minCapacity,
-    });
-    setEditModalOpen(true);
-  };
-
-  const handleEditSubmit = async () => {
-    if (!editingScale) return;
-    try {
-      const values = await editForm.validateFields();
-      await apiClient.put(`/master/scales/${editingScale.scaleId}`, values);
-      message.success('계량대가 수정되었습니다.');
-      setEditModalOpen(false);
-      setEditingScale(null);
-      editForm.resetFields();
-      fetchData();
-    } catch { /* validation error */ }
-  };
-
-  const handleDelete = async (scaleId: number) => {
-    try {
-      await apiClient.delete(`/master/scales/${scaleId}`);
-      message.success('계량대가 삭제되었습니다.');
-      fetchData();
-    } catch {
-      message.error('계량대 삭제에 실패했습니다.');
-    }
-  };
-
-  const columns: ColumnsType<Scale> = [
-    { title: 'ID', dataIndex: 'scaleId', width: 80 },
-    { title: '계량대명', dataIndex: 'scaleName', width: 130 },
-    { title: '위치', dataIndex: 'location', width: 110 },
-    { title: '최대용량(kg)', dataIndex: 'maxCapacity', width: 130, align: 'right', render: (v?: number) => v?.toLocaleString() ?? '-' },
-    { title: '최소용량(kg)', dataIndex: 'minCapacity', width: 130, align: 'right', render: (v?: number) => v?.toLocaleString() ?? '-' },
-    { title: '상태', dataIndex: 'scaleStatus', width: 100, render: (v: string) => <Tag color={scaleStatusColors[v]}>{v}</Tag> },
-    {
-      title: '관리',
-      key: 'actions',
-      width: 100,
-      render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Popconfirm
-            title="삭제 확인"
-            description="이 계량대를 삭제하시겠습니까?"
-            onConfirm={() => handleDelete(record.scaleId)}
-            okText="삭제"
-            cancelText="취소"
-          >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
-  return (
-    <>
-      <Typography.Title level={4}>계량대 관리</Typography.Title>
-      <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} align="center">
-        <Space>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>계량대 등록</Button>
-        </Space>
-        <Space>
-          <Input
-            placeholder="계량대명 검색"
-            allowClear
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-            style={{ width: 250 }}
-            prefix={<SearchOutlined />}
-          />
-          <Button type="primary" icon={<SearchOutlined />} onClick={fetchData}>조회</Button>
-          <Button icon={<ReloadOutlined />} onClick={handleReset}>초기화</Button>
-        </Space>
-      </Space>
-      <SortableTable columns={columns} dataSource={filteredData} rowKey="scaleId" loading={loading} size="middle" tableKey="masterScale" />
-
-      <Modal
-        title="계량대 등록"
-        open={modalOpen}
-        onOk={handleCreate}
-        onCancel={() => { setModalOpen(false); form.resetFields(); }}
-        okText="저장"
-        cancelText="취소"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="scaleName" label="계량대명" rules={[{ required: true }, maxLengthRule(50)]}><Input /></Form.Item>
-          <Form.Item name="location" label="위치" rules={[maxLengthRule(100)]}><Input /></Form.Item>
-          <Form.Item name="maxCapacity" label="최대용량(kg)" rules={[positiveNumberRule]}><InputNumber style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="minCapacity" label="최소용량(kg)" dependencies={['maxCapacity']} rules={[positiveNumberRule, mustBeLessThanField('maxCapacity', '최대용량')]}><InputNumber style={{ width: '100%' }} /></Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="계량대 수정"
-        open={editModalOpen}
-        onOk={handleEditSubmit}
-        onCancel={() => { setEditModalOpen(false); setEditingScale(null); editForm.resetFields(); }}
-        okText="수정"
-        cancelText="취소"
-      >
-        <Form form={editForm} layout="vertical">
-          <Form.Item name="scaleName" label="계량대명" rules={[{ required: true }, maxLengthRule(50)]}><Input /></Form.Item>
-          <Form.Item name="location" label="위치" rules={[maxLengthRule(100)]}><Input /></Form.Item>
-          <Form.Item name="maxCapacity" label="최대용량(kg)" rules={[positiveNumberRule]}><InputNumber style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="minCapacity" label="최소용량(kg)" dependencies={['maxCapacity']} rules={[positiveNumberRule, mustBeLessThanField('maxCapacity', '최대용량')]}><InputNumber style={{ width: '100%' }} /></Form.Item>
-        </Form>
-      </Modal>
-    </>
-  );
-};
+const MasterScalePage: React.FC = () => (
+  <MasterCrudPage<Scale>
+    title="계량대 관리"
+    endpoint="/master/scales"
+    rowKey="scaleId"
+    tableKey="masterScale"
+    entityName="계량대"
+    searchPlaceholder="계량대명 검색"
+    columns={columns}
+    formFields={formFields}
+    getEditFieldValues={(r) => ({
+      scaleName: r.scaleName,
+      location: r.location,
+      maxCapacity: r.maxCapacity,
+      minCapacity: r.minCapacity,
+    })}
+    extractData={(resData) => {
+      const d = resData as { data?: Scale[] };
+      return d.data || [];
+    }}
+    filterData={(data, keyword) => {
+      if (!keyword) return data;
+      const kw = keyword.toLowerCase();
+      return data.filter((item) => item.scaleName.toLowerCase().includes(kw));
+    }}
+  />
+);
 
 export default MasterScalePage;

@@ -4,6 +4,16 @@ import com.dongkuk.weighing.global.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * 업체(운송사) 엔티티
+ *
+ * 운송사 정보를 관리하는 JPA 엔티티.
+ * 업체명, 업종, 사업자번호, 대표자, 연락처, 주소 등의 기본 정보와
+ * 활성/비활성 상태를 관리한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @Entity
 @Table(name = "tb_company", indexes = {
         @Index(name = "idx_company_name", columnList = "company_name"),
@@ -50,6 +60,7 @@ public class Company extends BaseEntity {
         this.address = address;
     }
 
+    /** 업체 정보를 수정한다. */
     public void update(String companyName, String companyType, String businessNumber,
                        String representative, String phoneNumber, String address) {
         this.companyName = companyName;
@@ -60,10 +71,12 @@ public class Company extends BaseEntity {
         this.address = address;
     }
 
+    /** 업체를 비활성화한다. */
     public void deactivate() {
         this.isActive = false;
     }
 
+    /** 업체를 활성화한다. */
     public void activate() {
         this.isActive = true;
     }

@@ -1,3 +1,13 @@
+/**
+ * 출문증 관리 페이지 컴포넌트
+ *
+ * 계량 완료 후 발행되는 출문증(Gate Pass)을 관리하는 페이지입니다.
+ * 출문증 목록 조회, 승인/반려 처리, 반려 사유 입력 등의
+ * 기능을 제공하며, 승인 상태에 따른 태그 색상 표시와
+ * 실시간 데이터 갱신을 지원합니다.
+ *
+ * @returns 출문증 관리 페이지 JSX
+ */
 import React, { useEffect, useState } from 'react';
 import { Button, Space, Typography, Tag, Modal, Input, Form, message, Popconfirm, Card, Row, Col } from 'antd';
 import SortableTable from '../components/SortableTable';

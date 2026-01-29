@@ -1,3 +1,14 @@
+/**
+ * 장비 모니터링 페이지 컴포넌트
+ *
+ * 계량소에 설치된 장비(저울, 카메라, 차단기 등)의
+ * 실시간 상태를 모니터링하는 페이지입니다.
+ * 장비별 온라인/오프라인 상태, 마지막 통신 시간,
+ * 장비 유형별 요약 카드, 상태별 필터 검색 기능을 제공합니다.
+ * WebSocket을 통해 장비 상태 변경을 실시간으로 갱신합니다.
+ *
+ * @returns 장비 모니터링 페이지 JSX
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Typography,
@@ -28,6 +39,7 @@ import apiClient from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
 import dayjs from 'dayjs';
 
+/** 장비 상태 데이터 구조 */
 interface DeviceStatus {
   deviceId: number;
   deviceCode: string;
@@ -45,6 +57,7 @@ interface DeviceStatus {
   updatedAt: string;
 }
 
+/** 장비 상태 요약 (상단 카드 표시용) */
 interface DeviceSummary {
   totalDevices: number;
   onlineCount: number;
@@ -140,10 +153,10 @@ const columns: ColumnsType<DeviceStatus> = [
 ];
 
 const MonitoringPage: React.FC = () => {
-  const [devices, setDevices] = useState<DeviceStatus[]>([]);
-  const [summary, setSummary] = useState<DeviceSummary | null>(null);
+  const [devices, setDevices] = useState<DeviceStatus[]>([]);           // 장비 목록
+  const [summary, setSummary] = useState<DeviceSummary | null>(null);   // 상태 요약
   const [loading, setLoading] = useState(false);
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<string>('');             // 장비 유형 필터
 
   const fetchData = useCallback(async () => {
     setLoading(true);

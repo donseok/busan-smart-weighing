@@ -1,3 +1,7 @@
+/// 부산 스마트 계량 모바일 앱 진입점
+///
+/// 앱 초기화, 서비스 생성, Provider 등록 및 실행을 담당합니다.
+/// Mock 모드와 실제 API 모드를 구분하여 서비스를 구성합니다.
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,9 +16,19 @@ import 'services/notification_service.dart';
 import 'providers/auth_provider.dart';
 import 'providers/dispatch_provider.dart';
 
+/// 앱의 메인 진입점
+///
+/// 초기화 순서:
+/// 1. Flutter 바인딩 초기화
+/// 2. Firebase 초기화 (mock/웹이 아닌 경우)
+/// 3. 화면 방향 및 시스템 UI 설정
+/// 4. API 서비스 인스턴스 생성 (mock 또는 실제)
+/// 5. 인증/알림 서비스 초기화
+/// 6. Provider 등록 및 앱 실행
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  /// mock 데이터 사용 여부를 설정에서 가져옴
   final useMock = ApiConfig.useMockData;
 
   // Firebase 초기화 (mock 모드 또는 웹에서는 스킵)
@@ -29,7 +43,7 @@ void main() async {
       DeviceOrientation.portraitDown,
     ]);
 
-    // Set system UI overlay style - Dark Theme
+    // 시스템 UI 오버레이 스타일 설정 - 다크 테마
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -40,7 +54,7 @@ void main() async {
     );
   }
 
-  // Initialize services — mock 모드이면 MockApiService 사용
+  // API 서비스 초기화 — mock 모드이면 MockApiService 사용
   final ApiService? realApiService;
   final MockApiService? mockApiService;
 
@@ -63,7 +77,7 @@ void main() async {
     await notificationService.initialize();
   }
 
-  // Create providers
+  // Provider 인스턴스 생성
   final authProvider = AuthProvider(authService);
   final dispatchProvider = useMock
       ? DispatchProvider.mock(mockApiService!)
@@ -76,6 +90,7 @@ void main() async {
     await authProvider.tryAutoLogin();
   }
 
+  /// MultiProvider로 전역 서비스 및 상태 관리 Provider를 등록하고 앱 실행
   runApp(
     MultiProvider(
       providers: [

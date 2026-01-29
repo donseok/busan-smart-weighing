@@ -1,3 +1,8 @@
+/// 공지사항 및 문의/전화 화면
+///
+/// 두 개의 탭으로 구성됩니다:
+/// 1. 공지사항 탭: 서버에서 공지 목록을 조회하여 접이식(expandable) 카드로 표시
+/// 2. 문의/전화 탭: 문의 유형별 전화 연결 카드 (일반/계량/배차/시스템/기타)
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -5,6 +10,9 @@ import 'package:provider/provider.dart';
 import '../../config/api_config.dart';
 import '../../services/api_service.dart';
 
+/// 공지/문의 화면 위젯
+///
+/// [TabController]로 '공지사항'과 '문의/전화' 두 탭을 관리합니다.
 class NoticeScreen extends StatefulWidget {
   const NoticeScreen({super.key});
 
@@ -14,6 +22,7 @@ class NoticeScreen extends StatefulWidget {
 
 class _NoticeScreenState extends State<NoticeScreen>
     with SingleTickerProviderStateMixin {
+  /// 공지사항/문의전화 탭 컨트롤러
   late TabController _tabController;
 
   @override
@@ -58,8 +67,12 @@ class _NoticeScreenState extends State<NoticeScreen>
   }
 }
 
-// ---- Notice List Tab ----
+// ---- 공지사항 목록 탭 ----
 
+/// 공지사항 목록 탭 위젯
+///
+/// [ApiService]로 공지사항을 조회하고, 로딩/에러/빈 상태 및
+/// 목록을 [_NoticeCard]로 표시합니다.
 class _NoticeListTab extends StatefulWidget {
   const _NoticeListTab();
 
@@ -68,8 +81,13 @@ class _NoticeListTab extends StatefulWidget {
 }
 
 class _NoticeListTabState extends State<_NoticeListTab> {
+  /// 공지사항 목록
   List<_NoticeItem> _notices = [];
+
+  /// 로딩 상태
   bool _isLoading = true;
+
+  /// 오류 메시지
   String? _errorMessage;
 
   @override
@@ -80,6 +98,7 @@ class _NoticeListTabState extends State<_NoticeListTab> {
     });
   }
 
+  /// 서버에서 공지사항 목록을 조회
   Future<void> _loadNotices() async {
     setState(() {
       _isLoading = true;
@@ -91,11 +110,13 @@ class _NoticeListTabState extends State<_NoticeListTab> {
       final response = await apiService.get(
         ApiConfig.noticesUrl,
         fromData: (data) {
+          // 단순 배열 응답 처리
           if (data is List) {
             return data
                 .map((e) => _NoticeItem.fromJson(e as Map<String, dynamic>))
                 .toList();
           }
+          // 페이징 응답 (content 필드) 처리
           if (data is Map<String, dynamic> && data.containsKey('content')) {
             return (data['content'] as List)
                 .map((e) => _NoticeItem.fromJson(e as Map<String, dynamic>))
@@ -129,10 +150,12 @@ class _NoticeListTabState extends State<_NoticeListTab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // 로딩 중
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // 에러 발생
     if (_errorMessage != null) {
       return Center(
         child: Column(
@@ -152,6 +175,7 @@ class _NoticeListTabState extends State<_NoticeListTab> {
       );
     }
 
+    // 공지 없음
     if (_notices.isEmpty) {
       return Center(
         child: Column(
@@ -174,6 +198,7 @@ class _NoticeListTabState extends State<_NoticeListTab> {
       );
     }
 
+    // 공지사항 목록
     return RefreshIndicator(
       onRefresh: _loadNotices,
       child: ListView.builder(
@@ -188,7 +213,12 @@ class _NoticeListTabState extends State<_NoticeListTab> {
   }
 }
 
+/// 공지사항 접이식 카드 위젯
+///
+/// 탭하면 내용이 펼쳐지거나 접힙니다.
+/// [isImportant]가 true이면 '중요' 배지를 표시합니다.
 class _NoticeCard extends StatefulWidget {
+  /// 표시할 공지사항 데이터
   final _NoticeItem notice;
 
   const _NoticeCard({required this.notice});
@@ -198,6 +228,7 @@ class _NoticeCard extends StatefulWidget {
 }
 
 class _NoticeCardState extends State<_NoticeCard> {
+  /// 펼침/접힘 상태
   bool _isExpanded = false;
 
   @override
@@ -227,6 +258,7 @@ class _NoticeCardState extends State<_NoticeCard> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 중요 공지 배지
                   if (widget.notice.isImportant)
                     Container(
                       margin: const EdgeInsets.only(right: 8, top: 2),
@@ -255,6 +287,7 @@ class _NoticeCardState extends State<_NoticeCard> {
                       ),
                     ),
                   ),
+                  // 펼침/접힘 아이콘
                   Icon(
                     _isExpanded ? Icons.expand_less : Icons.expand_more,
                     color: theme.colorScheme.onSurfaceVariant,
@@ -268,6 +301,7 @@ class _NoticeCardState extends State<_NoticeCard> {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
+              // 펼쳐진 내용
               if (_isExpanded) ...[
                 const SizedBox(height: 12),
                 const Divider(),
@@ -285,11 +319,16 @@ class _NoticeCardState extends State<_NoticeCard> {
   }
 }
 
-// ---- Inquiry Call Tab ----
+// ---- 문의/전화 탭 ----
 
+/// 문의/전화 탭 위젯
+///
+/// 문의 유형별(일반/계량/배차/시스템/기타) 전화 연결 카드를 표시합니다.
+/// 카드 탭 시 해당 전화번호로 자동 연결(url_launcher)합니다.
 class _InquiryCallTab extends StatelessWidget {
   const _InquiryCallTab();
 
+  /// 문의 유형 목록 (정적 데이터)
   static const List<_CallType> _callTypes = [
     _CallType(
       title: '일반 문의',
@@ -335,7 +374,7 @@ class _InquiryCallTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Info card
+        // 안내 카드: 운영시간 정보
         Card(
           elevation: 0,
           color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
@@ -377,18 +416,24 @@ class _InquiryCallTab extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // Call type cards
+        // 문의 유형별 전화 연결 카드 목록
         ..._callTypes.map((callType) => _CallTypeCard(callType: callType)),
       ],
     );
   }
 }
 
+/// 문의 유형별 전화 연결 카드
+///
+/// 아이콘, 제목, 설명, 전화번호를 표시하며
+/// 탭 시 [url_launcher]로 전화를 연결합니다.
 class _CallTypeCard extends StatelessWidget {
+  /// 문의 유형 데이터
   final _CallType callType;
 
   const _CallTypeCard({required this.callType});
 
+  /// 전화 발신 (url_launcher 사용)
   Future<void> _makePhoneCall(BuildContext context) async {
     final uri = Uri.parse('tel:${callType.phoneNumber}');
     try {
@@ -430,6 +475,7 @@ class _CallTypeCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
+              // 유형별 아이콘
               Container(
                 width: 48,
                 height: 48,
@@ -440,6 +486,7 @@ class _CallTypeCard extends StatelessWidget {
                 child: Icon(callType.icon, color: callType.color),
               ),
               const SizedBox(width: 16),
+              // 제목 + 설명
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -460,6 +507,7 @@ class _CallTypeCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // 전화 아이콘 + 번호
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -486,13 +534,23 @@ class _CallTypeCard extends StatelessWidget {
   }
 }
 
-// ---- Data Models ----
+// ---- 데이터 모델 ----
 
+/// 공지사항 항목 모델 (화면 내부 전용)
 class _NoticeItem {
+  /// 공지 ID
   final String id;
+
+  /// 공지 제목
   final String title;
+
+  /// 공지 본문
   final String content;
+
+  /// 중요 공지 여부
   final bool isImportant;
+
+  /// 작성일시
   final DateTime createdAt;
 
   _NoticeItem({
@@ -503,6 +561,7 @@ class _NoticeItem {
     required this.createdAt,
   });
 
+  /// JSON에서 [_NoticeItem] 객체로 변환
   factory _NoticeItem.fromJson(Map<String, dynamic> json) {
     return _NoticeItem(
       id: json['id']?.toString() ?? '',
@@ -516,11 +575,21 @@ class _NoticeItem {
   }
 }
 
+/// 문의 전화 유형 모델 (화면 내부 전용)
 class _CallType {
+  /// 문의 유형 제목
   final String title;
+
+  /// 문의 유형 설명
   final String description;
+
+  /// 전화번호
   final String phoneNumber;
+
+  /// 아이콘
   final IconData icon;
+
+  /// 테마 색상
   final Color color;
 
   const _CallType({

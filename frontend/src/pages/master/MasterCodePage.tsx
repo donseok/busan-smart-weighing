@@ -1,3 +1,13 @@
+/**
+ * 공통코드 관리 페이지 컴포넌트 (기준정보)
+ *
+ * 시스템 전체에서 사용하는 공통코드를 관리하는 페이지입니다.
+ * 코드 그룹별 조회, 코드 등록/수정/삭제 기능을 제공하며,
+ * 코드명, 코드값, 정렬순서, 사용여부 등을 관리합니다.
+ * 기준정보 메뉴에서 접근할 수 있습니다.
+ *
+ * @returns 공통코드 관리 페이지 JSX
+ */
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Space, Typography, Modal, Form, Input, InputNumber, Popconfirm, message, Select, Tag } from 'antd';
 import SortableTable from '../../components/SortableTable';
@@ -6,6 +16,7 @@ import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
 import type { CommonCode } from '../../types';
 import { maxLengthRule } from '../../utils/validators';
+import { CODE_GROUP_COLORS } from '../../constants/labels';
 
 const MasterCodePage: React.FC = () => {
   const [data, setData] = useState<CommonCode[]>([]);
@@ -106,17 +117,7 @@ const MasterCodePage: React.FC = () => {
     }
   };
 
-  const getGroupColor = (group: string) => {
-    const colors: Record<string, string> = {
-      'ITEM_TYPE': 'blue',
-      'VEHICLE_TYPE': 'green',
-      'WEIGHING_MODE': 'orange',
-      'COMPANY_TYPE': 'purple',
-      'DISPATCH_STATUS': 'cyan',
-      'WEIGHING_STATUS': 'magenta',
-    };
-    return colors[group] || 'default';
-  };
+  const getGroupColor = (group: string) => CODE_GROUP_COLORS[group] || 'default';
 
   const columns: ColumnsType<CommonCode> = [
     { title: 'ID', dataIndex: 'codeId', width: 80 },

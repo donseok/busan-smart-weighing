@@ -1,3 +1,8 @@
+/// 계량 이력 화면
+///
+/// 월별/기간별 두 가지 탭으로 계량(Weighing) 기록 이력을 조회합니다.
+/// 월별 탭에서는 월간 요약(전체/완료/총 순중량)과 날짜별 그룹을 표시합니다.
+/// 기간별 탭에서는 DateRangePicker로 날짜 범위를 선택할 수 있습니다.
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +10,10 @@ import '../../models/weighing_record.dart';
 import '../../providers/dispatch_provider.dart';
 import '../../widgets/status_badge.dart';
 
+/// 계량 이력 화면 위젯
+///
+/// [TabController]로 '월별'과 '기간별' 두 탭을 관리합니다.
+/// [DispatchProvider.fetchWeighingRecords]로 기간 필터링된 계량 기록을 조회합니다.
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
@@ -14,13 +23,16 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen>
     with SingleTickerProviderStateMixin {
+  /// 월별/기간별 탭 컨트롤러
   late TabController _tabController;
 
-  // Date range for filtering
+  /// 기간별 조회 시작일 (기본: 30일 전)
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
+
+  /// 기간별 조회 종료일 (기본: 오늘)
   DateTime _endDate = DateTime.now();
 
-  // Monthly view state
+  /// 월별 조회 기준 월 (기본: 이번 달)
   DateTime _selectedMonth = DateTime.now();
 
   @override
@@ -28,6 +40,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_onTabChanged);
+    // 첫 프레임 렌더링 후 이력 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadHistory();
     });
@@ -40,18 +53,20 @@ class _HistoryScreenState extends State<HistoryScreen>
     super.dispose();
   }
 
+  /// 탭 변경 시 해당 탭에 맞는 이력 재조회
   void _onTabChanged() {
     if (!_tabController.indexIsChanging) {
       _loadHistory();
     }
   }
 
+  /// 현재 탭에 맞는 기간으로 계량 이력 조회
   Future<void> _loadHistory() async {
     final provider = context.read<DispatchProvider>();
     final dateFormat = DateFormat('yyyy-MM-dd');
 
     if (_tabController.index == 0) {
-      // Monthly view
+      // 월별 조회: 선택 월의 첫째 날 ~ 마지막 날
       final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
       final lastDay = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0);
       await provider.fetchWeighingRecords(
@@ -59,7 +74,7 @@ class _HistoryScreenState extends State<HistoryScreen>
         endDate: dateFormat.format(lastDay),
       );
     } else {
-      // Daily / date range view
+      // 기간별 조회: 사용자 선택 범위
       await provider.fetchWeighingRecords(
         startDate: dateFormat.format(_startDate),
         endDate: dateFormat.format(_endDate),
@@ -67,6 +82,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     }
   }
 
+  /// 기간별 탭의 날짜 범위 선택 다이얼로그 표시
   Future<void> _selectDateRange() async {
     final picked = await showDateRangePicker(
       context: context,
@@ -89,6 +105,9 @@ class _HistoryScreenState extends State<HistoryScreen>
     }
   }
 
+  /// 월별 탭에서 이전/다음 월로 이동
+  ///
+  /// [delta]가 -1이면 이전 월, +1이면 다음 월로 변경합니다.
   void _changeMonth(int delta) {
     setState(() {
       _selectedMonth = DateTime(
@@ -106,7 +125,7 @@ class _HistoryScreenState extends State<HistoryScreen>
 
     return Column(
       children: [
-        // Tab bar
+        // 월별/기간별 탭 바
         Container(
           color: theme.colorScheme.surface,
           child: TabBar(
@@ -118,10 +137,10 @@ class _HistoryScreenState extends State<HistoryScreen>
           ),
         ),
 
-        // Date controls
+        // 날짜 선택 컨트롤 (탭에 따라 월 이동/기간 선택)
         _buildDateControls(theme),
 
-        // Content
+        // 이력 리스트 (TabBarView)
         Expanded(
           child: TabBarView(
             controller: _tabController,
@@ -135,6 +154,10 @@ class _HistoryScreenState extends State<HistoryScreen>
     );
   }
 
+  /// 날짜 선택 컨트롤 영역 빌드
+  ///
+  /// 월별 탭: 이전/다음 월 이동 버튼 + 현재 월 표시
+  /// 기간별 탭: 시작~종료 날짜 표시 (탭하면 DateRangePicker 열림)
   Widget _buildDateControls(ThemeData theme) {
     final monthFormat = DateFormat('yyyy년 MM월');
     final dateFormat = DateFormat('yyyy.MM.dd');
@@ -148,7 +171,7 @@ class _HistoryScreenState extends State<HistoryScreen>
         ),
       ),
       child: _tabController.index == 0
-          // Monthly controls
+          // 월별 컨트롤: < yyyy년 MM월 >
           ? Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -166,6 +189,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                 const SizedBox(width: 8),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
+                  // 현재 월보다 미래로는 이동 불가
                   onPressed: _selectedMonth.isBefore(
                     DateTime(DateTime.now().year, DateTime.now().month),
                   )
@@ -174,7 +198,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                 ),
               ],
             )
-          // Date range controls
+          // 기간별 컨트롤: 시작일 ~ 종료일
           : InkWell(
               onTap: _selectDateRange,
               borderRadius: BorderRadius.circular(8),
@@ -216,15 +240,20 @@ class _HistoryScreenState extends State<HistoryScreen>
     );
   }
 
+  /// 이력 리스트 빌드 (로딩/빈 상태/날짜별 그룹)
+  ///
+  /// [showSummary]가 true이면 리스트 상단에 월간 요약 카드를 표시합니다.
   Widget _buildHistoryList(
     DispatchProvider provider,
     ThemeData theme, {
     bool showSummary = false,
   }) {
+    // 로딩 중 (첫 조회)
     if (provider.isLoading && provider.weighingRecords.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // 이력 없음
     if (provider.weighingRecords.isEmpty) {
       return Center(
         child: Column(
@@ -247,7 +276,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       );
     }
 
-    // Group by date
+    // 날짜별 그룹핑 (내림차순)
     final grouped = _groupByDate(provider.weighingRecords);
     final dateKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
@@ -257,6 +286,7 @@ class _HistoryScreenState extends State<HistoryScreen>
         padding: const EdgeInsets.all(16),
         itemCount: dateKeys.length + (showSummary ? 1 : 0),
         itemBuilder: (context, index) {
+          // 월간 요약 카드 (첫 번째 아이템)
           if (showSummary && index == 0) {
             return _buildMonthlySummary(theme, provider.weighingRecords);
           }
@@ -269,6 +299,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     );
   }
 
+  /// 월간 요약 카드 빌드 (전체 건수, 완료 건수, 총 순중량)
   Widget _buildMonthlySummary(ThemeData theme, List<WeighingRecord> records) {
     final completedCount =
         records.where((r) => r.status == WeighingStatus.completed).length;
@@ -297,6 +328,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     );
   }
 
+  /// 요약 항목 빌드 (라벨 + 값)
   Widget _buildSummaryItem(ThemeData theme, String label, String value) {
     return Column(
       children: [
@@ -318,6 +350,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     );
   }
 
+  /// 계량 기록을 날짜별로 그룹핑
   Map<String, List<WeighingRecord>> _groupByDate(List<WeighingRecord> records) {
     final map = <String, List<WeighingRecord>>{};
     final dateFormat = DateFormat('yyyy-MM-dd');
@@ -328,6 +361,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return map;
   }
 
+  /// 날짜별 그룹 영역 빌드 (날짜 헤더 + 건수 배지 + 기록 카드 목록)
   Widget _buildDateGroup(
     ThemeData theme,
     String date,
@@ -372,7 +406,11 @@ class _HistoryScreenState extends State<HistoryScreen>
   }
 }
 
+/// 계량 이력 기록 카드
+///
+/// 배차번호, 상태 배지, 차량번호, 품목, 순중량, 1차 계량 시각을 표시합니다.
 class _HistoryRecordCard extends StatelessWidget {
+  /// 표시할 계량 기록 데이터
   final WeighingRecord record;
 
   const _HistoryRecordCard({required this.record});
@@ -394,6 +432,7 @@ class _HistoryRecordCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 배차번호 + 상태 배지
             Row(
               children: [
                 Expanded(
@@ -412,6 +451,7 @@ class _HistoryRecordCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            // 차량번호 + 품목
             Row(
               children: [
                 Icon(
@@ -441,6 +481,7 @@ class _HistoryRecordCard extends StatelessWidget {
                 ),
               ],
             ),
+            // 순중량 + 1차 계량 시각 (순중량이 있는 경우)
             if (record.netWeight != null) ...[
               const SizedBox(height: 8),
               Row(

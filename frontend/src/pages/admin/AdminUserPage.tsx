@@ -1,3 +1,14 @@
+/**
+ * 사용자 관리 페이지 컴포넌트 (관리자 전용)
+ *
+ * 시스템 사용자 계정을 관리하는 페이지입니다.
+ * 사용자 등록/수정/삭제, 역할(Role) 변경, 비밀번호 초기화,
+ * 계정 잠금/해제 기능을 제공합니다.
+ * 사용자 역할은 ADMIN, OPERATOR, VIEWER로 구분되며,
+ * 역할에 따라 시스템 접근 권한이 달라집니다.
+ *
+ * @returns 사용자 관리 페이지 JSX
+ */
 import React, { useEffect, useState } from 'react';
 import {
   Button,
@@ -34,16 +45,16 @@ const roleOptions = [
 ];
 
 const AdminUserPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]);                          // 사용자 목록
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
-  const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [roleModalVisible, setRoleModalVisible] = useState(false);
-  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [form] = Form.useForm();
-  const [roleForm] = Form.useForm();
-  const [passwordForm] = Form.useForm();
+  const [createModalVisible, setCreateModalVisible] = useState(false);     // 사용자 추가 모달
+  const [roleModalVisible, setRoleModalVisible] = useState(false);         // 역할 변경 모달
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false); // 비밀번호 초기화 모달
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);     // 선택된 사용자
+  const [form] = Form.useForm();           // 사용자 추가 폼
+  const [roleForm] = Form.useForm();       // 역할 변경 폼
+  const [passwordForm] = Form.useForm();   // 비밀번호 초기화 폼
 
   const fetchUsers = async (page = 1, size = 10) => {
     setLoading(true);
@@ -88,6 +99,7 @@ const AdminUserPage: React.FC = () => {
     }
   };
 
+  /** 사용자 계정 활성/비활성 상태 토글 */
   const handleToggleActive = async (userId: number) => {
     try {
       const response = await apiClient.put(`/users/${userId}/toggle-active`);
@@ -103,6 +115,7 @@ const AdminUserPage: React.FC = () => {
     }
   };
 
+  /** 로그인 실패 횟수 초과로 잠긴 계정 해제 */
   const handleUnlock = async (userId: number) => {
     try {
       const response = await apiClient.put(`/users/${userId}/unlock`);
@@ -118,6 +131,7 @@ const AdminUserPage: React.FC = () => {
     }
   };
 
+  /** 선택된 사용자의 역할(ADMIN/MANAGER/DRIVER) 변경 */
   const handleRoleChange = async (values: { userRole: string }) => {
     if (!selectedUser) return;
     try {
@@ -136,6 +150,7 @@ const AdminUserPage: React.FC = () => {
     }
   };
 
+  /** 관리자에 의한 사용자 비밀번호 강제 초기화 */
   const handlePasswordReset = async (values: { newPassword: string }) => {
     if (!selectedUser) return;
     try {

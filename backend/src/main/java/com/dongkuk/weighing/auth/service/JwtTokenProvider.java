@@ -15,14 +15,29 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * JWT (JSON Web Token) 인증 토큰 제공자
+ *
+ * JWT Access Token과 Refresh Token의 생성, 검증, 파싱을 담당한다.
+ * HMAC-SHA 알고리즘으로 토큰을 서명하며, 사용자 식별 정보(userId, role 등)를
+ * Claims에 포함시킨다. 토큰 만료, 무결성 검증 등 보안 기능을 제공한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;
+
+    /** HMAC-SHA 서명용 비밀 키 */
     private SecretKey secretKey;
 
+    /**
+     * 빈 초기화 시 Base64 인코딩된 비밀 키를 디코딩하여 SecretKey 객체를 생성한다.
+     */
     @PostConstruct
     void init() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
@@ -32,6 +47,10 @@ public class JwtTokenProvider {
     /**
      * Access Token 생성.
      * Claims: sub(userId), login_id, role, company_id, device_type, jti
+     *
+     * @param user 사용자 엔티티
+     * @param deviceType 디바이스 타입 (WEB/MOBILE)
+     * @return 서명된 JWT Access Token 문자열
      */
     public String generateAccessToken(User user, DeviceType deviceType) {
         Date now = new Date();
@@ -43,7 +62,7 @@ public class JwtTokenProvider {
                 .claim("role", user.getUserRole().name())
                 .claim("company_id", user.getCompanyId())
                 .claim("device_type", deviceType.name())
-                .id(UUID.randomUUID().toString())
+                .id(UUID.randomUUID().toString())   // JTI: 토큰 고유 식별자 (블랙리스트용)
                 .issuer(jwtProperties.getIssuer())
                 .issuedAt(now)
                 .expiration(expiry)
@@ -53,7 +72,11 @@ public class JwtTokenProvider {
 
     /**
      * Refresh Token 생성.
-     * Claims: sub(userId), device_type, jti (최소한의 정보만)
+     * Claims: sub(userId), device_type, jti (최소한의 정보만 포함)
+     *
+     * @param user 사용자 엔티티
+     * @param deviceType 디바이스 타입 (WEB/MOBILE)
+     * @return 서명된 JWT Refresh Token 문자열
      */
     public String generateRefreshToken(User user, DeviceType deviceType) {
         Date now = new Date();
@@ -72,6 +95,10 @@ public class JwtTokenProvider {
 
     /**
      * 토큰 유효성 검증.
+     * 서명 무결성, 만료 여부, 형식 유효성을 확인한다.
+     *
+     * @param token JWT 토큰 문자열
+     * @return 유효하면 true, 아니면 false
      */
     public boolean validateToken(String token) {
         try {
@@ -89,7 +116,10 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 토큰에서 Claims 추출.
+     * 토큰에서 Claims(클레임 정보)를 추출한다.
+     *
+     * @param token JWT 토큰 문자열
+     * @return Claims 객체
      */
     public Claims extractClaims(String token) {
         return Jwts.parser()
@@ -100,7 +130,10 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 토큰에서 userId 추출.
+     * 토큰에서 userId(사용자 ID)를 추출한다.
+     *
+     * @param token JWT 토큰 문자열
+     * @return 사용자 ID (subject claim)
      */
     public Long extractUserId(String token) {
         String subject = extractClaims(token).getSubject();
@@ -108,14 +141,22 @@ public class JwtTokenProvider {
     }
 
     /**
-     * 토큰에서 JTI 추출.
+     * 토큰에서 JTI(JWT ID, 토큰 고유 식별자)를 추출한다.
+     * 블랙리스트 관리에 사용된다.
+     *
+     * @param token JWT 토큰 문자열
+     * @return JTI 문자열
      */
     public String extractJti(String token) {
         return extractClaims(token).getId();
     }
 
     /**
-     * 토큰 잔여 만료 시간(ms) 계산.
+     * 토큰의 잔여 만료 시간(밀리초)을 계산한다.
+     * 로그아웃 시 블랙리스트 TTL 설정에 사용된다.
+     *
+     * @param token JWT 토큰 문자열
+     * @return 잔여 만료 시간 (밀리초)
      */
     public long getRemainingExpiration(String token) {
         Date expiration = extractClaims(token).getExpiration();

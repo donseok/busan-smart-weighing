@@ -1,10 +1,24 @@
+/// OTP 인증 입력 화면 (계량용)
+///
+/// 배차별 계량 진행 시 필요한 OTP 인증을 처리합니다.
+/// 커스텀 숫자 키패드(0~9, C, 백스페이스)와 6자리 OTP 표시 영역,
+/// 5분 카운트다운 타이머를 제공합니다.
+/// OTP 만료 시 재요청 버튼이 표시됩니다.
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/dispatch_provider.dart';
 
+/// OTP 인증 입력 화면 위젯
+///
+/// [dispatchId]와 [dispatchNumber]를 전달받아
+/// OTP 코드 6자리를 입력하고 서버에 인증을 요청합니다.
+/// 인증 성공 시 `Navigator.pop(context, true)`로 결과를 반환합니다.
 class OtpInputScreen extends StatefulWidget {
+  /// 인증 대상 배차 ID
   final String dispatchId;
+
+  /// 화면에 표시할 배차번호
   final String dispatchNumber;
 
   const OtpInputScreen({
@@ -18,14 +32,25 @@ class OtpInputScreen extends StatefulWidget {
 }
 
 class _OtpInputScreenState extends State<OtpInputScreen> {
+  /// 입력된 OTP 코드 문자열 (최대 6자리)
   String _otpCode = '';
+
+  /// OTP 인증 요청 중 여부
   bool _isVerifying = false;
+
+  /// 오류 메시지
   String? _errorMessage;
 
-  // 5-minute timer
+  /// 타이머 총 시간 (5분 = 300초)
   static const int _timerDurationSeconds = 5 * 60;
+
+  /// 남은 시간 (초)
   int _remainingSeconds = _timerDurationSeconds;
+
+  /// 카운트다운 타이머
   Timer? _timer;
+
+  /// 타이머 만료 여부
   bool _isTimerExpired = false;
 
   @override
@@ -40,6 +65,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     super.dispose();
   }
 
+  /// 5분 카운트다운 타이머 시작 (또는 재시작)
   void _startTimer() {
     _remainingSeconds = _timerDurationSeconds;
     _isTimerExpired = false;
@@ -56,12 +82,14 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     });
   }
 
+  /// 남은 시간 표시 문자열 (MM:SS 형식)
   String get _timerDisplay {
     final minutes = _remainingSeconds ~/ 60;
     final seconds = _remainingSeconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
+  /// 숫자 키 입력 처리 (최대 6자리까지)
   void _onKeyTap(String value) {
     if (_otpCode.length < 6) {
       setState(() {
@@ -71,6 +99,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     }
   }
 
+  /// 백스페이스 처리 (마지막 문자 삭제)
   void _onBackspace() {
     if (_otpCode.isNotEmpty) {
       setState(() {
@@ -80,6 +109,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     }
   }
 
+  /// 전체 초기화 (C 버튼)
   void _onClear() {
     setState(() {
       _otpCode = '';
@@ -87,6 +117,10 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     });
   }
 
+  /// OTP 인증 요청
+  ///
+  /// 6자리 입력 확인 및 타이머 만료 여부를 검증한 후
+  /// [DispatchProvider.verifyOtp]로 서버 인증을 요청합니다.
   Future<void> _verifyOtp() async {
     if (_otpCode.length != 6) {
       setState(() {
@@ -120,6 +154,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     });
 
     if (response.success && response.data == true) {
+      // 인증 성공: 스낵바 표시 후 결과 반환
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -130,6 +165,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
         Navigator.pop(context, true);
       }
     } else {
+      // 인증 실패: 에러 메시지 표시 및 코드 초기화
       setState(() {
         _errorMessage =
             response.error?.message ?? 'OTP 인증에 실패했습니다. 다시 시도해주세요.';
@@ -150,7 +186,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header info
+            // 헤더: 배차번호 + 안내 문구 + 타이머
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -170,7 +206,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Timer
+                  // 카운트다운 타이머 표시
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -210,7 +246,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
               ),
             ),
 
-            // OTP display
+            // OTP 6자리 표시 영역
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Row(
@@ -246,7 +282,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
               ),
             ),
 
-            // Error message
+            // 오류 메시지
             if (_errorMessage != null)
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -261,10 +297,10 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
 
             const Spacer(),
 
-            // Numeric keypad
+            // 커스텀 숫자 키패드
             _buildKeypad(theme),
 
-            // Verify button
+            // 인증하기 버튼
             Padding(
               padding: const EdgeInsets.all(16),
               child: SizedBox(
@@ -301,7 +337,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
               ),
             ),
 
-            // Resend button
+            // OTP 만료 시 재요청 버튼
             if (_isTimerExpired)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -320,6 +356,7 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     );
   }
 
+  /// 숫자 키패드 빌드 (4x3 그리드: 1~9, C, 0, 백스페이스)
   Widget _buildKeypad(ThemeData theme) {
     const keys = [
       ['1', '2', '3'],
@@ -347,6 +384,9 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     );
   }
 
+  /// 개별 키 버튼 빌드
+  ///
+  /// 'C'(전체 삭제)와 '<'(백스페이스)는 특수 키로 배경색이 다릅니다.
   Widget _buildKeyButton(ThemeData theme, String key) {
     final isSpecial = key == 'C' || key == '<';
 

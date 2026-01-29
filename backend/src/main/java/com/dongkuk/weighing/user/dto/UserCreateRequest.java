@@ -6,6 +6,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 사용자 생성 요청 DTO
+ *
+ * 새로운 사용자 등록 시 필요한 정보를 전달하는 요청 객체.
+ * 로그인 ID, 비밀번호, 이름, 전화번호, 역할, 소속 업체 정보를 포함한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 public record UserCreateRequest(
     @NotBlank @Size(min = 3, max = 50)
     String loginId,

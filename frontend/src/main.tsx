@@ -1,3 +1,13 @@
+/**
+ * 애플리케이션 엔트리 포인트
+ *
+ * React 애플리케이션의 진입점으로, 루트 DOM에 앱을 마운트합니다.
+ * BrowserRouter, Ant Design ConfigProvider(한국어 로케일),
+ * ThemeProvider, TabProvider 등 전역 프로바이더를 설정합니다.
+ * 다크/라이트 테마에 따른 Ant Design 테마 설정을 적용합니다.
+ *
+ * @module main
+ */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

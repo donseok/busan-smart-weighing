@@ -1,7 +1,17 @@
+/// 앱 드로어(Drawer) 위젯
+///
+/// 사용자 정보(이름, 역할, 업체명, 차량번호, 연락처)를 표시하고
+/// 설정 메뉴와 로그아웃 기능을 제공합니다.
+/// 로그아웃 시 확인 다이얼로그를 표시합니다.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
+/// 앱 드로어 위젯
+///
+/// [AuthProvider]에서 사용자 정보를 가져와
+/// [UserAccountsDrawerHeader]에 이름과 역할(관리자/운전자)을 표시합니다.
+/// 하단에 로그아웃 버튼이 있으며, 탭 시 확인 다이얼로그를 표시합니다.
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -14,6 +24,7 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
+          // 사용자 헤더 (이름, 역할, 아바타)
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -45,6 +56,7 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
           ),
+          // 사용자 상세 정보 (업체명, 차량번호, 연락처)
           if (user != null) ...[
             if (user.companyName != null)
               _buildInfoTile(
@@ -69,6 +81,7 @@ class AppDrawer extends StatelessWidget {
               ),
             const Divider(),
           ],
+          // 설정 메뉴
           ListTile(
             leading: Icon(Icons.settings, color: theme.colorScheme.onSurfaceVariant),
             title: const Text('설정'),
@@ -78,6 +91,7 @@ class AppDrawer extends StatelessWidget {
           ),
           const Spacer(),
           const Divider(),
+          // 로그아웃 버튼 (확인 다이얼로그 포함)
           ListTile(
             leading: Icon(Icons.logout, color: theme.colorScheme.error),
             title: Text(
@@ -115,6 +129,7 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
+  /// 사용자 정보 행 빌드 (아이콘 + 라벨 + 값)
   Widget _buildInfoTile(
     BuildContext context, {
     required IconData icon,

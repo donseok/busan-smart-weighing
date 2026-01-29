@@ -1,3 +1,13 @@
+/**
+ * 계량 현황 페이지 컴포넌트
+ *
+ * 계량 기록 목록을 조회하고 상세 정보를 확인하는 페이지입니다.
+ * 상태, 계량방식, 기간별 필터 검색을 지원하며,
+ * WebSocket을 통해 실시간으로 목록이 갱신됩니다.
+ * 행 클릭 시 계량 상세정보 모달을 표시합니다.
+ *
+ * @returns 계량 현황 페이지 JSX
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Typography,

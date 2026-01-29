@@ -57,6 +57,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 개발 환경 전용 초기 데이터 로더
+ *
+ * 개발(dev) 프로필에서만 활성화되며, 애플리케이션 시작 시
+ * 테스트/개발용 초기 데이터를 데이터베이스에 자동 생성한다.
+ * 회사, 차량, 계량대, 공통코드, 사용자, 배차, 계량실적,
+ * 출문관리, 계량전표, LPR 캡처, 문의, 알림, 시스템설정,
+ * 공지사항, 장비상태, FAQ 등 전체 도메인의 샘플 데이터를 포함한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @Slf4j
 @Configuration
 @Profile("dev")

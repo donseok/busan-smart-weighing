@@ -24,6 +24,17 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+/**
+ * OTP (일회용 비밀번호) 서비스
+ *
+ * OTP 코드의 생성과 검증을 담당한다.
+ * SecureRandom으로 안전한 6자리 코드를 생성하고, Redis에 TTL과 함께 저장한다.
+ * 검증 시 실패 횟수를 추적하여 초과 시 OTP를 무효화하며,
+ * 성공 시 인증 완료 키를 Redis에 저장하여 OTP 기반 로그인과 연계한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,18 +46,22 @@ public class OtpService {
     private final OtpProperties otpProperties;
     private final ObjectMapper objectMapper;
 
+    /** 암호학적으로 안전한 난수 생성기 (OTP 코드 생성용) */
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     /**
      * OTP 생성.
-     * SecureRandom 6자리 코드 → Redis TTL 저장 + DB 감사 로그
+     * SecureRandom 6자리 코드 -> Redis TTL 저장 + DB 감사 로그
+     *
+     * @param request OTP 생성 요청 (scaleId, vehicleId, plateNumber)
+     * @return OTP 생성 응답 (코드, 만료 시각, TTL)
      */
     @Transactional
     public OtpGenerateResponse generate(OtpGenerateRequest request) {
         String otpCode = generateOtpCode();
         LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(otpProperties.getTtlSeconds());
 
-        // Redis에 OTP 세션 데이터 저장
+        // Redis에 OTP 세션 데이터 저장 (TTL 적용)
         String sessionJson = buildSessionJson(request);
         redisTemplate.opsForValue().set(
                 codeKey(otpCode), sessionJson,
@@ -57,7 +72,7 @@ public class OtpService {
                 scaleKey(request.scaleId()), otpCode,
                 Duration.ofSeconds(otpProperties.getTtlSeconds()));
 
-        // DB 감사 로그 저장
+        // DB 감사 로그 저장 (OTP 발급 이력 추적)
         OtpSession otpSession = OtpSession.builder()
                 .otpCode(otpCode)
                 .vehicleId(request.vehicleId())
@@ -74,7 +89,11 @@ public class OtpService {
 
     /**
      * OTP 검증.
-     * Redis 조회 → 실패 횟수 확인 → 전화번호 매칭 → 성공 시 삭제
+     * Redis 조회 -> 실패 횟수 확인 -> 전화번호 매칭 -> 성공 시 삭제
+     *
+     * @param request OTP 검증 요청 (otpCode, phoneNumber)
+     * @return OTP 검증 응답 (검증 결과, 차량 정보)
+     * @throws BusinessException OTP 만료, 미존재, 실패 횟수 초과, 미등록 전화번호 시
      */
     @Transactional
     public OtpVerifyResponse verify(OtpVerifyRequest request) {
@@ -84,7 +103,7 @@ public class OtpService {
             throw new BusinessException(ErrorCode.OTP_001);
         }
 
-        // 2. 실패 횟수 확인
+        // 2. 실패 횟수 확인 (최대 실패 횟수 초과 시 OTP 무효화)
         String failCount = redisTemplate.opsForValue().get(failKey(request.otpCode()));
         int currentFails = failCount != null ? Integer.parseInt(failCount) : 0;
         if (currentFails >= otpProperties.getMaxFailedAttempts()) {
@@ -98,16 +117,16 @@ public class OtpService {
         User user = userRepository.findByPhoneNumber(request.phoneNumber())
                 .orElseThrow(() -> new BusinessException(ErrorCode.OTP_002));
 
-        // 4. OTP 세션 데이터 파싱
+        // 4. OTP 세션 데이터 파싱 (차량 정보 추출)
         JsonNode sessionData = parseSessionJson(sessionJson);
         Long vehicleId = sessionData.get("vehicle_id").asLong();
         String plateNumber = sessionData.get("plate_number").asText();
 
-        // 5. 검증 성공 → Redis 키 삭제 (일회용)
+        // 5. 검증 성공 -> Redis 키 삭제 (일회용)
         redisTemplate.delete(codeKey(request.otpCode()));
         redisTemplate.delete(failKey(request.otpCode()));
 
-        // 인증 완료 키 저장 (OTP 로그인 연계)
+        // 인증 완료 키 저장 (OTP 로그인 연계, 5분 TTL)
         redisTemplate.opsForValue().set(
                 "otp:verified:" + request.phoneNumber(),
                 request.otpCode(),
@@ -120,24 +139,29 @@ public class OtpService {
 
     // === Private 헬퍼 ===
 
+    /** SecureRandom으로 지정 길이의 OTP 코드를 생성한다 */
     private String generateOtpCode() {
         int bound = (int) Math.pow(10, otpProperties.getCodeLength());
         int code = SECURE_RANDOM.nextInt(bound);
         return String.format("%0" + otpProperties.getCodeLength() + "d", code);
     }
 
+    /** OTP 코드용 Redis 키를 생성한다 */
     private String codeKey(String otpCode) {
         return "otp:code:" + otpCode;
     }
 
+    /** 계량대별 OTP용 Redis 키를 생성한다 */
     private String scaleKey(Long scaleId) {
         return "otp:scale:" + scaleId;
     }
 
+    /** OTP 검증 실패 횟수용 Redis 키를 생성한다 */
     private String failKey(String otpCode) {
         return "otp:fail:" + otpCode;
     }
 
+    /** OTP 세션 데이터를 JSON 문자열로 직렬화한다 */
     private String buildSessionJson(OtpGenerateRequest request) {
         try {
             return objectMapper.writeValueAsString(new OtpSessionData(
@@ -147,6 +171,7 @@ public class OtpService {
         }
     }
 
+    /** JSON 문자열을 OTP 세션 데이터로 역직렬화한다 */
     private JsonNode parseSessionJson(String json) {
         try {
             return objectMapper.readTree(json);
@@ -155,5 +180,6 @@ public class OtpService {
         }
     }
 
+    /** OTP 세션 데이터 내부 레코드 (Redis 저장용) */
     private record OtpSessionData(Long vehicleId, String plateNumber, Long scaleId) {}
 }

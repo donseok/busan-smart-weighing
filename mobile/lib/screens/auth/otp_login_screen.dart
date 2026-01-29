@@ -1,3 +1,8 @@
+/// OTP 안전 로그인 화면
+///
+/// 휴대폰 번호 입력 -> OTP 코드 6자리 입력의 2단계 인증 화면입니다.
+/// 1단계: 휴대폰 번호를 입력하여 OTP 코드 발송을 요청합니다.
+/// 2단계: 수신한 6자리 OTP 코드를 입력하여 인증을 완료합니다.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +13,9 @@ import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
 import '../../services/auth_service.dart';
 
+/// OTP 안전 로그인 화면 위젯
+///
+/// [_currentStep] 값에 따라 휴대폰 입력(0) 또는 OTP 입력(1) 화면을 표시합니다.
 class OtpLoginScreen extends StatefulWidget {
   const OtpLoginScreen({super.key});
 
@@ -16,16 +24,30 @@ class OtpLoginScreen extends StatefulWidget {
 }
 
 class _OtpLoginScreenState extends State<OtpLoginScreen> {
+  /// 휴대폰 번호 입력 컨트롤러
   final _phoneController = TextEditingController();
+
+  /// 휴대폰 번호 폼 유효성 검증 키
   final _phoneFormKey = GlobalKey<FormState>();
+
+  /// OTP 6자리 각 자릿수 입력 컨트롤러 목록
   final List<TextEditingController> _otpControllers =
       List.generate(6, (_) => TextEditingController());
+
+  /// OTP 6자리 각 자릿수 포커스 노드 목록
   final List<FocusNode> _otpFocusNodes =
       List.generate(6, (_) => FocusNode());
 
+  /// 현재 단계 (0: 휴대폰 번호 입력, 1: OTP 코드 입력)
   int _currentStep = 0; // 0 = phone input, 1 = OTP input
+
+  /// 로딩 상태
   bool _isLoading = false;
+
+  /// 오류 메시지
   String? _errorMessage;
+
+  /// 입력된 휴대폰 번호 (OTP 발송 후 저장)
   String _phoneNumber = '';
 
   @override
@@ -40,9 +62,14 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
     super.dispose();
   }
 
+  /// OTP 6자리 코드 문자열 (각 자릿수를 결합)
   String get _otpCode =>
       _otpControllers.map((c) => c.text).join();
 
+  /// OTP 발송 요청
+  ///
+  /// 휴대폰 번호 유효성 검증 후 서버에 OTP 발송을 요청합니다.
+  /// 성공 시 2단계(OTP 입력)로 전환합니다.
   Future<void> _requestOtp() async {
     if (!_phoneFormKey.currentState!.validate()) return;
 
@@ -81,6 +108,10 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
     }
   }
 
+  /// OTP 코드 인증
+  ///
+  /// 입력된 6자리 OTP 코드를 서버에 전송하여 인증합니다.
+  /// 성공 시 자동 로그인으로 인증 상태를 전환합니다.
   Future<void> _verifyOtp() async {
     final otpCode = _otpCode;
     if (otpCode.length != 6) {
@@ -123,6 +154,9 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
     }
   }
 
+  /// OTP 입력 시 자동 포커스 이동
+  ///
+  /// 한 자리 입력 시 다음 칸으로, 삭제 시 이전 칸으로 포커스를 이동합니다.
   void _onOtpChanged(int index, String value) {
     if (value.length == 1 && index < 5) {
       _otpFocusNodes[index + 1].requestFocus();
@@ -132,6 +166,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
     }
   }
 
+  /// 1단계(휴대폰 번호 입력)로 되돌아가기
   void _resetToPhoneStep() {
     setState(() {
       _currentStep = 0;
@@ -163,6 +198,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
     );
   }
 
+  /// 1단계: 휴대폰 번호 입력 화면
   Widget _buildPhoneStep(ThemeData theme) {
     return Form(
       key: _phoneFormKey,
@@ -282,6 +318,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
     );
   }
 
+  /// 2단계: OTP 6자리 코드 입력 화면
   Widget _buildOtpStep(ThemeData theme) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

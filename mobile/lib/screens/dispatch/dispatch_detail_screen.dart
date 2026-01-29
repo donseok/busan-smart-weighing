@@ -1,3 +1,7 @@
+/// 배차 상세 화면
+///
+/// 특정 배차(Dispatch)의 상세 정보를 섹션별로 표시합니다.
+/// 표시 섹션: 상태 카드, 차량 정보, 업체/품목, 경로, 예상 중량, 메모
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -5,7 +9,11 @@ import '../../models/dispatch.dart';
 import '../../providers/dispatch_provider.dart';
 import '../../widgets/status_badge.dart';
 
+/// 배차 상세 화면 위젯
+///
+/// [dispatchId]를 전달받아 [DispatchProvider]에서 상세 데이터를 조회합니다.
 class DispatchDetailScreen extends StatefulWidget {
+  /// 조회할 배차 ID
   final String dispatchId;
 
   const DispatchDetailScreen({super.key, required this.dispatchId});
@@ -18,6 +26,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
   @override
   void initState() {
     super.initState();
+    // 첫 프레임 렌더링 후 배차 상세 조회
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DispatchProvider>().fetchDispatchDetail(widget.dispatchId);
     });
@@ -38,15 +47,18 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
     );
   }
 
+  /// 본문 영역 빌드 (로딩/에러/빈 상태/상세 내용 분기)
   Widget _buildBody(
     DispatchProvider provider,
     Dispatch? dispatch,
     ThemeData theme,
   ) {
+    // 로딩 중
     if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // 에러 발생
     if (provider.errorMessage != null) {
       return Center(
         child: Column(
@@ -63,6 +75,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
       );
     }
 
+    // 배차 데이터 없음
     if (dispatch == null) {
       return const Center(child: Text('배차 정보를 찾을 수 없습니다.'));
     }
@@ -74,7 +87,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status card
+          // 상태 카드: 배차번호 + 상태 배지 + 배차일시
           Card(
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -125,7 +138,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Details section
+          // 차량 정보 섹션
           _buildSection(
             context,
             title: '차량 정보',
@@ -136,6 +149,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
           ),
           const SizedBox(height: 16),
 
+          // 업체/품목 섹션
           _buildSection(
             context,
             title: '업체 / 품목',
@@ -148,6 +162,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
           ),
           const SizedBox(height: 16),
 
+          // 경로 정보 섹션 (출발지 또는 도착지가 있는 경우)
           if (dispatch.origin != null || dispatch.destination != null)
             _buildSection(
               context,
@@ -160,6 +175,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
               ],
             ),
 
+          // 예상 중량 섹션
           if (dispatch.expectedWeight != null) ...[
             const SizedBox(height: 16),
             _buildSection(
@@ -175,6 +191,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
             ),
           ],
 
+          // 메모 섹션
           if (dispatch.memo != null && dispatch.memo!.isNotEmpty) ...[
             const SizedBox(height: 16),
             _buildSection(
@@ -196,6 +213,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
     );
   }
 
+  /// 정보 섹션 카드 빌드 (제목 + 내용 목록)
   Widget _buildSection(
     BuildContext context, {
     required String title,
@@ -228,6 +246,7 @@ class _DispatchDetailScreenState extends State<DispatchDetailScreen> {
     );
   }
 
+  /// 정보 행 빌드 (라벨 80px + 값)
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     final theme = Theme.of(context);
     return Padding(

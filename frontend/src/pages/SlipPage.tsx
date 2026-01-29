@@ -1,3 +1,13 @@
+/**
+ * 전자계량표 관리 페이지 컴포넌트
+ *
+ * 계량 완료 후 생성되는 전자계량표(Weighing Slip)를 관리하는 페이지입니다.
+ * 기간, 품목유형, 업체별 필터 검색과 페이지네이션을 지원하며,
+ * 계량표 상세 정보 모달, PDF 다운로드, 공유 기능을 제공합니다.
+ * 계량 데이터(총중량, 공차중량, 순중량)와 운송 정보를 표시합니다.
+ *
+ * @returns 전자계량표 관리 페이지 JSX
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Button,

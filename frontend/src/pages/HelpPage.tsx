@@ -1,3 +1,13 @@
+/**
+ * 도움말 페이지 컴포넌트
+ *
+ * 시스템 사용 안내와 자주 묻는 질문(FAQ)을 제공하는 페이지입니다.
+ * FAQ 탭과 시스템 안내 탭으로 구성되며,
+ * FAQ는 카테고리별 아코디언 형태로 질문/답변을 표시합니다.
+ * 시스템 안내에서는 주요 기능별 사용 방법을 안내합니다.
+ *
+ * @returns 도움말 페이지 JSX
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Typography,

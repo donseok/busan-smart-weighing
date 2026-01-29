@@ -1,14 +1,25 @@
+/// 목(Mock) 정적 데이터
+///
+/// 백엔드 서버 없이 앱을 테스트하기 위한 정적 Mock 데이터 클래스입니다.
+/// 사용자, 배차, 계량 기록, 계량표, 알림, 공지사항, 대시보드 요약 등
+/// 앱의 모든 데이터 영역을 커버합니다.
+/// [MockApiService]에서 참조하여 API 응답을 생성합니다.
 import '../models/dispatch.dart';
 import '../models/weighing_record.dart';
 import '../models/weighing_slip.dart';
 import '../models/notification_item.dart';
 import '../models/user.dart';
 
-/// 목(Mock) 데이터 - 백엔드 없이 앱 테스트용
+/// Mock 정적 데이터 클래스
+///
+/// private 생성자로 인스턴스 생성을 방지하며,
+/// 모든 데이터는 static 필드/메서드로 접근합니다.
 class MockData {
   MockData._();
 
   // ── 사용자 ──
+
+  /// Mock 운전자 사용자
   static final User driverUser = User(
     id: '1',
     loginId: 'driver01',
@@ -19,6 +30,7 @@ class MockData {
     phoneNumber: '010-1234-5678',
   );
 
+  /// Mock 관리자 사용자
   static final User managerUser = User(
     id: '2',
     loginId: 'admin',
@@ -29,6 +41,8 @@ class MockData {
   );
 
   // ── 배차 목록 ──
+
+  /// Mock 배차 데이터 (5건: 등록/진행중/완료/완료/취소)
   static final List<Dispatch> dispatches = [
     Dispatch(
       id: 'D001',
@@ -110,6 +124,8 @@ class MockData {
   ];
 
   // ── 계량 기록 ──
+
+  /// Mock 계량 기록 데이터 (3건: 대기/1차 계량 중/완료)
   static final List<WeighingRecord> weighingRecords = [
     WeighingRecord(
       id: 'W001',
@@ -155,7 +171,9 @@ class MockData {
     ),
   ];
 
-  // ── 계량표(슬립) ──
+  // ── 계량표(전자계량표) ──
+
+  /// Mock 계량표 데이터 (3건)
   static final List<WeighingSlip> slips = [
     WeighingSlip(
       id: 'S001',
@@ -229,6 +247,8 @@ class MockData {
   ];
 
   // ── 알림 ──
+
+  /// Mock 알림 데이터 (6건: 계량완료, 배차확정, 시스템, 1차계량, 배차취소, 앱업데이트)
   static final List<NotificationItem> notifications = [
     NotificationItem(
       notificationId: 1,
@@ -284,8 +304,9 @@ class MockData {
     ),
   ];
 
-  // ── 공지사항 (Notice screens use NotificationItem model with different types) ──
-  // The notice screen shows these as expandable list items
+  // ── 공지사항 ──
+
+  /// Mock 공지사항 데이터 (5건: 시스템점검, 법규, 업데이트, 운영, 개인정보)
   static final List<Map<String, dynamic>> notices = [
     {
       'id': 1,
@@ -329,25 +350,33 @@ class MockData {
     },
   ];
 
-  // ── 대시보드 요약 ──
+  // ── 대시보드 요약 (computed properties) ──
+
+  /// 오늘 배차 건수
   static int get todayDispatchCount =>
       dispatches.where((d) => _isToday(d.dispatchDate)).length;
 
+  /// 오늘 완료 배차 건수
   static int get todayCompletedCount =>
       dispatches.where((d) => _isToday(d.dispatchDate) && d.status == DispatchStatus.completed).length;
 
+  /// 현재 대기/진행 중인 계량 건수
   static int get todayWaitingCount =>
       weighingRecords.where((w) => w.status == WeighingStatus.waiting || w.status == WeighingStatus.firstWeighing).length;
 
+  /// 미읽음 알림 건수
   static int get unreadNotificationCount =>
       notifications.where((n) => !n.isRead).length;
 
+  /// 날짜가 오늘인지 확인하는 헬퍼
   static bool _isToday(DateTime date) {
     final now = DateTime.now();
     return date.year == now.year && date.month == now.month && date.day == now.day;
   }
 
   // ── 최근 활동 ──
+
+  /// 홈 대시보드에 표시할 최근 활동 목록
   static List<Map<String, dynamic>> get recentActivities => [
     {
       'type': 'weighing_complete',

@@ -1,3 +1,13 @@
+/**
+ * 로그인 페이지 컴포넌트
+ *
+ * JWT 기반 인증을 위한 로그인 폼을 제공하는 페이지입니다.
+ * 사용자 ID와 비밀번호를 입력받아 서버 인증 후
+ * JWT 토큰을 localStorage에 저장하고 대시보드로 이동합니다.
+ * 인증 실패 시 오류 메시지를 표시합니다.
+ *
+ * @returns 로그인 페이지 JSX
+ */
 import React from 'react';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
@@ -12,6 +22,7 @@ const LoginPage: React.FC = () => {
   const colors = themeMode === 'dark' ? darkColors : lightColors;
   const isDark = themeMode === 'dark';
 
+  /** 로그인 폼 제출 - JWT 토큰 저장 후 대시보드로 이동 */
   const onFinish = async (values: { loginId: string; password: string }) => {
     try {
       const res = await apiClient.post('/auth/login', {

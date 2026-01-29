@@ -1,3 +1,9 @@
+/// 계량표(전자계량표) 상세 화면
+///
+/// 특정 계량표(WeighingSlip)의 상세 정보를 섹션별로 표시합니다.
+/// 표시 섹션: 헤더(계량표번호), 중량 요약, 차량 정보, 업체/품목,
+/// 계량 정보(1차/2차 시각 및 중량), 경로, 메모
+/// 카카오톡/SMS/기타 앱으로 계량표 공유 기능을 제공합니다.
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +12,12 @@ import '../../models/weighing_slip.dart';
 import '../../providers/dispatch_provider.dart';
 import '../../widgets/weight_display_card.dart';
 
+/// 계량표 상세 화면 위젯
+///
+/// [slipId]를 전달받아 [DispatchProvider]에서 계량표 상세를 조회합니다.
+/// AppBar에 공유 버튼이 있으며, 하단에도 공유 버튼을 제공합니다.
 class SlipDetailScreen extends StatefulWidget {
+  /// 조회할 계량표 ID
   final String slipId;
 
   const SlipDetailScreen({super.key, required this.slipId});
@@ -19,11 +30,15 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
   @override
   void initState() {
     super.initState();
+    // 첫 프레임 렌더링 후 계량표 상세 조회
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DispatchProvider>().fetchSlipDetail(widget.slipId);
     });
   }
 
+  /// 계량표 공유 방법 선택 바텀시트 표시
+  ///
+  /// 카카오톡, SMS, 기타(시스템 공유)의 세 가지 옵션을 제공합니다.
   void _showShareDialog(WeighingSlip slip) {
     showModalBottomSheet(
       context: context,
@@ -45,6 +60,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
                       ),
                 ),
                 const SizedBox(height: 24),
+                // 카카오톡 공유
                 ListTile(
                   leading: Container(
                     width: 48,
@@ -66,6 +82,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
+                // SMS 공유
                 ListTile(
                   leading: Container(
                     width: 48,
@@ -87,6 +104,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
                   },
                 ),
                 const SizedBox(height: 8),
+                // 기타 (시스템 공유)
                 ListTile(
                   leading: Container(
                     width: 48,
@@ -112,6 +130,9 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
     );
   }
 
+  /// 서버 API를 통한 계량표 공유 (카카오톡/SMS)
+  ///
+  /// 서버 공유 실패 시 시스템 공유로 폴백합니다.
   Future<void> _shareVia(String type, WeighingSlip slip) async {
     final provider = context.read<DispatchProvider>();
     final response = await provider.shareSlip(
@@ -126,11 +147,14 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
         const SnackBar(content: Text('공유가 완료되었습니다.')),
       );
     } else {
-      // Fallback to system share
+      // 서버 공유 실패 시 시스템 공유로 폴백
       _shareViaSystem(slip);
     }
   }
 
+  /// 시스템 공유 (share_plus 패키지 사용)
+  ///
+  /// 계량표 정보를 텍스트로 구성하여 OS의 공유 시트를 띄웁니다.
   Future<void> _shareViaSystem(WeighingSlip slip) async {
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     final shareText = '''
@@ -165,6 +189,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
         title: const Text('계량표 상세'),
         centerTitle: true,
         actions: [
+          // AppBar 공유 버튼
           if (slip != null)
             IconButton(
               icon: const Icon(Icons.share),
@@ -177,15 +202,18 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
     );
   }
 
+  /// 본문 영역 빌드 (로딩/에러/빈 상태/상세 내용 분기)
   Widget _buildBody(
     DispatchProvider provider,
     WeighingSlip? slip,
     ThemeData theme,
   ) {
+    // 로딩 중
     if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // 에러 발생
     if (provider.errorMessage != null) {
       return Center(
         child: Column(
@@ -200,6 +228,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
       );
     }
 
+    // 계량표 데이터 없음
     if (slip == null) {
       return const Center(child: Text('계량표 정보를 찾을 수 없습니다.'));
     }
@@ -211,7 +240,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Slip header
+          // 계량표 헤더 카드 (아이콘 + 제목 + 계량표번호)
           Card(
             elevation: 0,
             color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
@@ -248,7 +277,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Weight summary
+          // 중량 요약 (총중량/공차중량/순중량 3열)
           WeightSummaryRow(
             firstWeight: slip.firstWeight,
             secondWeight: slip.secondWeight,
@@ -256,7 +285,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
           ),
           const SizedBox(height: 16),
 
-          // Vehicle info
+          // 차량 정보 섹션
           _buildSection(
             context,
             title: '차량 정보',
@@ -267,7 +296,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Company info
+          // 업체/품목 섹션
           _buildSection(
             context,
             title: '업체 / 품목',
@@ -280,7 +309,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Weighing details
+          // 계량 정보 섹션 (1차/2차 계량 시각, 중량, 순중량, 계량대, 담당자)
           _buildSection(
             context,
             title: '계량 정보',
@@ -321,7 +350,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Route info
+          // 경로 섹션 (출발지/도착지가 있는 경우)
           if (slip.origin != null || slip.destination != null)
             _buildSection(
               context,
@@ -334,6 +363,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
               ],
             ),
 
+          // 메모 섹션
           if (slip.memo != null && slip.memo!.isNotEmpty) ...[
             const SizedBox(height: 12),
             _buildSection(
@@ -350,7 +380,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
 
           const SizedBox(height: 24),
 
-          // Share button
+          // 하단 공유 버튼
           SizedBox(
             width: double.infinity,
             height: 52,
@@ -374,6 +404,7 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
     );
   }
 
+  /// 정보 섹션 카드 빌드 (제목 + 내용 목록)
   Widget _buildSection(
     BuildContext context, {
     required String title,
@@ -406,6 +437,9 @@ class _SlipDetailScreenState extends State<SlipDetailScreen> {
     );
   }
 
+  /// 정보 행 빌드 (라벨 80px + 값)
+  ///
+  /// [highlight]가 true이면 순중량 등 강조 스타일을 적용합니다.
   Widget _buildInfoRow(
     BuildContext context,
     String label,

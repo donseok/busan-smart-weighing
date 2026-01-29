@@ -1,55 +1,68 @@
-spring:
-  datasource:
-    url: jdbc:h2:mem:weighing-dev;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+# ─── 개발 환경(dev) 프로필 설정 ───
+# H2 인메모리 데이터베이스를 사용하는 로컬 개발용 설정입니다.
 
+spring:
+  # ─── 데이터베이스 설정 (H2 인메모리) ───
+  datasource:
+    url: jdbc:h2:mem:weighing-dev;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE  # H2 인메모리 DB URL (종료 시 데이터 유지)
+    username: sa  # H2 기본 사용자명
+    password:  # H2 비밀번호 (없음)
+    driver-class-name: org.h2.Driver  # H2 JDBC 드라이버
+
+  # ─── JPA / Hibernate 설정 ───
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create  # DDL 자동 생성 전략 (create: 매 시작 시 테이블 재생성)
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect  # H2 전용 Hibernate 방언
+        format_sql: true  # SQL 포맷팅 출력 (디버깅용)
         jdbc:
-          time_zone: Asia/Seoul
+          time_zone: Asia/Seoul  # JDBC 타임존 (한국 표준시)
 
+  # ─── H2 웹 콘솔 설정 ───
   h2:
     console:
-      enabled: true
-      path: /h2-console
+      enabled: true  # H2 웹 콘솔 활성화
+      path: /h2-console  # H2 콘솔 접근 경로
 
+  # ─── Redis 설정 (로컬) ───
   data:
     redis:
-      host: localhost
-      port: 6370
+      host: localhost  # Redis 서버 호스트
+      port: 6370  # Redis 서버 포트
 
+# ─── CORS 설정 (개발 환경) ───
 cors:
-  allowed-origins: http://localhost:3000,http://localhost:8088
-  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
-  allowed-headers: "*"
-  allow-credentials: true
-  max-age: 3600
+  allowed-origins: http://localhost:3000,http://localhost:8088  # 허용 출처 (로컬 프론트엔드)
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS  # 허용 HTTP 메서드
+  allowed-headers: "*"  # 허용 요청 헤더
+  allow-credentials: true  # 자격 증명(쿠키) 포함 허용
+  max-age: 3600  # Preflight 캐시 시간 (1시간, 초)
 
+# ─── JWT 인증 토큰 설정 (개발용) ───
 jwt:
-  secret: dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1hbmQtdmFsaWRhdGlvbi10ZXN0aW5n
-  access-token-expiration: 1800000
-  refresh-token-expiration: 604800000
-  issuer: weighing-api-dev
+  secret: dGVzdC1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tZ2VuZXJhdGlvbi1hbmQtdmFsaWRhdGlvbi10ZXN0aW5n  # 개발용 JWT 비밀키 (Base64)
+  access-token-expiration: 1800000  # 액세스 토큰 만료 시간 (30분, 밀리초)
+  refresh-token-expiration: 604800000  # 리프레시 토큰 만료 시간 (7일, 밀리초)
+  issuer: weighing-api-dev  # JWT 발급자 (개발 환경)
 
+# ─── OTP 인증 설정 ───
 otp:
-  code-length: 6
-  ttl-seconds: 300
-  max-failed-attempts: 3
+  code-length: 6  # OTP 코드 자릿수
+  ttl-seconds: 300  # OTP 유효 시간 (5분, 초)
+  max-failed-attempts: 3  # OTP 최대 실패 허용 횟수
 
+# ─── 내부 API 설정 ───
 api:
-  internal-key: test-internal-key
+  internal-key: test-internal-key  # 내부 API 인증 키 (개발용)
 
+# ─── AES 암호화 설정 ───
 encryption:
-  aes-key: YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=
+  aes-key: YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY=  # 개발용 AES 암호화 키 (Base64)
 
+# ─── 로깅 설정 (개발 환경) ───
 logging:
   level:
-    com.dongkuk.weighing: DEBUG
-    org.springframework.security: DEBUG
+    com.dongkuk.weighing: DEBUG  # 애플리케이션 로그 레벨
+    org.springframework.security: DEBUG  # Spring Security 로그 레벨 (디버깅용)

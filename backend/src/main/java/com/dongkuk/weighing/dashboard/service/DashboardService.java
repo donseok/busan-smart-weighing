@@ -24,6 +24,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 대시보드 서비스
+ *
+ * 메인 대시보드에 필요한 요약 정보를 집계하는 비즈니스 로직.
+ * 당일 배차/출문/계량 현황과 운송사별 월간 계량 통계를 제공한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,6 +44,10 @@ public class DashboardService {
     private final WeighingRepository weighingRepository;
     private final CompanyRepository companyRepository;
 
+    /**
+     * 당일 배차/출문/계량 현황 요약 정보를 조회한다.
+     * 각 업무별 상태별 건수를 집계하여 반환한다.
+     */
     public DashboardSummaryResponse getTodaySummary() {
         LocalDate today = LocalDate.now();
 
@@ -63,18 +76,22 @@ public class DashboardService {
         );
     }
 
+    /**
+     * 운송사별 월간 계량 통계를 조회한다.
+     * 당월 1일부터 오늘까지의 운송사별 계량 횟수와 총 순중량(톤)을 집계한다.
+     */
     public List<CompanyStatistics> getCompanyStatistics() {
         LocalDate today = LocalDate.now();
         LocalDate monthStart = today.withDayOfMonth(1);
         LocalDateTime monthStartDt = monthStart.atStartOfDay();
         LocalDateTime todayEnd = today.atTime(LocalTime.MAX);
 
-        // 운송사 목록
+        // 활성 운송사 목록 조회
         List<Company> companies = companyRepository.findByIsActiveTrue();
         Map<Long, String> companyNames = companies.stream()
                 .collect(Collectors.toMap(Company::getCompanyId, Company::getCompanyName));
 
-        // 운송사별 계량 통계
+        // 운송사별 계량 통계 집계
         List<Object[]> stats = weighingRepository.countGroupByCompany(monthStartDt, todayEnd);
 
         List<CompanyStatistics> result = new ArrayList<>();
@@ -84,6 +101,7 @@ public class DashboardService {
             BigDecimal totalWeight = (BigDecimal) row[2];
             String companyName = companyNames.getOrDefault(companyId, "알 수 없음");
 
+            // kg 단위를 톤(ton) 단위로 변환
             result.add(new CompanyStatistics(
                     companyId,
                     companyName,

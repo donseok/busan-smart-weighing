@@ -1,3 +1,13 @@
+/**
+ * 페이지 레지스트리 설정
+ *
+ * 애플리케이션의 모든 페이지를 정의하는 중앙 레지스트리입니다.
+ * 각 페이지의 라우트 경로, 메뉴 아이콘, 레이블, 권한 수준,
+ * React.lazy를 통한 코드 분할(lazy loading) 컴포넌트를 관리합니다.
+ * 사이드바 메뉴와 탭 네비게이션에서 이 레지스트리를 참조합니다.
+ *
+ * @module pageRegistry
+ */
 import React from 'react';
 import {
   DashboardOutlined,
@@ -40,13 +50,15 @@ const AdminSettingsPage = React.lazy(() => import('../pages/admin/AdminSettingsP
 const AdminAuditLogPage = React.lazy(() => import('../pages/admin/AdminAuditLogPage'));
 const MyPage = React.lazy(() => import('../pages/MyPage'));
 
+/** 페이지 설정 인터페이스 */
 export interface PageConfig {
-  component: React.LazyExoticComponent<React.FC>;
-  title: string;
-  icon: React.ReactNode;
-  closable: boolean;
+  component: React.LazyExoticComponent<React.FC>; // lazy 로딩 컴포넌트
+  title: string;        // 탭/메뉴 표시 제목
+  icon: React.ReactNode; // 메뉴 아이콘
+  closable: boolean;     // 탭 닫기 가능 여부
 }
 
+/** 전체 페이지 레지스트리 - 라우트 경로를 키로 사용 */
 export const PAGE_REGISTRY: Record<string, PageConfig> = {
   '/dashboard': {
     component: DashboardPage,

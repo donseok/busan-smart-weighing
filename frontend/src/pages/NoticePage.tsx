@@ -1,3 +1,13 @@
+/**
+ * 공지사항 관리 페이지 컴포넌트
+ *
+ * 시스템 공지사항의 CRUD 기능을 제공하는 관리 페이지입니다.
+ * 공지사항 등록/수정/삭제, 게시/비게시 전환, 상단 고정(Pin) 토글,
+ * 키워드 검색 등의 기능을 지원합니다.
+ * 관리자만 등록/수정/삭제가 가능하며, 일반 사용자는 조회만 가능합니다.
+ *
+ * @returns 공지사항 관리 페이지 JSX
+ */
 import React, { useState, useEffect } from 'react';
 import {
   Button,
@@ -25,40 +35,21 @@ import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import { darkColors, lightColors } from '../theme/themeConfig';
 import { useTheme } from '../context/ThemeContext';
+import type { Notice } from '../types';
+import { NOTICE_CATEGORY_OPTIONS, NOTICE_CATEGORY_COLORS } from '../constants/labels';
 
 const { TextArea } = Input;
 const { Title } = Typography;
 
-interface Notice {
-  noticeId: number;
-  title: string;
-  content: string;
-  category: string;
-  categoryDescription: string;
-  authorName: string;
-  isPublished: boolean;
-  isPinned: boolean;
-  publishedAt: string;
-  viewCount: number;
-  createdAt: string;
-}
-
-const categoryOptions = [
-  { value: 'SYSTEM', label: '시스템' },
-  { value: 'MAINTENANCE', label: '시스템 점검' },
-  { value: 'UPDATE', label: '업데이트' },
-  { value: 'GENERAL', label: '일반 공지' },
-];
-
 const NoticePage: React.FC = () => {
-  const [notices, setNotices] = useState<Notice[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);                // 공지사항 목록
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
-  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);             // 등록/수정 모달
+  const [detailModalVisible, setDetailModalVisible] = useState(false); // 상세 보기 모달
+  const [editingNotice, setEditingNotice] = useState<Notice | null>(null);   // 수정 대상 공지
+  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null); // 상세 보기 대상
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');              // 제목 검색어
   const [form] = Form.useForm();
 
   const { themeMode } = useTheme();
@@ -146,6 +137,7 @@ const NoticePage: React.FC = () => {
     }
   };
 
+  /** 공지사항 게시/비게시 상태 토글 */
   const handleTogglePublish = async (noticeId: number) => {
     try {
       await apiClient.patch(`/notices/${noticeId}/publish`);
@@ -156,6 +148,7 @@ const NoticePage: React.FC = () => {
     }
   };
 
+  /** 공지사항 상단 고정/해제 토글 */
   const handleTogglePin = async (noticeId: number) => {
     try {
       await apiClient.patch(`/notices/${noticeId}/pin`);
@@ -206,18 +199,12 @@ const NoticePage: React.FC = () => {
     },
     {
       title: '카테고리',
-      dataIndex: 'categoryDescription',
+      dataIndex: 'categoryDesc',
       key: 'category',
       width: 120,
-      render: (text: string, record: Notice) => {
-        const colorMap: Record<string, string> = {
-          SYSTEM: 'blue',
-          MAINTENANCE: 'orange',
-          UPDATE: 'purple',
-          GENERAL: 'cyan',
-        };
-        return <Tag color={colorMap[record.category] || 'default'}>{text}</Tag>;
-      },
+      render: (text: string, record: Notice) => (
+        <Tag color={NOTICE_CATEGORY_COLORS[record.category] || 'default'}>{text}</Tag>
+      ),
     },
     {
       title: '제목',
@@ -344,7 +331,7 @@ const NoticePage: React.FC = () => {
             label="카테고리"
             rules={[{ required: true, message: '카테고리를 선택하세요' }]}
           >
-            <Select options={categoryOptions} />
+            <Select options={NOTICE_CATEGORY_OPTIONS} />
           </Form.Item>
           <Form.Item
             name="content"
@@ -406,7 +393,7 @@ const NoticePage: React.FC = () => {
               <Tag color={selectedNotice.isPublished ? 'green' : 'default'}>
                 {selectedNotice.isPublished ? '공개' : '비공개'}
               </Tag>
-              <Tag>{selectedNotice.categoryDescription}</Tag>
+              <Tag>{selectedNotice.categoryDesc}</Tag>
             </Space>
             <div style={{ color: colors.textSecondary, marginBottom: 16 }}>
               작성자: {selectedNotice.authorName} | 조회수: {selectedNotice.viewCount} |

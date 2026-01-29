@@ -1,55 +1,67 @@
-spring:
-  datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 15
-      connection-timeout: 5000
+# ─── 운영 환경(prod) 프로필 설정 ───
+# Railway 배포용 PostgreSQL 기반 운영 환경 설정입니다.
 
+spring:
+  # ─── 데이터베이스 설정 (PostgreSQL) ───
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}  # 데이터베이스 연결 URL (환경변수 필수)
+    username: ${DB_USERNAME}  # 데이터베이스 사용자명 (환경변수 필수)
+    password: ${DB_PASSWORD}  # 데이터베이스 비밀번호 (환경변수 필수)
+    driver-class-name: org.postgresql.Driver  # PostgreSQL JDBC 드라이버
+    hikari:
+      minimum-idle: 5  # 최소 유휴 커넥션 수
+      maximum-pool-size: 15  # 최대 커넥션 풀 크기
+      connection-timeout: 5000  # 커넥션 획득 타임아웃 (밀리초)
+
+  # ─── JPA / Hibernate 설정 ───
   jpa:
     hibernate:
-      ddl-auto: update
-    open-in-view: false
+      ddl-auto: update  # DDL 자동 생성 전략 (update: 스키마 변경 자동 반영)
+    open-in-view: false  # OSIV 비활성화 (운영 성능 최적화)
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect  # PostgreSQL Hibernate 방언
+        format_sql: false  # SQL 포맷팅 비활성화 (운영 로그 절약)
         jdbc:
-          time_zone: Asia/Seoul
+          time_zone: Asia/Seoul  # JDBC 타임존 (한국 표준시)
 
+  # ─── Redis 설정 ───
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      timeout: 3000ms
+      host: ${REDIS_HOST}  # Redis 서버 호스트 (환경변수 필수)
+      port: ${REDIS_PORT:6379}  # Redis 서버 포트
+      password: ${REDIS_PASSWORD:}  # Redis 비밀번호
+      timeout: 3000ms  # Redis 연결 타임아웃
 
+# ─── JWT 인증 토큰 설정 (운영) ───
 jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: 1800000
-  refresh-token-expiration: 604800000
-  issuer: weighing-api
+  secret: ${JWT_SECRET}  # JWT 서명 비밀키 (환경변수 필수, 반드시 안전한 값 사용)
+  access-token-expiration: 1800000  # 액세스 토큰 만료 시간 (30분, 밀리초)
+  refresh-token-expiration: 604800000  # 리프레시 토큰 만료 시간 (7일, 밀리초)
+  issuer: weighing-api  # JWT 발급자
 
+# ─── CORS 설정 (운영 환경) ───
 cors:
-  allowed-origins: ${CORS_ORIGIN_WEB:https://busan-smart-weighing.vercel.app}
-  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
-  allowed-headers: "*"
-  allow-credentials: true
-  max-age: 3600
+  allowed-origins: ${CORS_ORIGIN_WEB:https://busan-smart-weighing.vercel.app}  # 허용 출처 (운영 프론트엔드 URL)
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS  # 허용 HTTP 메서드
+  allowed-headers: "*"  # 허용 요청 헤더
+  allow-credentials: true  # 자격 증명(쿠키) 포함 허용
+  max-age: 3600  # Preflight 캐시 시간 (1시간, 초)
 
+# ─── 내부 API 설정 ───
 api:
-  internal-key: ${API_INTERNAL_KEY}
+  internal-key: ${API_INTERNAL_KEY}  # 내부 API 인증 키 (환경변수 필수)
 
+# ─── AES 암호화 설정 ───
 encryption:
-  aes-key: ${AES_SECRET_KEY}
+  aes-key: ${AES_SECRET_KEY}  # AES 암호화 키 (환경변수 필수)
 
+# ─── 서버 설정 ───
 server:
-  port: ${PORT:8080}
+  port: ${PORT:8080}  # 서버 포트 (Railway PORT 환경변수 사용)
 
+# ─── 로깅 설정 (운영 환경) ───
 logging:
   level:
-    com.dongkuk.weighing: INFO
-    org.springframework.security: WARN
+    com.dongkuk.weighing: INFO  # 애플리케이션 로그 레벨 (INFO: 운영 최적화)
+    org.springframework.security: WARN  # Spring Security 로그 레벨 (WARN: 경고만 출력)

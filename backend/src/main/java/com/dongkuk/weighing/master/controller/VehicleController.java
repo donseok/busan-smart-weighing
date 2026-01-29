@@ -13,6 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 차량 관리 컨트롤러
+ *
+ * 차량 등록, 조회(ID/차량번호), 수정, 삭제 기능을 제공하는 REST API 컨트롤러.
+ * 모든 엔드포인트는 관리자(ADMIN) 권한이 필요하다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @RestController
 @RequestMapping("/api/v1/master/vehicles")
 @RequiredArgsConstructor
@@ -21,6 +30,7 @@ public class VehicleController {
 
     private final VehicleService vehicleService;
 
+    /** 차량 등록 */
     @PostMapping
     public ResponseEntity<ApiResponse<VehicleResponse>> createVehicle(
             @Valid @RequestBody VehicleRequest request) {
@@ -28,12 +38,14 @@ public class VehicleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
+    /** 차량 단건 조회 (ID) */
     @GetMapping("/{vehicleId}")
     public ResponseEntity<ApiResponse<VehicleResponse>> getVehicle(@PathVariable Long vehicleId) {
         VehicleResponse response = vehicleService.getVehicle(vehicleId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /** 차량번호(번호판)로 차량 조회 */
     @GetMapping("/plate/{plateNumber}")
     public ResponseEntity<ApiResponse<VehicleResponse>> getVehicleByPlate(
             @PathVariable String plateNumber) {
@@ -41,12 +53,14 @@ public class VehicleController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /** 차량 목록 페이징 조회 (활성 차량만) */
     @GetMapping
     public ResponseEntity<ApiResponse<Page<VehicleResponse>>> getVehicles(Pageable pageable) {
         Page<VehicleResponse> response = vehicleService.getVehicles(pageable);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /** 차량 정보 수정 */
     @PutMapping("/{vehicleId}")
     public ResponseEntity<ApiResponse<VehicleResponse>> updateVehicle(
             @PathVariable Long vehicleId,
@@ -55,6 +69,7 @@ public class VehicleController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /** 차량 삭제 */
     @DeleteMapping("/{vehicleId}")
     public ResponseEntity<ApiResponse<Void>> deleteVehicle(@PathVariable Long vehicleId) {
         vehicleService.deleteVehicle(vehicleId);

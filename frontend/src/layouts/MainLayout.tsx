@@ -34,6 +34,13 @@ import FavoriteButton from '../components/FavoriteButton';
 
 const { Header, Sider, Content } = Layout;
 
+/**
+ * 사이드바 메뉴 항목 정의
+ *
+ * 애플리케이션의 전체 메뉴 구조를 정의합니다.
+ * 각 항목은 경로(key), 아이콘(icon), 라벨(label)로 구성되며,
+ * '기준정보 관리'와 '시스템 관리'는 하위 메뉴(children)를 포함합니다.
+ */
 const menuItems = [
   { key: '/dashboard', icon: <DashboardOutlined />, label: '대시보드' },
   { key: '/weighing-station', icon: <DesktopOutlined />, label: '계량소 관제' },
@@ -69,15 +76,40 @@ const menuItems = [
   },
 ];
 
+/**
+ * 메인 레이아웃 컴포넌트
+ *
+ * 애플리케이션의 전체 레이아웃을 구성하는 최상위 레이아웃 컴포넌트입니다.
+ * - 왼쪽 사이드바: 접이식 네비게이션 메뉴 (로고, 메뉴 항목)
+ * - 상단 헤더: 즐겨찾기, 테마 전환, 사용자 정보, 로그아웃
+ * - 탭 바: 멀티 탭 인터페이스 (드래그 재배치, 컨텍스트 메뉴 지원)
+ * - 콘텐츠 영역: 활성 탭의 페이지 콘텐츠 표시
+ *
+ * 모든 탭 컴포넌트를 동시에 렌더링하고 display로 전환하여
+ * 탭 변경 시 컴포넌트가 언마운트되지 않도록 합니다.
+ *
+ * @returns 메인 레이아웃 JSX
+ */
 const MainLayout: React.FC = () => {
+  /** 사이드바 접힘 상태 */
   const [collapsed, setCollapsed] = useState(false);
+  /** 즐겨찾기 팝오버 열림 상태 */
   const [favoritesOpen, setFavoritesOpen] = useState(false);
   const navigate = useNavigate();
+  /** 테마 모드(dark/light) 및 전환 함수 */
   const { themeMode, toggleTheme } = useTheme();
+  /** 탭 관리 컨텍스트 (열기, 닫기, 이동 등) */
   const { tabs, activeKey, openTab, closeTab, closeOtherTabs, closeAllClosable, closeRightTabs, setActiveTab, moveTab } = useTab();
+  /** 탭 드래그 시 드래그 중인 탭 키를 저장하는 ref */
   const dragKeyRef = useRef<string | null>(null);
 
-  // 현재 경로에 따라 열려야 할 서브메뉴 계산
+  /**
+   * 현재 활성 탭의 경로에 따라 열어야 할 서브메뉴 키를 계산
+   *
+   * 하위 메뉴 항목이 활성 상태일 때 해당 상위 메뉴를 자동으로 펼칩니다.
+   *
+   * @returns 열어야 할 서브메뉴 키 배열
+   */
   const getOpenKeys = () => {
     const keys: string[] = [];
     for (const item of menuItems) {
@@ -92,12 +124,13 @@ const MainLayout: React.FC = () => {
     return keys;
   };
 
+  /** 서브메뉴 열림 상태 (초기값: 현재 경로의 상위 메뉴 또는 기준정보) */
   const [openKeys, setOpenKeys] = useState<string[]>(() => {
     const pathKeys = getOpenKeys();
     return pathKeys.length > 0 ? pathKeys : ['master'];
   });
 
-  // 활성 탭 변경 시 해당 서브메뉴 자동 열기
+  /** 활성 탭 변경 시 해당 서브메뉴를 자동으로 펼침 */
   useEffect(() => {
     const pathKeys = getOpenKeys();
     if (pathKeys.length > 0) {
@@ -108,15 +141,25 @@ const MainLayout: React.FC = () => {
     }
   }, [activeKey]);
 
-  // 현재 페이지 정보 (즐겨찾기 버튼용)
+  /**
+   * 현재 활성 탭에 해당하는 메뉴 항목 정보
+   * (즐겨찾기 버튼에 현재 페이지 이름과 경로를 전달하기 위해 사용)
+   */
   const currentPageInfo = menuItems.flatMap(item =>
     'children' in item && item.children ? item.children : [item]
   ).find(item => item?.key === activeKey);
 
-  // 현재 테마에 맞는 색상 선택
+  /** 현재 테마에 맞는 색상 팔레트 선택 */
   const colors = themeMode === 'dark' ? darkColors : lightColors;
+  /** 다크 모드 여부 */
   const isDark = themeMode === 'dark';
 
+  /**
+   * 로그아웃 핸들러
+   *
+   * 로컬스토리지의 인증 토큰과 탭 세션을 삭제하고
+   * 로그인 페이지로 이동합니다.
+   */
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
@@ -124,7 +167,15 @@ const MainLayout: React.FC = () => {
     navigate('/login');
   };
 
-  // 탭 편집 (닫기) 핸들러
+  /**
+   * 탭 편집(닫기) 핸들러
+   *
+   * Ant Design Tabs의 onEdit 콜백으로 사용됩니다.
+   * 'remove' 액션일 때 해당 탭을 닫습니다.
+   *
+   * @param targetKey - 편집 대상 탭 키
+   * @param action - 편집 액션 ('add' 또는 'remove')
+   */
   const handleTabEdit = (
     targetKey: React.MouseEvent | React.KeyboardEvent | string,
     action: 'add' | 'remove',
@@ -136,6 +187,7 @@ const MainLayout: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
+      {/* 왼쪽 사이드바: 접이식 네비게이션 메뉴 */}
       <Sider
         collapsible
         collapsed={collapsed}
@@ -149,7 +201,7 @@ const MainLayout: React.FC = () => {
           flexDirection: 'column',
         }}
       >
-        {/* 로고 영역 */}
+        {/* 로고 영역: 클릭 시 대시보드 탭으로 이동 */}
         <div
           onClick={() => openTab('/dashboard')}
           style={{
@@ -166,6 +218,7 @@ const MainLayout: React.FC = () => {
           onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
           onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
         >
+          {/* 로고 아이콘 (그라디언트 배경) */}
           <div
             style={{
               width: 32,
@@ -183,6 +236,7 @@ const MainLayout: React.FC = () => {
           >
             DK
           </div>
+          {/* 사이드바가 펼쳐진 상태에서만 텍스트 표시 */}
           {!collapsed && (
             <Typography.Text
               strong
@@ -198,6 +252,7 @@ const MainLayout: React.FC = () => {
           )}
         </div>
 
+        {/* 네비게이션 메뉴 (스크롤 가능 영역) */}
         <div style={{ flex: 1, overflow: 'auto' }}>
           <Menu
             theme={isDark ? 'dark' : 'light'}
@@ -217,6 +272,7 @@ const MainLayout: React.FC = () => {
       </Sider>
 
       <Layout style={{ background: colors.bgBase }}>
+        {/* 상단 헤더: 즐겨찾기, 테마 전환, 사용자 메뉴 */}
         <Header
           style={{
             padding: '0 24px',
@@ -229,7 +285,7 @@ const MainLayout: React.FC = () => {
             background: isDark ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.9)',
           }}
         >
-          {/* 현재 페이지 즐겨찾기 버튼 */}
+          {/* 현재 페이지 즐겨찾기 추가/해제 버튼 */}
           {currentPageInfo && (
             <FavoriteButton
               favoriteType="MENU"
@@ -239,7 +295,7 @@ const MainLayout: React.FC = () => {
             />
           )}
 
-          {/* 즐겨찾기 목록 */}
+          {/* 즐겨찾기 목록 팝오버 */}
           <Popover
             content={<FavoritesList onNavigate={() => setFavoritesOpen(false)} />}
             title="즐겨찾기"
@@ -258,9 +314,10 @@ const MainLayout: React.FC = () => {
             </Button>
           </Popover>
 
+          {/* 구분선 */}
           <div style={{ width: 1, height: 20, background: colors.border }} />
 
-          {/* 테마 토글 스위치 */}
+          {/* 다크/라이트 테마 전환 스위치 */}
           <Tooltip title={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <SunOutlined style={{
@@ -282,12 +339,14 @@ const MainLayout: React.FC = () => {
             </div>
           </Tooltip>
 
+          {/* 구분선 */}
           <div style={{
             width: 1,
             height: 20,
             background: colors.border,
           }} />
 
+          {/* 사용자 정보 및 로그아웃 */}
           <Typography.Text style={{ color: colors.textSecondary, fontSize: 13 }}>
             관리자
           </Typography.Text>
@@ -311,7 +370,7 @@ const MainLayout: React.FC = () => {
           </Button>
         </Header>
 
-        {/* 탭 바 */}
+        {/* 멀티 탭 바: 드래그 재배치, 컨텍스트 메뉴(우클릭) 지원 */}
         <div style={{
           background: isDark ? colors.bgSider : '#fafafa',
           borderBottom: `1px solid ${colors.border}`,
@@ -326,6 +385,7 @@ const MainLayout: React.FC = () => {
             onEdit={handleTabEdit}
             size="small"
             items={tabs.map(tab => {
+              /** 탭 우클릭 컨텍스트 메뉴 항목 정의 */
               const contextMenuItems: MenuProps['items'] = [
                 ...(tab.closable ? [{
                   key: 'close',
@@ -348,6 +408,7 @@ const MainLayout: React.FC = () => {
               return {
                 key: tab.key,
                 label: (
+                  /* 우클릭 컨텍스트 메뉴가 연결된 드래그 가능한 탭 라벨 */
                   <Dropdown
                     menu={{
                       items: contextMenuItems,
@@ -362,6 +423,7 @@ const MainLayout: React.FC = () => {
                     }}
                     trigger={['contextMenu']}
                   >
+                    {/* 드래그앤드롭으로 탭 순서 변경 가능 */}
                     <span
                       draggable
                       onDragStart={(e) => {
@@ -394,6 +456,7 @@ const MainLayout: React.FC = () => {
           />
         </div>
 
+        {/* 콘텐츠 영역: 모든 탭 컴포넌트를 동시 렌더링하고 display로 전환하여 언마운트 방지 */}
         <Content style={{ margin: 16, overflow: 'auto' }}>
           <div
             style={{
@@ -404,7 +467,7 @@ const MainLayout: React.FC = () => {
               border: `1px solid ${colors.border}`,
             }}
           >
-            {/* 모든 탭 컴포넌트를 동시 렌더링 — display로 전환하여 unmount 방지 */}
+            {/* 활성 탭만 display:block, 나머지는 display:none으로 숨김 */}
             {tabs.map(tab => (
               <div
                 key={tab.key}

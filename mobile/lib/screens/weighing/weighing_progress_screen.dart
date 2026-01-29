@@ -1,3 +1,9 @@
+/// 계량 진행 현황 화면
+///
+/// 오늘 날짜 기준 계량(Weighing) 기록의 실시간 진행 상태를 표시합니다.
+/// 10초 간격 자동 새로고침으로 실시간 상태를 반영하며,
+/// 새로 완료된 계량이 감지되면 계량표 확인 다이얼로그를 표시합니다.
+/// 각 카드에는 진행률 바, 단계 라벨, 중량 요약, 시각, OTP 인증 버튼이 포함됩니다.
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +15,10 @@ import '../../widgets/status_badge.dart';
 import '../../widgets/weight_display_card.dart';
 import 'otp_input_screen.dart';
 
+/// 계량 진행 현황 화면 위젯
+///
+/// [Timer]로 10초 간격 자동 새로고침을 수행합니다.
+/// 이전 조회와 비교하여 새로 완료된 계량을 감지합니다.
 class WeighingProgressScreen extends StatefulWidget {
   const WeighingProgressScreen({super.key});
 
@@ -17,16 +27,20 @@ class WeighingProgressScreen extends StatefulWidget {
 }
 
 class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
+  /// 10초 간격 자동 새로고침 타이머
   Timer? _refreshTimer;
+
+  /// 이전에 완료 상태였던 기록 ID 집합 (새 완료 감지용)
   Set<String> _previouslyCompletedIds = {};
 
   @override
   void initState() {
     super.initState();
+    // 첫 프레임 렌더링 후 계량 기록 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadRecords();
     });
-    // Auto-refresh every 10 seconds for real-time status
+    // 10초 간격 자동 새로고침으로 실시간 상태 반영
     _refreshTimer = Timer.periodic(
       const Duration(seconds: 10),
       (_) => _loadRecords(),
@@ -39,6 +53,7 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
     super.dispose();
   }
 
+  /// 오늘 날짜 기준 계량 기록 조회 및 새 완료 감지
   Future<void> _loadRecords() async {
     final provider = context.read<DispatchProvider>();
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -49,16 +64,17 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
 
     if (!mounted) return;
 
-    // Check for newly completed records
+    // 현재 완료된 기록 ID 수집
     final currentCompleted = provider.weighingRecords
         .where((r) => r.status == WeighingStatus.completed)
         .map((r) => r.id)
         .toSet();
 
+    // 이전 대비 새로 완료된 기록 감지
     final newlyCompleted = currentCompleted.difference(_previouslyCompletedIds);
 
     if (newlyCompleted.isNotEmpty && _previouslyCompletedIds.isNotEmpty) {
-      // Find the first newly completed record for the dialog
+      // 새로 완료된 첫 번째 기록으로 다이얼로그 표시
       final completedRecord = provider.weighingRecords.firstWhere(
         (r) => newlyCompleted.contains(r.id),
       );
@@ -79,6 +95,7 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
               FilledButton(
                 onPressed: () {
                   Navigator.pop(ctx);
+                  // 계량표 상세 화면으로 이동
                   context.go('/slip/${completedRecord.id}');
                 },
                 child: const Text('계량표 보기'),
@@ -103,15 +120,19 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
     );
   }
 
+  /// 본문 영역 빌드 (로딩/빈 상태/목록 분기)
   Widget _buildBody(DispatchProvider provider, ThemeData theme) {
+    // 초기 로딩 중
     if (provider.isLoading && provider.weighingRecords.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // 계량 기록 없음
     if (provider.weighingRecords.isEmpty) {
       return _buildEmptyState(theme);
     }
 
+    // 계량 진행 카드 목록
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: provider.weighingRecords.length,
@@ -120,6 +141,7 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
         return _WeighingProgressCard(
           record: record,
           onOtpTap: () {
+            // OTP 인증 화면으로 이동
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -135,6 +157,7 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
     );
   }
 
+  /// 빈 상태 UI (진행 중 계량 없음 안내)
   Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: Column(
@@ -165,8 +188,15 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
   }
 }
 
+/// 계량 진행 카드 위젯
+///
+/// 배차번호, 차량/업체, 상태 배지, 진행률 바, 단계 라벨,
+/// 중량 요약(WeightSummaryRow), 계량 시각, OTP 인증 버튼을 표시합니다.
 class _WeighingProgressCard extends StatelessWidget {
+  /// 표시할 계량 기록 데이터
   final WeighingRecord record;
+
+  /// OTP 인증 버튼 탭 콜백
   final VoidCallback onOtpTap;
 
   const _WeighingProgressCard({
@@ -191,7 +221,7 @@ class _WeighingProgressCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // 헤더: 배차번호, 차량/업체, 상태 배지
             Row(
               children: [
                 Expanded(
@@ -223,11 +253,11 @@ class _WeighingProgressCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Progress indicator
+            // 진행률 섹션 (퍼센트 + 바 + 단계 라벨)
             _buildProgressSection(theme),
             const SizedBox(height: 16),
 
-            // Weight display
+            // 중량 요약 (총중량/공차중량/순중량)
             WeightSummaryRow(
               firstWeight: record.firstWeight,
               secondWeight: record.secondWeight,
@@ -235,7 +265,7 @@ class _WeighingProgressCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Timestamps
+            // 계량 시각 (1차/2차)
             if (record.firstWeighingTime != null)
               _buildTimestamp(
                 theme,
@@ -249,7 +279,7 @@ class _WeighingProgressCard extends StatelessWidget {
                 timeFormat.format(record.secondWeighingTime!),
               ),
 
-            // OTP button for waiting status
+            // OTP 인증 버튼 (대기 상태일 때만)
             if (record.status == WeighingStatus.waiting) ...[
               const SizedBox(height: 16),
               SizedBox(
@@ -273,6 +303,7 @@ class _WeighingProgressCard extends StatelessWidget {
     );
   }
 
+  /// 진행률 섹션 빌드 (퍼센트 텍스트 + 프로그레스바 + 단계 라벨)
   Widget _buildProgressSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,6 +327,7 @@ class _WeighingProgressCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
+        // 프로그레스바
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -306,6 +338,7 @@ class _WeighingProgressCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
+        // 단계 라벨: 대기 -> 1차 -> 2차 -> 완료
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -319,6 +352,7 @@ class _WeighingProgressCard extends StatelessWidget {
     );
   }
 
+  /// 단계 라벨 빌드 (활성/비활성 스타일 구분)
   Widget _buildStepLabel(ThemeData theme, String label, bool active) {
     return Text(
       label,
@@ -331,6 +365,7 @@ class _WeighingProgressCard extends StatelessWidget {
     );
   }
 
+  /// 계량 시각 행 빌드 (시계 아이콘 + 라벨: 시각)
   Widget _buildTimestamp(ThemeData theme, String label, String time) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),

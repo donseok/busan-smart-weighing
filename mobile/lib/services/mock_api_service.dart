@@ -1,18 +1,33 @@
+/// 목(Mock) API 서비스
+///
+/// 백엔드 서버 없이 앱 전체 플로우를 테스트하기 위한 Mock 구현입니다.
+/// [ApiService]와 동일한 인터페이스(get, post, put, delete)를 제공하며,
+/// 500ms 지연 후 [MockData]에서 정적 데이터를 반환합니다.
+/// URL 패턴에 따라 적절한 Mock 응답으로 라우팅합니다.
 import '../config/api_config.dart';
 import '../models/api_response.dart';
 import 'mock_data.dart';
 
-/// 목(Mock) API 서비스 - 백엔드 없이 앱 전체 플로우 테스트용
-/// ApiService와 동일한 인터페이스를 제공하며, MockData에서 데이터를 반환
+/// Mock API 서비스 클래스
+///
+/// 실제 HTTP 요청 대신 [MockData]의 정적 데이터를 반환합니다.
+/// [_delay]만큼 지연시켜 실제 네트워크 환경을 시뮬레이션합니다.
+/// [_routeGet]과 [_routePost]에서 URL 패턴에 따라 적절한 응답을 생성합니다.
 class MockApiService {
+  /// Mock 액세스 토큰 (로그인 시 설정)
   String? _accessToken;
+
+  /// Mock 리프레시 토큰 (로그인 시 설정)
   String? _refreshToken;
 
-  /// 시뮬레이션 지연 시간
+  /// 시뮬레이션 네트워크 지연 시간 (500ms)
   static const _delay = Duration(milliseconds: 500);
 
   // ── HTTP 메서드 (ApiService 인터페이스 호환) ──
 
+  /// GET 요청 (Mock)
+  ///
+  /// [url]에 따라 [_routeGet]에서 적절한 Mock 응답을 반환합니다.
   Future<ApiResponse<T>> get<T>(
     String url, {
     Map<String, dynamic>? queryParameters,
@@ -22,6 +37,9 @@ class MockApiService {
     return _routeGet<T>(url, queryParameters, fromData);
   }
 
+  /// POST 요청 (Mock)
+  ///
+  /// [url]에 따라 [_routePost]에서 적절한 Mock 응답을 반환합니다.
   Future<ApiResponse<T>> post<T>(
     String url, {
     dynamic data,
@@ -31,6 +49,7 @@ class MockApiService {
     return _routePost<T>(url, data, fromData);
   }
 
+  /// PUT 요청 (Mock) - 항상 성공 응답 반환
   Future<ApiResponse<T>> put<T>(
     String url, {
     dynamic data,
@@ -40,6 +59,7 @@ class MockApiService {
     return ApiResponse<T>(success: true, message: 'Updated');
   }
 
+  /// DELETE 요청 (Mock) - 항상 성공 응답 반환
   Future<ApiResponse<T>> delete<T>(
     String url, {
     T Function(dynamic)? fromData,
@@ -48,8 +68,9 @@ class MockApiService {
     return ApiResponse<T>(success: true, message: 'Deleted');
   }
 
-  // ── 토큰 관리 ──
+  // ── 토큰 관리 (메모리 기반) ──
 
+  /// Mock 토큰 저장
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
@@ -58,16 +79,21 @@ class MockApiService {
     _refreshToken = refreshToken;
   }
 
+  /// Mock 토큰 삭제
   Future<void> clearTokens() async {
     _accessToken = null;
     _refreshToken = null;
   }
 
+  /// Mock 액세스 토큰 조회
   Future<String?> getAccessToken() async => _accessToken;
+
+  /// Mock 리프레시 토큰 조회
   Future<String?> getRefreshToken() async => _refreshToken;
 
-  // ── GET 라우팅 ──
+  // ── GET 라우팅 (URL 패턴별 Mock 응답) ──
 
+  /// GET 요청을 URL 패턴에 따라 적절한 Mock 응답으로 라우팅
   ApiResponse<T> _routeGet<T>(
     String url,
     Map<String, dynamic>? queryParams,
@@ -95,13 +121,13 @@ class MockApiService {
       );
     }
 
-    // 계량 기록
+    // 계량 기록 목록
     if (url == ApiConfig.weighingsUrl) {
       final data = MockData.weighingRecords.map((w) => w.toJson()).toList();
       return _wrapList<T>(data, fromData);
     }
 
-    // 계량 상세
+    // 계량 기록 상세
     if (url.startsWith(ApiConfig.baseUrl) && url.contains('/weighings/')) {
       final id = url.split('/weighings/').last;
       final record = MockData.weighingRecords.where((w) => w.id == id).firstOrNull;
@@ -164,30 +190,32 @@ class MockApiService {
       return ApiResponse<T>(success: true);
     }
 
-    // 공지사항
+    // 공지사항 목록
     if (url == ApiConfig.noticesUrl) {
       return _wrapList<T>(MockData.notices, fromData);
     }
 
+    // 지원하지 않는 URL
     return ApiResponse<T>(
       success: false,
       error: ApiError(code: 'NOT_FOUND', message: 'Mock: 지원하지 않는 API ($url)'),
     );
   }
 
-  // ── POST 라우팅 ──
+  // ── POST 라우팅 (URL 패턴별 Mock 응답) ──
 
+  /// POST 요청을 URL 패턴에 따라 적절한 Mock 응답으로 라우팅
   ApiResponse<T> _routePost<T>(
     String url,
     dynamic data,
     T Function(dynamic)? fromData,
   ) {
-    // 로그인
+    // 로그인 (ID/PW)
     if (url == ApiConfig.loginUrl) {
       final body = data as Map<String, dynamic>?;
       final loginId = body?['loginId'] as String? ?? '';
 
-      // 아무 아이디/비밀번호나 허용 (mock)
+      // 'admin' 아이디면 관리자, 그 외는 운전자로 Mock 로그인
       final user = loginId == 'admin' ? MockData.managerUser : MockData.driverUser;
       final responseData = {
         'user': user.toJson(),
@@ -277,7 +305,7 @@ class MockApiService {
       return ApiResponse<T>(success: true, message: '로그아웃 완료');
     }
 
-    // 슬립 공유
+    // 계량표 공유
     if (url.contains('/slips/') && url.endsWith('/share')) {
       if (fromData != null) {
         return ApiResponse<T>(success: true, data: fromData(true), message: '공유 완료');
@@ -285,11 +313,12 @@ class MockApiService {
       return ApiResponse<T>(success: true, message: '공유 완료');
     }
 
-    // FCM 토큰 등록
+    // FCM 토큰 등록/해제
     if (url == ApiConfig.pushRegisterUrl || url == ApiConfig.pushUnregisterUrl) {
       return ApiResponse<T>(success: true);
     }
 
+    // 지원하지 않는 URL
     return ApiResponse<T>(
       success: false,
       error: ApiError(code: 'NOT_FOUND', message: 'Mock: 지원하지 않는 API ($url)'),
@@ -298,6 +327,7 @@ class MockApiService {
 
   // ── 헬퍼 ──
 
+  /// 리스트 데이터를 [ApiResponse]로 래핑
   ApiResponse<T> _wrapList<T>(
     List<dynamic> data,
     T Function(dynamic)? fromData,

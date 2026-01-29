@@ -1,3 +1,14 @@
+/**
+ * 탭 관리 컨텍스트 (TabContext)
+ *
+ * 멀티탭 네비게이션 시스템의 상태를 관리하는 React Context입니다.
+ * 탭 열기/닫기, 활성 탭 전환, 탭 순서 드래그 앤 드롭 변경,
+ * 세션 스토리지를 통한 탭 상태 영속화 기능을 제공합니다.
+ * MainLayout에서 탭 UI를 렌더링하고,
+ * 각 페이지 컴포넌트가 탭으로 관리됩니다.
+ *
+ * @module TabContext
+ */
 import React, {
   createContext,
   useContext,
@@ -11,31 +22,34 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { message, Spin } from 'antd';
 import { PAGE_REGISTRY, PINNED_TABS, MAX_TABS } from '../config/pageRegistry';
 
+/** 탭 항목 인터페이스 */
 export interface TabItem {
-  key: string;
-  title: string;
-  icon: React.ReactNode;
-  closable: boolean;
-  component: React.ReactNode;
+  key: string;              // 라우트 경로 (고유 키)
+  title: string;            // 탭 표시 제목
+  icon: React.ReactNode;    // 탭 아이콘
+  closable: boolean;        // 닫기 가능 여부 (고정 탭은 false)
+  component: React.ReactNode; // 렌더링할 페이지 컴포넌트
 }
 
+/** 탭 컨텍스트 API 인터페이스 */
 interface TabContextType {
-  tabs: TabItem[];
-  activeKey: string;
-  openTab: (key: string) => void;
-  closeTab: (key: string) => void;
-  closeOtherTabs: (key: string) => void;
-  closeAllClosable: () => void;
-  closeRightTabs: (key: string) => void;
-  setActiveTab: (key: string) => void;
-  moveTab: (dragKey: string, hoverKey: string) => void;
+  tabs: TabItem[];                                          // 열린 탭 목록
+  activeKey: string;                                        // 현재 활성 탭 키
+  openTab: (key: string) => void;                           // 탭 열기
+  closeTab: (key: string) => void;                          // 탭 닫기
+  closeOtherTabs: (key: string) => void;                    // 다른 탭 모두 닫기
+  closeAllClosable: () => void;                             // 닫을 수 있는 탭 모두 닫기
+  closeRightTabs: (key: string) => void;                    // 오른쪽 탭 모두 닫기
+  setActiveTab: (key: string) => void;                      // 활성 탭 변경
+  moveTab: (dragKey: string, hoverKey: string) => void;     // 탭 순서 변경 (드래그)
 }
 
 const TabContext = createContext<TabContextType | null>(null);
 
-const SESSION_KEY = 'bsw_open_tabs';
-const ACTIVE_KEY = 'bsw_active_tab';
+const SESSION_KEY = 'bsw_open_tabs';   // sessionStorage 키: 열린 탭 목록
+const ACTIVE_KEY = 'bsw_active_tab';   // sessionStorage 키: 활성 탭
 
+/** 세션 스토리지에서 저장된 탭 키 목록 복원 */
 function loadSessionTabs(): string[] {
   try {
     const raw = sessionStorage.getItem(SESSION_KEY);
@@ -45,6 +59,7 @@ function loadSessionTabs(): string[] {
   }
 }
 
+/** 현재 열린 탭 키 목록을 세션 스토리지에 저장 */
 function saveSessionTabs(keys: string[]) {
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(keys));
 }
@@ -57,6 +72,7 @@ function saveActiveKey(key: string) {
   sessionStorage.setItem(ACTIVE_KEY, key);
 }
 
+/** 페이지 레지스트리에서 키에 해당하는 탭 아이템 생성 (Suspense 래핑) */
 function createTabItem(key: string): TabItem | null {
   const config = PAGE_REGISTRY[key];
   if (!config) return null;
@@ -273,12 +289,14 @@ export const TabProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 };
 
+/** 탭 컨텍스트 사용 훅 (TabProvider 내부에서만 사용 가능) */
 export function useTab(): TabContextType {
   const ctx = useContext(TabContext);
   if (!ctx) throw new Error('useTab must be used within TabProvider');
   return ctx;
 }
 
+/** 로그아웃 시 탭 세션 데이터 초기화 */
 export function clearTabSession() {
   sessionStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(ACTIVE_KEY);

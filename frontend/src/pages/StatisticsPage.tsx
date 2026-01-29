@@ -1,3 +1,14 @@
+/**
+ * 통계 및 보고서 페이지 컴포넌트
+ *
+ * 계량 데이터의 일별/월별 통계를 조회하고 분석하는 페이지입니다.
+ * 기간, 업체, 품목유형별 필터 검색을 지원하며,
+ * 총 계량 건수, 총 중량, 품목별/업체별 최다 항목 등의
+ * 요약 통계 카드를 제공합니다.
+ * Excel 다운로드 기능으로 통계 데이터를 내보낼 수 있습니다.
+ *
+ * @returns 통계 및 보고서 페이지 JSX
+ */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Typography,
@@ -23,9 +34,11 @@ import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import dayjs, { type Dayjs } from 'dayjs';
 import { colors } from '../theme/themeConfig';
+import { ITEM_TYPE_OPTIONS } from '../constants/labels';
 
 const { RangePicker } = DatePicker;
 
+/** 일별 통계 데이터 구조 */
 interface DailyStatistics {
   date: string;
   companyId?: number;
@@ -37,6 +50,7 @@ interface DailyStatistics {
   totalWeightTon: number;
 }
 
+/** 월별 통계 데이터 구조 */
 interface MonthlyStatistics {
   year: number;
   month: number;
@@ -49,27 +63,23 @@ interface MonthlyStatistics {
   totalWeightTon: number;
 }
 
+/** 통계 요약 데이터 (상단 카드 표시용) */
 interface StatisticsSummary {
-  totalCount: number;
-  totalWeightKg: number;
-  totalWeightTon: number;
-  countByItemType: Record<string, number>;
-  weightByItemType: Record<string, number>;
-  countByCompany: Record<string, number>;
+  totalCount: number;           // 총 계량 건수
+  totalWeightKg: number;        // 총 중량 (kg)
+  totalWeightTon: number;       // 총 중량 (톤)
+  countByItemType: Record<string, number>;   // 품목유형별 건수
+  weightByItemType: Record<string, number>;  // 품목유형별 중량
+  countByCompany: Record<string, number>;    // 업체별 건수
 }
 
+/** 운송사 선택 옵션용 데이터 */
 interface Company {
   companyId: number;
   companyName: string;
 }
 
-const itemTypeOptions = [
-  { value: 'BY_PRODUCT', label: '부산물' },
-  { value: 'WASTE', label: '폐기물' },
-  { value: 'SUB_MATERIAL', label: '부재료' },
-  { value: 'EXPORT', label: '반출' },
-  { value: 'GENERAL', label: '일반' },
-];
+const itemTypeOptions = ITEM_TYPE_OPTIONS;
 
 const dailyColumns: ColumnsType<DailyStatistics> = [
   { title: '날짜', dataIndex: 'date', width: 120 },
@@ -134,16 +144,17 @@ const StatisticsPage: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
     dayjs().subtract(30, 'day'),
     dayjs(),
-  ]);
-  const [companyId, setCompanyId] = useState<number | undefined>();
-  const [itemType, setItemType] = useState<string | undefined>();
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [dailyData, setDailyData] = useState<DailyStatistics[]>([]);
-  const [monthlyData, setMonthlyData] = useState<MonthlyStatistics[]>([]);
-  const [summary, setSummary] = useState<StatisticsSummary | null>(null);
+  ]); // 조회 기간 (기본 최근 30일)
+  const [companyId, setCompanyId] = useState<number | undefined>();    // 업체 필터
+  const [itemType, setItemType] = useState<string | undefined>();      // 품목유형 필터
+  const [companies, setCompanies] = useState<Company[]>([]);           // 업체 목록 (Select 옵션)
+  const [dailyData, setDailyData] = useState<DailyStatistics[]>([]);   // 일별 통계 데이터
+  const [monthlyData, setMonthlyData] = useState<MonthlyStatistics[]>([]); // 월별 통계 데이터
+  const [summary, setSummary] = useState<StatisticsSummary | null>(null);  // 요약 통계
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('daily');
+  const [activeTab, setActiveTab] = useState('daily'); // 현재 활성 탭 (daily/monthly)
 
+  /** 운송사 목록 조회 (필터 Select 옵션 데이터) */
   const fetchCompanies = useCallback(async () => {
     try {
       const res = await apiClient.get('/companies');
@@ -153,6 +164,7 @@ const StatisticsPage: React.FC = () => {
     }
   }, []);
 
+  /** 일별/월별/요약 통계를 병렬로 조회 */
   const fetchStatistics = useCallback(async () => {
     if (!dateRange[0] || !dateRange[1]) return;
 
@@ -188,6 +200,7 @@ const StatisticsPage: React.FC = () => {
     fetchStatistics();
   }, [fetchStatistics]);
 
+  /** Excel 파일 다운로드 - Blob 응답을 받아 다운로드 링크 생성 */
   const handleExport = async () => {
     if (!dateRange[0] || !dateRange[1]) return;
 

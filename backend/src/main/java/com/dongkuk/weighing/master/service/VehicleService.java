@@ -13,6 +13,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 차량 관리 서비스
+ *
+ * 차량 등록, 조회(ID/차량번호), 수정, 삭제 등
+ * 차량 마스터 데이터 관련 비즈니스 로직을 처리한다.
+ * 차량번호(번호판) 중복 등록을 방지한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,8 +31,10 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
 
+    /** 차량을 등록한다. 차량번호 중복 시 예외를 발생시킨다. */
     @Transactional
     public VehicleResponse createVehicle(VehicleRequest request) {
+        // 차량번호(번호판) 중복 검증
         if (vehicleRepository.existsByPlateNumber(request.plateNumber())) {
             throw new BusinessException(ErrorCode.MASTER_002);
         }
@@ -42,22 +54,26 @@ public class VehicleService {
         return VehicleResponse.from(saved);
     }
 
+    /** 차량을 ID로 단건 조회한다. */
     public VehicleResponse getVehicle(Long vehicleId) {
         Vehicle vehicle = findVehicleById(vehicleId);
         return VehicleResponse.from(vehicle);
     }
 
+    /** 차량번호(번호판)로 차량을 조회한다. */
     public VehicleResponse getVehicleByPlateNumber(String plateNumber) {
         Vehicle vehicle = vehicleRepository.findByPlateNumber(plateNumber)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MASTER_001));
         return VehicleResponse.from(vehicle);
     }
 
+    /** 활성 차량 목록을 페이징 조회한다. */
     public Page<VehicleResponse> getVehicles(Pageable pageable) {
         return vehicleRepository.findByIsActiveTrue(pageable)
                 .map(VehicleResponse::from);
     }
 
+    /** 차량 정보를 수정한다. */
     @Transactional
     public VehicleResponse updateVehicle(Long vehicleId, VehicleRequest request) {
         Vehicle vehicle = findVehicleById(vehicleId);
@@ -70,6 +86,7 @@ public class VehicleService {
         return VehicleResponse.from(vehicle);
     }
 
+    /** 차량을 삭제한다. */
     @Transactional
     public void deleteVehicle(Long vehicleId) {
         Vehicle vehicle = findVehicleById(vehicleId);
@@ -77,6 +94,7 @@ public class VehicleService {
         log.info("차량 삭제: vehicleId={}", vehicleId);
     }
 
+    /** ID로 차량을 조회하고 없으면 예외를 발생시킨다. */
     private Vehicle findVehicleById(Long vehicleId) {
         return vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MASTER_001));

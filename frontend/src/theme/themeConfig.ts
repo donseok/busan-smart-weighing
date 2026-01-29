@@ -1,3 +1,14 @@
+/**
+ * Ant Design 테마 설정 모듈
+ *
+ * 다크 모드와 라이트 모드의 전체 UI 테마를 정의합니다.
+ * "Modern Industrial Intelligence" 디자인 컨셉을 기반으로,
+ * 다크 모드는 SF 관제 센터, 라이트 모드는 클린 비즈니스 스타일을 적용합니다.
+ * 각 모드별 색상 팔레트, 컴포넌트별 토큰, 알고리즘을 설정하며,
+ * colors 객체로 공통 시맨틱 색상(primary, success, warning, error)을 제공합니다.
+ *
+ * @module themeConfig
+ */
 import { ThemeConfig, theme } from 'antd';
 
 // UI/UX Recommendation: "Modern Industrial Intelligence"
