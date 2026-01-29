@@ -1,9 +1,10 @@
 # 부산 스마트 계량 시스템 - 기능 명세서 (Functional Specification)
 
-**버전**: 1.0
+**버전**: 1.1
 **작성일**: 2026-01-27
+**최종 수정일**: 2026-01-29
 **기반 문서**: PRD-20260127-154446, TRD-20260127-155235, WBS-20260127-160043
-**상태**: Draft
+**상태**: Updated
 
 ---
 
@@ -1586,4 +1587,105 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 
 ---
 
+---
+
+## 10. 구현 현황 (Implementation Status)
+
+> **최종 업데이트**: 2026-01-29
+
+### 10.1 웹 프론트엔드 화면 구현 현황
+
+| 경로 | 화면명 | FUNC 매핑 | 구현 상태 | 비고 |
+|------|--------|-----------|----------|------|
+| `/login` | 로그인 | FUNC-025-API | ✅ 완료 | JWT 인증, 테마 연동 |
+| `/dashboard` | 대시보드 | FUNC-006 | ✅ 완료 | 3탭 구조 (개요/실시간/분석), ECharts 6.0 |
+| `/dispatch` | 배차 관리 | FUNC-005 | ✅ 완료 | CRUD, 검색/필터/페이징 |
+| `/weighing` | 계량 현황 | FUNC-006 | ✅ 완료 | 실시간 현황, WebSocket |
+| `/inquiry` | 계량 조회 | FUNC-006 | ✅ 완료 | 상세 검색, 엑셀 내보내기 |
+| `/gate-pass` | 출문 관리 | FUNC-030 | ✅ 완료 | 승인/반려 프로세스 |
+| `/slips` | 전자 계량표 | FUNC-009 | ✅ 완료 | 조회/공유/인쇄 |
+| `/statistics` | 통계/보고서 | FUNC-006 | ✅ 완료 | 기간별/조건별 분석 차트 |
+| `/weighing-station` | 계량소 관제 | FUNC-011 | ✅ 완료 | 고정 탭, 실시간 장비 연동 |
+| `/monitoring` | 장비 관제 | FUNC-010 | ✅ 완료 | 장비 상태 모니터링 |
+| `/master/companies` | 운송사 관리 | FUNC-008 | ✅ 완료 | MasterCrudPage 패턴 |
+| `/master/vehicles` | 차량 관리 | FUNC-008 | ✅ 완료 | MasterCrudPage 패턴 |
+| `/master/scales` | 계량대 관리 | FUNC-008 | ✅ 완료 | MasterCrudPage 패턴 |
+| `/master/codes` | 공통코드 관리 | FUNC-008 | ✅ 완료 | MasterCrudPage 패턴 |
+| `/notices` | 공지사항 | - | ✅ 완료 | 카테고리 필터, 고정 공지 |
+| `/help` | 이용 안내 | - | ✅ 완료 | 도움말/FAQ |
+| `/mypage` | 마이페이지 | - | ✅ 완료 | 프로필, 비밀번호 변경 |
+| `/admin/users` | 사용자 관리 | FUNC-008 | ✅ 완료 | ADMIN 전용 |
+| `/admin/settings` | 시스템 설정 | - | ✅ 완료 | ADMIN 전용 |
+| `/admin/audit-logs` | 감사 로그 | - | ✅ 완료 | ADMIN 전용 |
+
+### 10.2 모바일 앱 화면 구현 현황
+
+| 화면 | FUNC 매핑 | 구현 상태 | 비고 |
+|------|-----------|----------|------|
+| 로그인 (ID/PW) | FUNC-017 | ✅ 완료 | flutter_secure_storage |
+| OTP 로그인 | FUNC-017 | ✅ 완료 | OTP 기반 간편 로그인 |
+| 홈 화면 | - | ✅ 완료 | 대시보드, 퀵 액세스 |
+| 배차 목록 | FUNC-018 | ✅ 완료 | 당일 배차 필터 |
+| 배차 상세 | FUNC-018 | ✅ 완료 | 배차 정보, 계량 이동 |
+| OTP 입력 | FUNC-020 | ✅ 완료 | 6자리 입력, 타이머 |
+| 계량 진행 | FUNC-019 | ✅ 완료 | 진행 상태 실시간 표시 |
+| 전자 계량표 목록 | FUNC-021 | ✅ 완료 | 날짜별 조회 |
+| 전자 계량표 상세 | FUNC-021 | ✅ 완료 | 공유 (share_plus) |
+| 이력 조회 | FUNC-022 | ✅ 완료 | 기간별 검색 |
+| 공지사항 | - | ✅ 완료 | 카테고리별 조회 |
+| 알림 목록 | FUNC-024 | ✅ 완료 | FCM 푸시 + 인앱 알림 |
+
+### 10.3 데스크톱 (CS) 구현 현황
+
+| 기능 | FUNC 매핑 | 구현 상태 | 비고 |
+|------|-----------|----------|------|
+| 스플래시 화면 | - | ✅ 완료 | 초기화/연결 확인 |
+| 메인 계량 화면 | FUNC-010,011 | ✅ 완료 | 실시간 중량 표시 |
+| 인디게이터 통신 | FUNC-010 | ✅ 완료 | SerialPort + Simulator |
+| LPR 카메라 연동 | FUNC-040 | ✅ 완료 | 인터페이스 + Simulator |
+| 차량 감지기 연동 | FUNC-042 | ✅ 완료 | 인터페이스 + Simulator |
+| 전광판 제어 | FUNC-012 | ✅ 완료 | TCP 통신 |
+| 차단기 제어 | FUNC-013 | ✅ 완료 | TCP 통신 |
+| 계량 프로세스 | FUNC-011 | ✅ 완료 | WeighingProcessService 오케스트레이터 |
+| 로컬 캐시 | FUNC-016 | ✅ 완료 | SQLite 기반 |
+| API 서버 연동 | FUNC-015 | ✅ 완료 | HttpClient + JWT |
+| 단위 테스트 | - | ✅ 완료 | xUnit (3개 테스트 클래스) |
+
+### 10.4 백엔드 모듈 구현 현황
+
+| 모듈 | 주요 FUNC | 구현 상태 | 비고 |
+|------|-----------|----------|------|
+| auth | FUNC-017, 025-API | ✅ 완료 | JWT + OTP 로그인 + Redis 블랙리스트 |
+| user | FUNC-008 | ✅ 완료 | CRUD + 역할 관리 |
+| master | FUNC-008 | ✅ 완료 | 운송사/차량/계량대/공통코드 |
+| dispatch | FUNC-005 | ✅ 완료 | CRUD + 검색 + 상태 관리 |
+| weighing | FUNC-007 | ✅ 완료 | 계량 프로세스 + 통계 |
+| gatepass | FUNC-030 | ✅ 완료 | 출문 승인/반려 프로세스 |
+| slip | FUNC-009 | ✅ 완료 | 전자 계량표 + 공유 |
+| lpr | FUNC-001,002,003 | ✅ 완료 | 촬영/AI검증/배차매칭 |
+| otp | FUNC-004 | ✅ 완료 | Redis 기반 OTP 관리 |
+| notification | FUNC-024, 028-API | ✅ 완료 | FCM + 인앱 알림 |
+| websocket | FUNC-006 | ✅ 완료 | 계량/장비 상태 실시간 전송 |
+| dashboard | FUNC-006 | ✅ 완료 | 통계 API |
+| audit | - | ✅ 완료 | 감사 로그 |
+
+### 10.5 추가 구현 기능 (명세서 외)
+
+| 기능 | 설명 | 구현 위치 |
+|------|------|----------|
+| 온보딩 투어 | 신규 사용자 가이드 | `OnboardingTour.tsx` |
+| 키보드 단축키 | 페이지별 단축키 지원 | `useKeyboardShortcuts.ts` |
+| 탭 활성화 감지 | 브라우저 탭 전환 시 데이터 갱신 | `useTabVisible.ts` |
+| 숫자 애니메이션 | 대시보드 KPI 카드 애니메이션 | `AnimatedNumber.tsx` |
+| 드래그 정렬 | 테이블 행 드래그 재정렬 | `SortableTable.tsx` (@dnd-kit) |
+| 빈 상태 UI | 데이터 없을 때 안내 화면 | `EmptyState.tsx` |
+| 즐겨찾기 | 배차/업체 즐겨찾기 | `FavoriteButton.tsx`, `FavoritesList.tsx` |
+| 다크/라이트 테마 | 테마 전환 지원 | `ThemeContext.tsx`, `themeConfig.ts` |
+| 다중 탭 네비게이션 | 최대 10탭, 고정탭 지원 | `TabContext.tsx`, `pageRegistry.ts` |
+| 오프라인 캐시 (모바일) | SharedPreferences 기반 | `offline_cache_service.dart` |
+| 하드웨어 시뮬레이터 | 개발용 장비 시뮬레이션 | `Simulators/*.cs` |
+
+---
+
 *이 문서는 PRD-20260127-154446, TRD-20260127-155235, WBS-20260127-160043 기반으로 작성되었습니다.*
+*구현 현황은 2026-01-29 기준입니다.*

@@ -1990,4 +1990,332 @@ setItems(prev => prev.map(item =>
 
 ---
 
+## 13. 최근 추가된 프론트엔드 패턴
+
+### 13.1 페이지 레지스트리 (pageRegistry.ts)
+
+모든 페이지를 `config/pageRegistry.ts`에서 중앙 관리한다. 새 페이지 추가 시 이 파일만 수정하면 사이드바 메뉴, 탭 네비게이션, 권한 제어가 자동 적용된다.
+
+```typescript
+// config/pageRegistry.ts
+export interface PageConfig {
+  component: React.LazyExoticComponent<React.FC>; // React.lazy 코드분할
+  title: string;        // 메뉴/탭 표시 제목
+  icon: React.ReactNode; // 메뉴 아이콘 (Ant Design Icons)
+  closable: boolean;     // 탭 닫기 가능 여부
+  roles?: ('ADMIN' | 'MANAGER' | 'DRIVER')[]; // 접근 가능 역할
+}
+
+// 새 페이지 추가 예시
+const NewPage = React.lazy(() => import('../pages/NewPage'));
+
+export const PAGE_REGISTRY: Record<string, PageConfig> = {
+  '/new-page': {
+    component: NewPage,
+    title: '새 페이지',
+    icon: React.createElement(SomeIcon),
+    closable: true,
+    roles: ['ADMIN', 'MANAGER'], // 생략 시 전체 접근 가능
+  },
+  // ...기존 페이지들
+};
+```
+
+**핵심 포인트:**
+- `React.lazy`로 코드분할 → 해당 페이지 방문 시에만 JS 번들 로드
+- `closable: false`는 계량소 관제 같은 고정 탭에 사용
+- `PINNED_TABS` 배열에 추가하면 앱 시작 시 자동 열림
+- `MAX_TABS = 10`으로 최대 탭 수 제한
+
+### 13.2 인증 컨텍스트 (AuthContext.tsx)
+
+`AuthContext`는 전역 인증 상태를 관리한다. `localStorage`의 토큰을 기반으로 로그인 상태를 유지하고, 토큰 갱신을 자동 처리한다.
+
+```tsx
+// 사용 방법
+import { useAuth } from '../context/AuthContext';
+
+const MyComponent: React.FC = () => {
+    const { user, isAuthenticated, logout } = useAuth();
+
+    if (!isAuthenticated) return <Navigate to="/login" />;
+
+    return <div>안녕하세요, {user?.userName}님</div>;
+};
+```
+
+### 13.3 CRUD 상태 관리 훅 (useCrudState.ts)
+
+기준정보 페이지(운송사, 차량, 계량대, 공통코드)는 모두 동일한 CRUD 패턴을 따른다. `useCrudState`로 이 패턴을 재사용한다.
+
+```tsx
+const {
+    data, loading, searched,
+    totalElements, currentPage,
+    createModalOpen, editModalOpen, editingRecord,
+    setCreateModalOpen, setEditModalOpen,
+    handleSearch, handlePageChange,
+    handleCreate, handleEdit, handleDelete,
+} = useCrudState<Vehicle>({
+    fetchUrl: '/master/vehicles',
+    createUrl: '/master/vehicles',
+    updateUrl: (id) => `/master/vehicles/${id}`,
+    deleteUrl: (id) => `/master/vehicles/${id}`,
+});
+```
+
+### 13.4 MasterCrudPage 공통 컴포넌트
+
+기준정보 CRUD 페이지의 레이아웃과 동작을 표준화하는 공통 컴포넌트다. 검색 폼, 데이터 테이블, 생성/수정 모달을 자동 구성한다.
+
+```tsx
+<MasterCrudPage
+    title="차량 관리"
+    columns={vehicleColumns}
+    searchFields={searchFields}
+    createFields={createFields}
+    editFields={editFields}
+    fetchUrl="/master/vehicles"
+    createUrl="/master/vehicles"
+    updateUrl={(id) => `/master/vehicles/${id}`}
+    deleteUrl={(id) => `/master/vehicles/${id}`}
+/>
+```
+
+### 13.5 API 호출 훅 (useApiCall.ts)
+
+API 호출의 로딩/성공/에러 상태를 자동 관리하는 훅이다.
+
+```tsx
+const { execute, loading, error } = useApiCall();
+
+const handleSave = async () => {
+    const result = await execute(
+        () => apiClient.post('/dispatches', formData),
+        { successMessage: '배차가 등록되었습니다.' }
+    );
+    if (result) refreshData();
+};
+```
+
+### 13.6 키보드 단축키 (useKeyboardShortcuts.ts)
+
+페이지별 키보드 단축키를 등록하는 훅이다. 컴포넌트 언마운트 시 자동 해제된다.
+
+```tsx
+useKeyboardShortcuts([
+    { key: 'n', ctrl: true, handler: () => setCreateModalOpen(true), description: '신규 등록' },
+    { key: 'f', ctrl: true, handler: () => searchInputRef.current?.focus(), description: '검색' },
+    { key: 'Escape', handler: () => setModalOpen(false), description: '모달 닫기' },
+]);
+```
+
+### 13.7 WebSocket 훅 (useWebSocket.ts)
+
+STOMP 프로토콜 기반 WebSocket 연결을 관리하는 훅이다. 연결/재연결/구독을 자동 처리한다.
+
+```tsx
+const { connected, subscribe, publish } = useWebSocket({
+    url: '/ws',
+    onConnect: () => console.log('WebSocket 연결됨'),
+});
+
+// 구독
+useEffect(() => {
+    if (connected) {
+        subscribe('/topic/weighing-updates', (message) => {
+            const data = JSON.parse(message.body);
+            updateWeighingStatus(data);
+        });
+    }
+}, [connected]);
+```
+
+### 13.8 계량소 관제 아키텍처
+
+`WeighingStationPage`는 현장 계량소를 실시간 관제하는 전용 페이지다. 여러 하위 컴포넌트로 구성된다:
+
+```
+WeighingStationPage
+├── ConnectionStatusBar    → 장비 연결 상태 (인디게이터, LPR, 전광판, 차단기)
+├── WeightDisplay          → 실시간 중량 표시 (큰 숫자, 안정/불안정 상태)
+├── VehicleInfoPanel       → 현재 계량 중인 차량/배차 정보
+├── ProcessStateBar        → 계량 진행 단계 표시 (진입→감지→촬영→인식→계량→완료)
+├── ActionButtons          → 계량 시작/완료/취소 등 액션 버튼
+├── ModeToggle             → 자동/수동 모드 전환
+├── ManualControls         → 수동 모드 시 직접 제어 패널
+├── WeighingHistoryTable   → 최근 계량 이력 테이블
+├── StatusLog              → 장비/시스템 이벤트 로그
+└── SimulatorPanel         → 개발용 하드웨어 시뮬레이터
+```
+
+**데이터 흐름:**
+- `useWeighingStation` 훅: 계량 비즈니스 로직 (상태 관리, API 호출)
+- `useWeighingStationSocket` 훅: WebSocket 실시간 데이터 수신
+- `weighingStationApi.ts`: 계량소 전용 REST API 호출
+
+### 13.9 대시보드 탭 구조
+
+`DashboardPage`는 3개 탭으로 구성된다:
+
+| 탭 | 컴포넌트 | 내용 |
+|---|---------|------|
+| 개요 | `OverviewTab` | KPI 카드 (AnimatedNumber), 일별 추이 차트, 품목별 비율 |
+| 실시간 | `RealtimeTab` | WebSocket 기반 실시간 계량 현황, 계량대 상태 |
+| 분석 | `AnalysisTab` | 상세 통계 차트, 기간별/조건별 분석 |
+
+### 13.10 ECharts 설정
+
+ECharts 6.0은 tree-shaking을 위해 필요한 컴포넌트만 수동 등록해야 한다:
+
+```typescript
+// utils/echartsSetup.ts - 앱 시작 시 1회 호출
+import * as echarts from 'echarts/core';
+import { BarChart, LineChart, PieChart } from 'echarts/charts';
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+
+echarts.use([BarChart, LineChart, PieChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
+```
+
+```typescript
+// utils/chartOptions.ts - 공통 차트 옵션
+export const createLineChartOption = (data: DailyStatistics[]) => ({
+    // ... 표준화된 차트 옵션
+});
+```
+
+---
+
+## 14. 최근 추가된 모바일 패턴
+
+### 14.1 오프라인 캐시 서비스
+
+`offline_cache_service.dart`는 SharedPreferences 기반으로 핵심 데이터를 로컬에 캐시한다. 네트워크 불안정 시에도 기본 정보를 표시할 수 있다.
+
+```dart
+class OfflineCacheService {
+    // 배차 목록 캐시
+    Future<void> cacheDispatches(List<Dispatch> dispatches);
+    Future<List<Dispatch>?> getCachedDispatches();
+
+    // 캐시 만료 확인
+    bool isCacheExpired(String key, {Duration maxAge = const Duration(hours: 1)});
+}
+```
+
+**주의**: SharedPreferences는 소량 데이터에 적합하다. 대량 데이터는 SQLite 사용을 고려해야 한다.
+
+### 14.2 토스트 유틸
+
+`utils/toast_utils.dart`는 SnackBar 기반 알림을 표준화한다:
+
+```dart
+ToastUtils.showSuccess(context, '배차가 등록되었습니다.');
+ToastUtils.showError(context, '네트워크 오류가 발생했습니다.');
+ToastUtils.showWarning(context, 'OTP가 곧 만료됩니다.');
+```
+
+### 14.3 모바일 화면 구조
+
+```
+홈 (HomeScreen)
+├── 배차 목록 (DispatchListScreen)
+│   └── 배차 상세 (DispatchDetailScreen)
+├── 계량
+│   ├── OTP 입력 (OtpInputScreen)
+│   └── 계량 진행 (WeighingProgressScreen)
+├── 전자 계량표
+│   ├── 목록 (SlipListScreen)
+│   └── 상세 (SlipDetailScreen)
+├── 이력 조회 (HistoryScreen)
+├── 공지사항 (NoticeScreen)
+├── 알림 (NotificationListScreen)
+└── OTP 로그인 (OtpLoginScreen)
+```
+
+---
+
+## 15. 최근 추가된 데스크톱 패턴
+
+### 15.1 스플래시 폼
+
+`SplashForm.cs`는 앱 시작 시 초기화 상태를 표시한다:
+- 설정 파일 로드
+- 백엔드 API 연결 확인
+- 하드웨어 장비 연결 확인 (인디게이터, LPR, 전광판, 차단기)
+- 초기화 완료 후 MainForm으로 전환
+
+### 15.2 하드웨어 인터페이스 패턴
+
+모든 하드웨어 장비는 인터페이스로 추상화되어 있다. 실제 장비와 시뮬레이터가 동일한 인터페이스를 구현한다:
+
+```csharp
+// 인터페이스 정의
+public interface ILprCamera {
+    Task<LprCaptureResult> CaptureAsync();
+    bool IsConnected { get; }
+}
+
+// 실제 구현 (운영)
+public class LprCamera : ILprCamera { ... }
+
+// 시뮬레이터 (개발)
+public class LprCameraSimulator : ILprCamera { ... }
+```
+
+### 15.3 계량 프로세스 오케스트레이터
+
+`WeighingProcessService`가 전체 계량 프로세스를 관리한다:
+
+```
+차량 감지 → LPR 촬영 → AI 검증 → 배차 매칭 → 계량 시작
+→ 중량 안정화 대기 → 중량 기록 → 전광판 표시 → 차단기 개방
+→ API 서버 전송 → 완료
+```
+
+### 15.4 xUnit 테스트
+
+데스크톱 프로그램의 핵심 서비스에 대한 단위 테스트가 작성되어 있다:
+- `ApiServiceTests.cs`: REST API 호출 테스트
+- `IndicatorServiceTests.cs`: 인디게이터 데이터 파싱 테스트
+- `LocalCacheServiceTests.cs`: SQLite 캐시 CRUD 테스트
+
+```bash
+cd weighing-cs
+dotnet test      # xUnit 테스트 실행
+```
+
+---
+
+## 부록: 핵심 용어 사전
+
+| 용어 | 설명 |
+|------|------|
+| **REST API** | HTTP 메서드(GET/POST/PUT/DELETE)로 리소스를 조작하는 API 설계 방식 |
+| **SPA** | Single Page Application. 페이지 전환 없이 컴포넌트만 교체하는 웹 앱 |
+| **ORM** | Object-Relational Mapping. 객체와 DB 테이블을 매핑하는 기술 (JPA) |
+| **DTO** | Data Transfer Object. API 요청/응답에 사용되는 데이터 구조체 |
+| **DI** | Dependency Injection. 객체를 직접 생성하지 않고 외부에서 주입받는 패턴 |
+| **JWT** | JSON Web Token. 서버가 발급하는 인증 토큰 |
+| **STOMP** | WebSocket 위의 메시징 프로토콜 (Pub/Sub 패턴) |
+| **HMR** | Hot Module Replacement. 코드 수정 시 브라우저 새로고침 없이 반영 |
+| **CORS** | Cross-Origin Resource Sharing. 다른 도메인에서 API 호출 허용 설정 |
+| **HikariCP** | JDBC 커넥션 풀 라이브러리 (DB 연결 재사용으로 성능 향상) |
+| **FCM** | Firebase Cloud Messaging. Google의 푸시 알림 서비스 |
+| **Dirty Checking** | JPA가 Entity 변경을 자동 감지하여 UPDATE 쿼리를 생성하는 기능 |
+| **Bean** | Spring이 관리하는 객체 (Controller, Service, Repository 등) |
+| **Profile** | Spring의 환경별 설정 분리 기능 (dev, prod, test) |
+| **Interceptor** | 요청/응답을 가로채서 공통 처리하는 미들웨어 (Axios, Spring 모두 사용) |
+| **LPR** | License Plate Recognition. 차량번호판 자동인식 기술 |
+| **OTP** | One-Time Password. 일회용 보안 비밀번호 (Redis 기반, TTL 5분) |
+| **인디게이터** | 계량대에서 중량값을 표시/전송하는 장치 (시리얼 통신) |
+| **전광판** | OTP, 계량 안내 등을 표시하는 LED 디스플레이 (TCP 통신) |
+| **차단기** | 계량대 진입/출구 자동 차단기 (TCP 통신) |
+| **Tree-shaking** | 사용하지 않는 코드를 빌드 시 자동 제거하는 최적화 기법 |
+| **Code Splitting** | React.lazy를 이용해 페이지별 JS 번들을 분리하는 기법 |
+| **@dnd-kit** | React 드래그 앤 드롭 라이브러리 (테이블 행 정렬에 사용) |
+
+---
+
 > **마지막 조언**: 이 문서를 한 번에 외우려 하지 말고, 실제 코드를 읽으면서 필요할 때 참고하세요. 가장 좋은 학습은 프로젝트 코드를 직접 수정하고 동작을 확인하는 것입니다.
