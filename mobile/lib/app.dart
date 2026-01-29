@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/auth/otp_login_screen.dart';
 import 'screens/dispatch/dispatch_detail_screen.dart';
 import 'screens/weighing/otp_input_screen.dart';
 import 'screens/slip/slip_detail_screen.dart';
@@ -27,12 +28,13 @@ class BusanWeighingApp extends StatelessWidget {
       initialLocation: '/',
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
-        final isLoginRoute = state.matchedLocation == '/login';
+        final loc = state.matchedLocation;
+        final isAuthRoute = loc == '/login' || loc == '/otp-login' || loc == '/login/otp';
 
-        if (!isAuthenticated && !isLoginRoute) {
+        if (!isAuthenticated && !isAuthRoute) {
           return '/login';
         }
-        if (isAuthenticated && isLoginRoute) {
+        if (isAuthenticated && isAuthRoute) {
           return '/';
         }
         return null;
@@ -41,6 +43,16 @@ class BusanWeighingApp extends StatelessWidget {
         GoRoute(
           path: '/login',
           builder: (context, state) => const LoginScreen(),
+          routes: [
+            GoRoute(
+              path: 'otp',
+              builder: (context, state) => const OtpLoginScreen(),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: '/otp-login',
+          builder: (context, state) => const OtpLoginScreen(),
         ),
         GoRoute(
           path: '/',

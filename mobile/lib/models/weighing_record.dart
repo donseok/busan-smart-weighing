@@ -74,9 +74,9 @@ enum WeighingStatus {
       case WeighingStatus.waiting:
         return Icons.hourglass_empty;
       case WeighingStatus.firstWeighing:
-        return Icons.scale;
+        return Icons.monitor_weight;
       case WeighingStatus.secondWeighing:
-        return Icons.scale;
+        return Icons.monitor_weight;
       case WeighingStatus.completed:
         return Icons.check_circle;
       case WeighingStatus.error:

@@ -302,7 +302,7 @@ class _InquiryCallTab extends StatelessWidget {
       title: '계량 관련',
       description: '계량 오류, 재계량 요청 등',
       phoneNumber: '051-000-0002',
-      icon: Icons.scale,
+      icon: Icons.monitor_weight,
       color: Color(0xFFF59E0B),
     ),
     _CallType(

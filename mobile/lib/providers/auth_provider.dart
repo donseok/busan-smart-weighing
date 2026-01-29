@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
+import '../services/mock_data.dart';
 
 enum AuthStatus {
   initial,
@@ -21,16 +22,9 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider(this._authService);
 
-  /// 웹 테스트용: 로그인 없이 인증 상태로 진입
-  void setMockAuthenticated() {
-    _user = User(
-      id: '1',
-      loginId: 'admin',
-      name: '관리자',
-      role: UserRole.manager,
-      companyName: '동국운송',
-      phoneNumber: '010-0000-0000',
-    );
+  /// 웹/Mock 테스트용: 로그인 없이 인증 상태로 진입
+  void setMockAuthenticated({bool asManager = false}) {
+    _user = asManager ? MockData.managerUser : MockData.driverUser;
     _status = AuthStatus.authenticated;
     notifyListeners();
   }

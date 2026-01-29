@@ -86,7 +86,7 @@ class WeightSummaryRow extends StatelessWidget {
           child: WeightDisplayCard(
             title: '총중량',
             weight: firstWeight,
-            icon: Icons.scale,
+            icon: Icons.local_shipping,
             color: const Color(0xFF06B6D4),
           ),
         ),
@@ -95,7 +95,7 @@ class WeightSummaryRow extends StatelessWidget {
           child: WeightDisplayCard(
             title: '공차중량',
             weight: secondWeight,
-            icon: Icons.scale_outlined,
+            icon: Icons.local_shipping_outlined,
             color: const Color(0xFFF59E0B),
           ),
         ),

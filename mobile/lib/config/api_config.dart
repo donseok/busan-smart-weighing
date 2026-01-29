@@ -1,6 +1,9 @@
 class ApiConfig {
   static const String defaultBaseUrl = 'http://localhost:8080/api/v1';
 
+  /// true이면 MockApiService를 사용 (백엔드 불필요)
+  static bool useMockData = true;
+
   static String _baseUrl = defaultBaseUrl;
 
   static String get baseUrl => _baseUrl;

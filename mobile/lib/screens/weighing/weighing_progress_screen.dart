@@ -141,7 +141,7 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.scale_outlined,
+            Icons.monitor_weight_outlined,
             size: 64,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),

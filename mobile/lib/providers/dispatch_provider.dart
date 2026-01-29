@@ -5,9 +5,12 @@ import '../models/weighing_record.dart';
 import '../models/weighing_slip.dart';
 import '../models/api_response.dart';
 import '../services/api_service.dart';
+import '../services/mock_api_service.dart';
 
 class DispatchProvider extends ChangeNotifier {
-  final ApiService _apiService;
+  final ApiService? _apiService;
+  final MockApiService? _mockApiService;
+  bool get _useMock => _mockApiService != null;
 
   List<Dispatch> _dispatches = [];
   Dispatch? _selectedDispatch;
@@ -18,7 +21,13 @@ class DispatchProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
-  DispatchProvider(this._apiService);
+  DispatchProvider(ApiService apiService)
+      : _apiService = apiService,
+        _mockApiService = null;
+
+  DispatchProvider.mock(MockApiService mockService)
+      : _apiService = null,
+        _mockApiService = mockService;
 
   List<Dispatch> get dispatches => _dispatches;
   Dispatch? get selectedDispatch => _selectedDispatch;
@@ -27,6 +36,30 @@ class DispatchProvider extends ChangeNotifier {
   WeighingSlip? get selectedSlip => _selectedSlip;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+
+  // ── 내부 API 호출 헬퍼 ──
+
+  Future<ApiResponse<T>> _get<T>(
+    String url, {
+    Map<String, dynamic>? queryParameters,
+    T Function(dynamic)? fromData,
+  }) {
+    if (_useMock) {
+      return _mockApiService!.get<T>(url, queryParameters: queryParameters, fromData: fromData);
+    }
+    return _apiService!.get<T>(url, queryParameters: queryParameters, fromData: fromData);
+  }
+
+  Future<ApiResponse<T>> _post<T>(
+    String url, {
+    dynamic data,
+    T Function(dynamic)? fromData,
+  }) {
+    if (_useMock) {
+      return _mockApiService!.post<T>(url, data: data, fromData: fromData);
+    }
+    return _apiService!.post<T>(url, data: data, fromData: fromData);
+  }
 
   // ---- Dispatches ----
 
@@ -38,7 +71,7 @@ class DispatchProvider extends ChangeNotifier {
     try {
       final url =
           isManager ? ApiConfig.dispatchesUrl : ApiConfig.myDispatchesUrl;
-      final response = await _apiService.get<List<Dispatch>>(
+      final response = await _get<List<Dispatch>>(
         url,
         queryParameters: {'date': DateTime.now().toIso8601String().split('T')[0]},
         fromData: (data) {
@@ -76,7 +109,7 @@ class DispatchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.get<Dispatch>(
+      final response = await _get<Dispatch>(
         ApiConfig.dispatchDetailUrl(id),
         fromData: (data) =>
             Dispatch.fromJson(data as Map<String, dynamic>),
@@ -117,7 +150,7 @@ class DispatchProvider extends ChangeNotifier {
       if (startDate != null) queryParams['startDate'] = startDate;
       if (endDate != null) queryParams['endDate'] = endDate;
 
-      final response = await _apiService.get<List<WeighingRecord>>(
+      final response = await _get<List<WeighingRecord>>(
         ApiConfig.weighingsUrl,
         queryParameters: queryParams,
         fromData: (data) {
@@ -157,7 +190,7 @@ class DispatchProvider extends ChangeNotifier {
     required String dispatchId,
   }) async {
     try {
-      final response = await _apiService.post<bool>(
+      final response = await _post<bool>(
         ApiConfig.otpVerifyUrl,
         data: {
           'otp': otp,
@@ -193,7 +226,7 @@ class DispatchProvider extends ChangeNotifier {
       if (startDate != null) queryParams['startDate'] = startDate;
       if (endDate != null) queryParams['endDate'] = endDate;
 
-      final response = await _apiService.get<List<WeighingSlip>>(
+      final response = await _get<List<WeighingSlip>>(
         ApiConfig.slipsUrl,
         queryParameters: queryParams,
         fromData: (data) {
@@ -232,7 +265,7 @@ class DispatchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiService.get<WeighingSlip>(
+      final response = await _get<WeighingSlip>(
         ApiConfig.slipDetailUrl(id),
         fromData: (data) =>
             WeighingSlip.fromJson(data as Map<String, dynamic>),
@@ -257,7 +290,7 @@ class DispatchProvider extends ChangeNotifier {
     String? phoneNumber,
   }) async {
     try {
-      final response = await _apiService.post<bool>(
+      final response = await _post<bool>(
         ApiConfig.slipShareUrl(slipId),
         data: {
           'shareType': shareType,

@@ -271,7 +271,7 @@ class _NotificationCard extends StatelessWidget {
 
     switch (type.toUpperCase()) {
       case 'WEIGHING':
-        icon = Icons.scale;
+        icon = Icons.monitor_weight;
         label = '계량';
       case 'DISPATCH':
         icon = Icons.local_shipping;

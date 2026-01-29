@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import 'auth/otp_login_screen.dart';
 
 // Stitch 디자인 컬러 시스템
 class _AppColors {
@@ -348,12 +348,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: authProvider.isLoading
                       ? null
                       : () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const OtpLoginScreen(),
-                            ),
-                          );
+                          context.push('/otp-login');
                         },
                   icon: const Icon(
                     Icons.shield_outlined,
