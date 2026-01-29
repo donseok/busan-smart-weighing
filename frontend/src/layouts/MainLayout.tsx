@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout, Menu, Typography, Button, Tooltip, Switch, Popover, Tabs, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
@@ -26,11 +26,15 @@ import {
   QuestionCircleOutlined,
   DesktopOutlined,
 } from '@ant-design/icons';
-import { darkColors, lightColors } from '../theme/themeConfig';
+import { darkColors, lightColors, spacing, typography } from '../theme/themeConfig';
 import { useTheme } from '../context/ThemeContext';
 import { useTab, clearTabSession } from '../context/TabContext';
+import { useAuth } from '../context/AuthContext';
+import { PAGE_REGISTRY } from '../config/pageRegistry';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import FavoritesList from '../components/FavoritesList';
 import FavoriteButton from '../components/FavoriteButton';
+import OnboardingTour from '../components/OnboardingTour';
 
 const { Header, Sider, Content } = Layout;
 
@@ -100,8 +104,14 @@ const MainLayout: React.FC = () => {
   const { themeMode, toggleTheme } = useTheme();
   /** 탭 관리 컨텍스트 (열기, 닫기, 이동 등) */
   const { tabs, activeKey, openTab, closeTab, closeOtherTabs, closeAllClosable, closeRightTabs, setActiveTab, moveTab } = useTab();
+  /** 인증 컨텍스트 (사용자 정보 및 역할 확인) */
+  const { user, logout } = useAuth();
   /** 탭 드래그 시 드래그 중인 탭 키를 저장하는 ref */
   const dragKeyRef = useRef<string | null>(null);
+  /** 온보딩 투어 대상 요소 refs */
+  const siderRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   /**
    * 현재 활성 탭의 경로에 따라 열어야 할 서브메뉴 키를 계산
@@ -154,6 +164,57 @@ const MainLayout: React.FC = () => {
   /** 다크 모드 여부 */
   const isDark = themeMode === 'dark';
 
+  /** 역할 기반 메뉴 필터링 - 사용자 역할에 따라 접근 가능한 메뉴만 표시 (미인증 시 전체 표시) */
+  const filteredMenuItems = useMemo(() => {
+    if (!user) return menuItems;
+    return menuItems.map(item => {
+      if ('children' in item && item.children) {
+        const filteredChildren = item.children.filter(child => {
+          const config = PAGE_REGISTRY[child.key];
+          if (!config?.roles) return true;
+          return config.roles.includes(user.role);
+        });
+        if (filteredChildren.length === 0) return null;
+        return { ...item, children: filteredChildren };
+      }
+      const config = PAGE_REGISTRY[item.key];
+      if (config?.roles && !config.roles.includes(user.role)) return null;
+      return item;
+    }).filter(Boolean);
+  }, [user]);
+
+  /** 탭 전환 시 fadeIn 애니메이션 스타일 주입 */
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
+  }, []);
+
+  useKeyboardShortcuts([
+    {
+      key: 'w',
+      ctrl: true,
+      handler: () => { if (activeKey) closeTab(activeKey); },
+      description: '현재 탭 닫기',
+    },
+    {
+      key: 'Tab',
+      ctrl: true,
+      handler: () => {
+        const currentIdx = tabs.findIndex(t => t.key === activeKey);
+        const nextIdx = (currentIdx + 1) % tabs.length;
+        setActiveTab(tabs[nextIdx].key);
+      },
+      description: '다음 탭으로 이동',
+    },
+  ]);
+
   /**
    * 로그아웃 핸들러
    *
@@ -161,8 +222,7 @@ const MainLayout: React.FC = () => {
    * 로그인 페이지로 이동합니다.
    */
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    logout();
     clearTabSession();
     navigate('/login');
   };
@@ -210,7 +270,7 @@ const MainLayout: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             borderBottom: `1px solid ${colors.border}`,
-            gap: 8,
+            gap: spacing.sm,
             background: colors.bgSider,
             cursor: 'pointer',
             transition: 'opacity 0.2s',
@@ -242,7 +302,7 @@ const MainLayout: React.FC = () => {
               strong
               style={{
                 color: colors.textPrimary,
-                fontSize: 15,
+                fontSize: typography.bodyMd.fontSize,
                 letterSpacing: '-0.02em',
                 whiteSpace: 'nowrap',
               }}
@@ -253,14 +313,14 @@ const MainLayout: React.FC = () => {
         </div>
 
         {/* 네비게이션 메뉴 (스크롤 가능 영역) */}
-        <div style={{ flex: 1, overflow: 'auto' }}>
+        <div ref={siderRef} style={{ flex: 1, overflow: 'auto' }}>
           <Menu
             theme={isDark ? 'dark' : 'light'}
             selectedKeys={[activeKey]}
             openKeys={openKeys}
             onOpenChange={(keys) => setOpenKeys(keys)}
             mode="inline"
-            items={menuItems}
+            items={filteredMenuItems as MenuProps['items']}
             onClick={({ key }) => openTab(key)}
             style={{
               marginTop: 8,
@@ -274,12 +334,13 @@ const MainLayout: React.FC = () => {
       <Layout style={{ background: colors.bgBase }}>
         {/* 상단 헤더: 즐겨찾기, 테마 전환, 사용자 메뉴 */}
         <Header
+          ref={headerRef}
           style={{
-            padding: '0 24px',
+            padding: `0 ${spacing.xl}px`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
-            gap: 16,
+            gap: spacing.lg,
             borderBottom: `1px solid ${colors.border}`,
             backdropFilter: 'blur(12px)',
             background: isDark ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.9)',
@@ -319,7 +380,7 @@ const MainLayout: React.FC = () => {
 
           {/* 다크/라이트 테마 전환 스위치 */}
           <Tooltip title={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
               <SunOutlined style={{
                 color: isDark ? colors.textSecondary : colors.warning,
                 fontSize: 16,
@@ -347,8 +408,8 @@ const MainLayout: React.FC = () => {
           }} />
 
           {/* 사용자 정보 및 로그아웃 */}
-          <Typography.Text style={{ color: colors.textSecondary, fontSize: 13 }}>
-            관리자
+          <Typography.Text style={{ color: colors.textSecondary, fontSize: typography.bodySm.fontSize }}>
+            {user?.name || '사용자'}
           </Typography.Text>
           <Button
             type="text"
@@ -371,7 +432,7 @@ const MainLayout: React.FC = () => {
         </Header>
 
         {/* 멀티 탭 바: 드래그 재배치, 컨텍스트 메뉴(우클릭) 지원 */}
-        <div style={{
+        <div ref={contentRef} style={{
           background: isDark ? colors.bgSider : '#fafafa',
           borderBottom: `1px solid ${colors.border}`,
           paddingLeft: 8,
@@ -442,7 +503,7 @@ const MainLayout: React.FC = () => {
                         dragKeyRef.current = null;
                       }}
                       onDragEnd={() => { dragKeyRef.current = null; }}
-                      style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, cursor: 'grab' }}
+                      style={{ fontSize: typography.caption.fontSize, display: 'flex', alignItems: 'center', gap: spacing.xs, cursor: 'grab' }}
                     >
                       {tab.icon}
                       {tab.title}
@@ -457,21 +518,24 @@ const MainLayout: React.FC = () => {
         </div>
 
         {/* 콘텐츠 영역: 모든 탭 컴포넌트를 동시 렌더링하고 display로 전환하여 언마운트 방지 */}
-        <Content style={{ margin: 16, overflow: 'auto' }}>
+        <Content style={{ margin: spacing.lg, overflow: 'auto' }}>
           <div
             style={{
-              padding: 24,
+              padding: spacing.xl,
               minHeight: 360,
               background: colors.bgSurface,
               borderRadius: 12,
               border: `1px solid ${colors.border}`,
             }}
           >
-            {/* 활성 탭만 display:block, 나머지는 display:none으로 숨김 */}
+            {/* 활성 탭만 display:block, 나머지는 display:none으로 숨김 (전환 시 fadeIn 애니메이션) */}
             {tabs.map(tab => (
               <div
                 key={tab.key}
-                style={{ display: tab.key === activeKey ? 'block' : 'none' }}
+                style={{
+                  display: tab.key === activeKey ? 'block' : 'none',
+                  animation: tab.key === activeKey ? 'fadeIn 0.2s ease-in' : undefined,
+                }}
               >
                 {tab.component}
               </div>
@@ -479,6 +543,7 @@ const MainLayout: React.FC = () => {
           </div>
         </Content>
       </Layout>
+      <OnboardingTour siderRef={siderRef} headerRef={headerRef} contentRef={contentRef} />
     </Layout>
   );
 };

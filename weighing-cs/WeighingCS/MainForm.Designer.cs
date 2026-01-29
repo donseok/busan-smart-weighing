@@ -26,7 +26,7 @@ partial class MainForm
         this.splitMain = new SplitContainer();
         this.splitMain.Dock = DockStyle.Fill;
         this.splitMain.SplitterDistance = 400;
-        this.splitMain.FixedPanel = FixedPanel.Panel1;
+        this.splitMain.FixedPanel = FixedPanel.None;
 
         // =====================================================================
         // LEFT PANEL
@@ -46,7 +46,7 @@ partial class MainForm
         this.lblWeight.Font = new Font("Consolas", 80F, FontStyle.Bold);
         this.lblWeight.TextAlign = ContentAlignment.MiddleCenter;
         this.lblWeight.Dock = DockStyle.Fill;
-        this.lblWeight.ForeColor = Color.DarkGreen;
+        this.lblWeight.ForeColor = Color.FromArgb(6, 182, 212);
 
         this.lblStability = new Label();
         this.lblStability.Text = "불안정";
@@ -105,19 +105,20 @@ partial class MainForm
         this.grpConnections = new GroupBox();
         this.grpConnections.Text = "연결 상태";
         this.grpConnections.Dock = DockStyle.Top;
-        this.grpConnections.Height = 80;
+        this.grpConnections.Height = 100;
         this.grpConnections.Top = 360;
 
         this.tableConnections = new TableLayoutPanel();
         this.tableConnections.Dock = DockStyle.Fill;
         this.tableConnections.ColumnCount = 4;
-        this.tableConnections.RowCount = 2;
+        this.tableConnections.RowCount = 3;
         this.tableConnections.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
         this.tableConnections.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
         this.tableConnections.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
         this.tableConnections.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-        this.tableConnections.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-        this.tableConnections.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+        this.tableConnections.RowStyles.Add(new RowStyle(SizeType.Percent, 35F));
+        this.tableConnections.RowStyles.Add(new RowStyle(SizeType.Percent, 30F));
+        this.tableConnections.RowStyles.Add(new RowStyle(SizeType.Percent, 35F));
 
         this.lblIndicatorStatus = new Label { Text = "계량기", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
         this.lblDisplayStatus = new Label { Text = "전광판", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
@@ -138,6 +139,16 @@ partial class MainForm
         this.tableConnections.Controls.Add(this.indBarrier, 2, 1);
         this.tableConnections.Controls.Add(this.indNetwork, 3, 1);
 
+        this.lblIndicatorText = new Label { Text = "끊김", Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopCenter, Font = new Font("Segoe UI", 7.5F), ForeColor = Color.FromArgb(148, 163, 184) };
+        this.lblDisplayText = new Label { Text = "끊김", Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopCenter, Font = new Font("Segoe UI", 7.5F), ForeColor = Color.FromArgb(148, 163, 184) };
+        this.lblBarrierText = new Label { Text = "끊김", Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopCenter, Font = new Font("Segoe UI", 7.5F), ForeColor = Color.FromArgb(148, 163, 184) };
+        this.lblNetworkText = new Label { Text = "끊김", Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopCenter, Font = new Font("Segoe UI", 7.5F), ForeColor = Color.FromArgb(148, 163, 184) };
+
+        this.tableConnections.Controls.Add(this.lblIndicatorText, 0, 2);
+        this.tableConnections.Controls.Add(this.lblDisplayText, 1, 2);
+        this.tableConnections.Controls.Add(this.lblBarrierText, 2, 2);
+        this.tableConnections.Controls.Add(this.lblNetworkText, 3, 2);
+
         this.grpConnections.Controls.Add(this.tableConnections);
 
         // -- Recent history list ----------------------------------------------
@@ -156,6 +167,11 @@ partial class MainForm
         this.lvHistory.Columns.Add("중량(kg)", 90);
         this.lvHistory.Columns.Add("모드", 70);
         this.lvHistory.Columns.Add("상태", 80);
+
+        this.ctxHistory = new ContextMenuStrip();
+        this.ctxHistory.Items.Add("CSV로 내보내기", null, OnExportCsvClick);
+        this.ctxHistory.Items.Add("인쇄", null, OnPrintHistoryClick);
+        this.lvHistory.ContextMenuStrip = this.ctxHistory;
 
         this.grpHistory.Controls.Add(this.lvHistory);
 
@@ -211,6 +227,13 @@ partial class MainForm
         this.txtSearchPlate.Location = new Point(80, 25);
         this.txtSearchPlate.Width = 140;
 
+        this.lblPlateValidation = new Label();
+        this.lblPlateValidation.Text = "";
+        this.lblPlateValidation.Location = new Point(80, 48);
+        this.lblPlateValidation.AutoSize = true;
+        this.lblPlateValidation.Font = new Font("Segoe UI", 7.5F);
+        this.lblPlateValidation.ForeColor = Color.FromArgb(148, 163, 184);
+
         this.btnSearch = new Button();
         this.btnSearch.Text = "검색";
         this.btnSearch.Location = new Point(230, 24);
@@ -232,12 +255,13 @@ partial class MainForm
         this.btnConfirmWeight.Width = 230;
         this.btnConfirmWeight.Height = 40;
         this.btnConfirmWeight.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-        this.btnConfirmWeight.BackColor = Color.FromArgb(0, 120, 215);
+        this.btnConfirmWeight.BackColor = Color.FromArgb(6, 182, 212);
         this.btnConfirmWeight.ForeColor = Color.White;
         this.btnConfirmWeight.FlatStyle = FlatStyle.Flat;
 
         this.grpManual.Controls.Add(this.lblSearchPlate);
         this.grpManual.Controls.Add(this.txtSearchPlate);
+        this.grpManual.Controls.Add(this.lblPlateValidation);
         this.grpManual.Controls.Add(this.btnSearch);
         this.grpManual.Controls.Add(this.lblSelectDispatch);
         this.grpManual.Controls.Add(this.cboDispatches);
@@ -328,7 +352,8 @@ partial class MainForm
         this.lblProcessState.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         this.lblProcessState.TextAlign = ContentAlignment.MiddleLeft;
         this.lblProcessState.Padding = new Padding(5, 0, 0, 0);
-        this.lblProcessState.BackColor = Color.FromArgb(230, 230, 230);
+        this.lblProcessState.BackColor = Color.FromArgb(30, 41, 59);
+        this.lblProcessState.ForeColor = Color.FromArgb(248, 250, 252);
 
         // -- Status / log area ------------------------------------------------
         this.grpLog = new GroupBox();
@@ -336,14 +361,12 @@ partial class MainForm
         this.grpLog.Dock = DockStyle.Bottom;
         this.grpLog.Height = 150;
 
-        this.txtLog = new TextBox();
+        this.txtLog = new RichTextBox();
         this.txtLog.Dock = DockStyle.Fill;
-        this.txtLog.Multiline = true;
         this.txtLog.ReadOnly = true;
-        this.txtLog.ScrollBars = ScrollBars.Vertical;
-        this.txtLog.Font = new Font("Consolas", 8F);
-        this.txtLog.BackColor = Color.FromArgb(20, 20, 20);
-        this.txtLog.ForeColor = Color.Lime;
+        this.txtLog.Font = new Font("Consolas", 10F);
+        this.txtLog.BackColor = Color.FromArgb(15, 23, 42);
+        this.txtLog.ForeColor = Color.FromArgb(16, 185, 129);
 
         this.grpLog.Controls.Add(this.txtLog);
 
@@ -370,6 +393,97 @@ partial class MainForm
         this.StartPosition = FormStartPosition.CenterScreen;
         this.WindowState = FormWindowState.Maximized;
         this.Font = new Font("Segoe UI", 9F);
+
+        // =====================================================================
+        // Dark theme styling
+        // =====================================================================
+
+        // Form background
+        this.BackColor = Color.FromArgb(11, 17, 32);
+        this.ForeColor = Color.FromArgb(248, 250, 252);
+
+        // Panel backgrounds
+        this.panelLeft.BackColor = Color.FromArgb(11, 17, 32);
+        this.panelRight.BackColor = Color.FromArgb(11, 17, 32);
+        this.splitMain.BackColor = Color.FromArgb(51, 65, 85);
+
+        // GroupBox styling
+        this.grpWeight.ForeColor = Color.FromArgb(148, 163, 184);
+        this.grpVehicle.ForeColor = Color.FromArgb(148, 163, 184);
+        this.grpConnections.ForeColor = Color.FromArgb(148, 163, 184);
+        this.grpHistory.ForeColor = Color.FromArgb(148, 163, 184);
+        this.grpMode.ForeColor = Color.FromArgb(148, 163, 184);
+        this.grpManual.ForeColor = Color.FromArgb(148, 163, 184);
+        this.grpActions.ForeColor = Color.FromArgb(148, 163, 184);
+        this.grpSimulator.ForeColor = Color.FromArgb(148, 163, 184);
+        this.grpLog.ForeColor = Color.FromArgb(148, 163, 184);
+
+        // Vehicle info value labels - white text
+        this.lblPlateValue.ForeColor = Color.FromArgb(248, 250, 252);
+        this.lblCompanyValue.ForeColor = Color.FromArgb(248, 250, 252);
+        this.lblItemValue.ForeColor = Color.FromArgb(248, 250, 252);
+        this.lblDispatchValue.ForeColor = Color.FromArgb(248, 250, 252);
+        this.lblDriverValue.ForeColor = Color.FromArgb(248, 250, 252);
+
+        // Buttons - dark theme flat style
+        this.btnSearch.BackColor = Color.FromArgb(30, 41, 59);
+        this.btnSearch.ForeColor = Color.FromArgb(248, 250, 252);
+        this.btnSearch.FlatStyle = FlatStyle.Flat;
+        this.btnSearch.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+
+        this.btnReWeigh.BackColor = Color.FromArgb(30, 41, 59);
+        this.btnReWeigh.ForeColor = Color.FromArgb(248, 250, 252);
+        this.btnReWeigh.FlatStyle = FlatStyle.Flat;
+        this.btnReWeigh.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+
+        this.btnReset.BackColor = Color.FromArgb(30, 41, 59);
+        this.btnReset.ForeColor = Color.FromArgb(248, 250, 252);
+        this.btnReset.FlatStyle = FlatStyle.Flat;
+        this.btnReset.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+
+        this.btnBarrierOpen.BackColor = Color.FromArgb(30, 41, 59);
+        this.btnBarrierOpen.ForeColor = Color.FromArgb(248, 250, 252);
+        this.btnBarrierOpen.FlatStyle = FlatStyle.Flat;
+        this.btnBarrierOpen.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+
+        this.btnSimSensor.BackColor = Color.FromArgb(30, 41, 59);
+        this.btnSimSensor.ForeColor = Color.FromArgb(248, 250, 252);
+        this.btnSimSensor.FlatStyle = FlatStyle.Flat;
+        this.btnSimSensor.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+
+        this.btnSimLpr.BackColor = Color.FromArgb(30, 41, 59);
+        this.btnSimLpr.ForeColor = Color.FromArgb(248, 250, 252);
+        this.btnSimLpr.FlatStyle = FlatStyle.Flat;
+        this.btnSimLpr.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+
+        this.btnSimPosition.BackColor = Color.FromArgb(30, 41, 59);
+        this.btnSimPosition.ForeColor = Color.FromArgb(248, 250, 252);
+        this.btnSimPosition.FlatStyle = FlatStyle.Flat;
+        this.btnSimPosition.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+
+        this.btnSyncNow.BackColor = Color.FromArgb(30, 41, 59);
+        this.btnSyncNow.ForeColor = Color.FromArgb(248, 250, 252);
+        this.btnSyncNow.FlatStyle = FlatStyle.Flat;
+        this.btnSyncNow.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
+
+        // TextBox - dark theme
+        this.txtSearchPlate.BackColor = Color.FromArgb(15, 23, 42);
+        this.txtSearchPlate.ForeColor = Color.FromArgb(248, 250, 252);
+
+        // ComboBox - dark theme
+        this.cboDispatches.BackColor = Color.FromArgb(15, 23, 42);
+        this.cboDispatches.ForeColor = Color.FromArgb(248, 250, 252);
+
+        // RadioButtons - white text
+        this.rbAuto.ForeColor = Color.FromArgb(248, 250, 252);
+        this.rbManual.ForeColor = Color.FromArgb(248, 250, 252);
+
+        // CheckBox - white text
+        this.chkSimulatorMode.ForeColor = Color.FromArgb(248, 250, 252);
+
+        // ListView - dark theme
+        this.lvHistory.BackColor = Color.FromArgb(15, 23, 42);
+        this.lvHistory.ForeColor = Color.FromArgb(248, 250, 252);
     }
 
     #endregion
@@ -410,10 +524,15 @@ partial class MainForm
     private Panel indDisplay;
     private Panel indBarrier;
     private Panel indNetwork;
+    private Label lblIndicatorText;
+    private Label lblDisplayText;
+    private Label lblBarrierText;
+    private Label lblNetworkText;
 
     // History
     private GroupBox grpHistory;
     private ListView lvHistory;
+    private ContextMenuStrip ctxHistory;
 
     // Mode toggle
     private GroupBox grpMode;
@@ -424,6 +543,7 @@ partial class MainForm
     private GroupBox grpManual;
     private Label lblSearchPlate;
     private TextBox txtSearchPlate;
+    private Label lblPlateValidation;
     private Button btnSearch;
     private Label lblSelectDispatch;
     private ComboBox cboDispatches;
@@ -438,7 +558,7 @@ partial class MainForm
     // State + log
     private Label lblProcessState;
     private GroupBox grpLog;
-    private TextBox txtLog;
+    private RichTextBox txtLog;
 
     // Simulator controls
     private GroupBox grpSimulator;

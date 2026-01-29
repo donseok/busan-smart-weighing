@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/dispatch_provider.dart';
 import '../services/mock_data.dart';
 import '../config/api_config.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_drawer.dart';
+import '../app.dart';
 import 'dispatch/dispatch_list_screen.dart';
 import 'weighing/weighing_progress_screen.dart';
 import 'slip/slip_list_screen.dart';
@@ -19,7 +21,9 @@ import 'notice/notice_screen.dart';
 
 /// 홈 화면 위젯
 ///
-/// 하단 네비게이션 바 5개 탭(홈/배차/계량/계량표/더보기)과
+/// 하단 네비게이션 바를 통해 탭을 전환합니다.
+/// 관리자(MANAGER/ADMIN)는 5개 탭(홈/배차/계량/전표/더보기),
+/// 운전자(DRIVER)는 4개 탭(홈/배차/계량/더보기)을 표시합니다.
 /// [IndexedStack]으로 탭 전환 시 상태를 유지합니다.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,17 +36,28 @@ class _HomeScreenState extends State<HomeScreen> {
   /// 현재 선택된 탭 인덱스
   int _currentIndex = 0;
 
-  /// 하단 네비게이션 아이템 목록
-  static const List<_NavItem> _navItems = [
-    _NavItem(icon: Icons.dashboard_rounded, label: '홈'),
-    _NavItem(icon: Icons.local_shipping, label: '배차'),
-    _NavItem(icon: Icons.monitor_weight, label: '계량'),
-    _NavItem(icon: Icons.receipt_long, label: '계량표'),
-    _NavItem(icon: Icons.more_horiz, label: '더보기'),
+  /// 관리자용 화면 목록 (홈/배차/계량/전표/더보기)
+  late final List<Widget> _managerScreens;
+
+  /// 운전자용 화면 목록 (홈/배차/계량/더보기)
+  late final List<Widget> _driverScreens;
+
+  /// 관리자용 네비게이션 목록
+  static const List<NavigationDestination> _managerDestinations = [
+    NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: '홈'),
+    NavigationDestination(icon: Icon(Icons.local_shipping_outlined), selectedIcon: Icon(Icons.local_shipping), label: '배차'),
+    NavigationDestination(icon: Icon(Icons.scale_outlined), selectedIcon: Icon(Icons.scale), label: '계량'),
+    NavigationDestination(icon: Icon(Icons.receipt_long_outlined), selectedIcon: Icon(Icons.receipt_long), label: '전표'),
+    NavigationDestination(icon: Icon(Icons.more_horiz), selectedIcon: Icon(Icons.more_horiz), label: '더보기'),
   ];
 
-  /// 각 탭에 대응하는 화면 위젯 목록
-  late final List<Widget> _screens;
+  /// 운전자용 네비게이션 목록
+  static const List<NavigationDestination> _driverDestinations = [
+    NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: '홈'),
+    NavigationDestination(icon: Icon(Icons.local_shipping_outlined), selectedIcon: Icon(Icons.local_shipping), label: '배차'),
+    NavigationDestination(icon: Icon(Icons.scale_outlined), selectedIcon: Icon(Icons.scale), label: '계량'),
+    NavigationDestination(icon: Icon(Icons.more_horiz), selectedIcon: Icon(Icons.more_horiz), label: '더보기'),
+  ];
 
   /// 탭 전환 콜백 (대시보드 빠른 메뉴에서 사용)
   void _switchTab(int index) {
@@ -54,11 +69,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _screens = [
-      _DashboardContent(onSwitchTab: _switchTab),
+    _managerScreens = [
+      _DashboardContent(onSwitchTab: _switchTab, isManager: true),
       const DispatchListScreen(),
       const WeighingProgressScreen(),
       const SlipListScreen(),
+      const _MoreScreen(),
+    ];
+    _driverScreens = [
+      _DashboardContent(onSwitchTab: _switchTab, isManager: false),
+      const DispatchListScreen(),
+      const WeighingProgressScreen(),
       const _MoreScreen(),
     ];
   }
@@ -66,13 +87,29 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final isManager = authProvider.isManager;
+
+    // 역할에 따른 화면/네비게이션 목록 선택
+    final screens = isManager ? _managerScreens : _driverScreens;
+    final destinations = isManager ? _managerDestinations : _driverDestinations;
+
+    // 탭 개수 변경 시 인덱스 범위 보정
+    final safeIndex = _currentIndex.clamp(0, screens.length - 1);
+    if (safeIndex != _currentIndex) {
+      // setState 없이 직접 갱신 (build 중이므로)
+      _currentIndex = safeIndex;
+    }
+
     final isDashboard = _currentIndex == 0;
+
+    // AppBar 제목용 라벨 목록
+    final labels = destinations.map((d) => d.label).toList();
 
     return Scaffold(
       // 대시보드(홈)에서는 AppBar 숨김 (커스텀 헤더 사용)
       appBar: isDashboard ? null : AppBar(
         title: Text(
-          _navItems[_currentIndex].label,
+          labels[_currentIndex],
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -101,9 +138,9 @@ class _HomeScreenState extends State<HomeScreen> {
       // IndexedStack으로 탭 전환 시 각 화면의 상태를 유지
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
-      // 하단 네비게이션 바
+      // 하단 네비게이션 바 (역할별 탭 개수 분기)
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -112,29 +149,10 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        destinations: _navItems
-            .map(
-              (item) => NavigationDestination(
-                icon: Icon(item.icon),
-                selectedIcon: Icon(item.icon),
-                label: item.label,
-              ),
-            )
-            .toList(),
+        destinations: destinations,
       ),
     );
   }
-}
-
-/// 네비게이션 아이템 데이터 모델
-class _NavItem {
-  /// 아이콘
-  final IconData icon;
-
-  /// 라벨 텍스트
-  final String label;
-
-  const _NavItem({required this.icon, required this.label});
 }
 
 // ── 대시보드 콘텐츠 ──
@@ -143,11 +161,38 @@ class _NavItem {
 ///
 /// 인사말 헤더, 오늘 요약 카드(배차/완료/대기 건수),
 /// 빠른 메뉴 버튼, 최근 활동 목록을 표시합니다.
-class _DashboardContent extends StatelessWidget {
+/// [isManager]에 따라 빠른 메뉴 항목과 탭 인덱스가 달라집니다.
+/// Pull-to-Refresh와 헤더 새로고침 버튼을 지원합니다.
+class _DashboardContent extends StatefulWidget {
   /// 탭 전환 콜백 (빠른 메뉴 탭 시 호출)
   final void Function(int) onSwitchTab;
 
-  const _DashboardContent({required this.onSwitchTab});
+  /// 관리자 여부 (전표 탭 표시 및 탭 인덱스 결정에 사용)
+  final bool isManager;
+
+  const _DashboardContent({required this.onSwitchTab, required this.isManager});
+
+  @override
+  State<_DashboardContent> createState() => _DashboardContentState();
+}
+
+class _DashboardContentState extends State<_DashboardContent> {
+  /// 새로고침 진행 중 여부
+  bool _isRefreshing = false;
+
+  /// 대시보드 데이터 새로고침
+  ///
+  /// 배차 목록을 다시 조회하여 요약 통계를 갱신합니다.
+  Future<void> _handleRefresh() async {
+    setState(() => _isRefreshing = true);
+    // 배차 데이터를 새로고침하여 대시보드 통계에 반영
+    final authProvider = context.read<AuthProvider>();
+    final dispatchProvider = context.read<DispatchProvider>();
+    await dispatchProvider.fetchDispatches(isManager: authProvider.isManager);
+    if (mounted) {
+      setState(() => _isRefreshing = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,36 +201,40 @@ class _DashboardContent extends StatelessWidget {
     final unreadCount = ApiConfig.useMockData ? MockData.unreadNotificationCount : 0;
 
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── 헤더: 인사말 + 알림 벨 ──
-            _buildHeader(context, userName, unreadCount),
-            const SizedBox(height: 24),
+      child: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── 헤더: 인사말 + 새로고침 + 알림 벨 ──
+              _buildHeader(context, userName, unreadCount),
+              const SizedBox(height: 24),
 
-            // ── 오늘 요약 카드 ──
-            _buildSummaryCards(),
-            const SizedBox(height: 24),
+              // ── 오늘 요약 카드 ──
+              _buildSummaryCards(),
+              const SizedBox(height: 24),
 
-            // ── 빠른 메뉴 ──
-            _buildSectionTitle('빠른 메뉴'),
-            const SizedBox(height: 12),
-            _buildQuickActions(context),
-            const SizedBox(height: 24),
+              // ── 빠른 메뉴 ──
+              _buildSectionTitle('빠른 메뉴'),
+              const SizedBox(height: 12),
+              _buildQuickActions(context),
+              const SizedBox(height: 24),
 
-            // ── 최근 활동 ──
-            _buildSectionTitle('최근 활동'),
-            const SizedBox(height: 12),
-            _buildRecentActivities(),
-          ],
+              // ── 최근 활동 ──
+              _buildSectionTitle('최근 활동'),
+              const SizedBox(height: 12),
+              _buildRecentActivities(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// 헤더 영역: 사용자 인사말 + 알림 벨 아이콘
+  /// 헤더 영역: 사용자 인사말 + 새로고침 버튼 + 알림 벨 아이콘
   Widget _buildHeader(BuildContext context, String name, int unreadCount) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -213,6 +262,34 @@ class _DashboardContent extends StatelessWidget {
             ],
           ),
         ),
+        // 새로고침 버튼
+        IconButton(
+          onPressed: _isRefreshing ? null : _handleRefresh,
+          icon: _isRefreshing
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
+                )
+              : const Icon(
+                  Icons.refresh,
+                  color: AppColors.slate,
+                  size: 24,
+                ),
+          style: IconButton.styleFrom(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: AppColors.surfaceLight.withValues(alpha: 0.5)),
+            ),
+            padding: const EdgeInsets.all(10),
+          ),
+          tooltip: '새로고침',
+        ),
+        const SizedBox(width: 8),
         // 알림 벨 (미읽음 배지 포함)
         Stack(
           children: [
@@ -314,47 +391,56 @@ class _DashboardContent extends StatelessWidget {
     );
   }
 
-  /// 빠른 메뉴 영역 (배차확인/계량현황/계량표/이력조회)
+  /// 빠른 메뉴 영역 (역할별 분기)
+  ///
+  /// 관리자: 배차확인/계량현황/전표/이력조회 (4개)
+  /// 운전자: 배차확인/계량현황/이력조회 (3개)
   Widget _buildQuickActions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _QuickActionCard(
-            icon: Icons.local_shipping_outlined,
-            label: '배차확인',
-            color: AppColors.primary,
-            onTap: () => onSwitchTab(1),
-          ),
+    // 관리자: 홈(0)/배차(1)/계량(2)/전표(3)/더보기(4)
+    // 운전자: 홈(0)/배차(1)/계량(2)/더보기(3)
+    final moreTabIndex = widget.isManager ? 4 : 3;
+
+    final actions = <Widget>[
+      Expanded(
+        child: _QuickActionCard(
+          icon: Icons.local_shipping_outlined,
+          label: '배차확인',
+          color: AppColors.primary,
+          onTap: () => widget.onSwitchTab(1),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _QuickActionCard(
-            icon: Icons.monitor_weight_outlined,
-            label: '계량현황',
-            color: AppColors.green,
-            onTap: () => onSwitchTab(2),
-          ),
+      ),
+      const SizedBox(width: 10),
+      Expanded(
+        child: _QuickActionCard(
+          icon: Icons.monitor_weight_outlined,
+          label: '계량현황',
+          color: AppColors.green,
+          onTap: () => widget.onSwitchTab(2),
         ),
+      ),
+      if (widget.isManager) ...[
         const SizedBox(width: 10),
         Expanded(
           child: _QuickActionCard(
             icon: Icons.receipt_long_outlined,
-            label: '계량표',
+            label: '전표',
             color: AppColors.amber,
-            onTap: () => onSwitchTab(3),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _QuickActionCard(
-            icon: Icons.history,
-            label: '이력조회',
-            color: AppColors.blue,
-            onTap: () => onSwitchTab(4),
+            onTap: () => widget.onSwitchTab(3),
           ),
         ),
       ],
-    );
+      const SizedBox(width: 10),
+      Expanded(
+        child: _QuickActionCard(
+          icon: Icons.history,
+          label: '이력조회',
+          color: AppColors.blue,
+          onTap: () => widget.onSwitchTab(moreTabIndex),
+        ),
+      ),
+    ];
+
+    return Row(children: actions);
   }
 
   /// 최근 활동 목록 (Mock 데이터 기반)
@@ -666,6 +752,8 @@ class _MoreScreen extends StatelessWidget {
             onTap: () => context.push('/notifications'),
           ),
           const Divider(height: 32),
+          _ThemeToggleMenuItem(),
+          const Divider(height: 32),
           _MoreMenuItem(
             icon: Icons.logout,
             label: '로그아웃',
@@ -717,6 +805,41 @@ class _MoreMenuItem extends StatelessWidget {
       trailing: Icon(Icons.chevron_right, color: AppColors.surfaceLight),
       onTap: onTap,
       contentPadding: EdgeInsets.zero,
+    );
+  }
+}
+
+/// 테마 전환 메뉴 항목 위젯
+///
+/// 현재 테마 밝기를 감지하여 라이트/다크 모드 전환 버튼을 표시합니다.
+/// [themeNotifier]를 통해 앱 전역 테마를 변경합니다.
+class _ThemeToggleMenuItem extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, themeMode, _) {
+        final isDark = themeMode == ThemeMode.dark;
+        return ListTile(
+          leading: Icon(
+            isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+            color: AppColors.primary,
+          ),
+          title: Text(
+            isDark ? '라이트 모드' : '다크 모드',
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          subtitle: const Text('화면 테마를 전환합니다'),
+          trailing: Icon(Icons.chevron_right, color: AppColors.surfaceLight),
+          onTap: () {
+            themeNotifier.value =
+                isDark ? ThemeMode.light : ThemeMode.dark;
+          },
+          contentPadding: EdgeInsets.zero,
+        );
+      },
     );
   }
 }

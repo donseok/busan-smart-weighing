@@ -2,6 +2,7 @@ import React from 'react';
 import { Tag, theme } from 'antd';
 import type { WeightData, StabilityStatus } from '../../types/weighingStation';
 import { STABILITY_LABELS } from '../../types/weighingStation';
+import AnimatedNumber from '../AnimatedNumber';
 
 /**
  * 중량 표시 컴포넌트의 속성 인터페이스
@@ -41,11 +42,7 @@ const WeightDisplay: React.FC<WeightDisplayProps> = ({ weight }) => {
   /** 현재 안정성 상태에 맞는 색상 스타일 */
   const stabilityStyle = STABILITY_COLORS[weight.stability];
 
-  /** 중량 값을 한국어 로케일 형식으로 포맷 (소수점 1자리) */
-  const formattedWeight = weight.currentWeight.toLocaleString('ko-KR', {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  });
+  /** AnimatedNumber 컴포넌트를 사용하여 중량 값을 애니메이션으로 표시 */
 
   return (
     <div
@@ -103,6 +100,9 @@ const WeightDisplay: React.FC<WeightDisplayProps> = ({ weight }) => {
 
       {/* 중량 숫자 디스플레이 (모노스페이스 폰트, 72px 대형 표시) */}
       <div
+        role="status"
+        aria-live="assertive"
+        aria-label={`현재 중량 ${weight.currentWeight.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${weight.unit}, 상태: ${STABILITY_LABELS[weight.stability]}`}
         style={{
           fontFamily: "'JetBrains Mono', 'Consolas', 'Courier New', monospace",
           fontSize: 72,
@@ -120,7 +120,7 @@ const WeightDisplay: React.FC<WeightDisplayProps> = ({ weight }) => {
           padding: '16px 0',
         }}
       >
-        {formattedWeight}
+        <AnimatedNumber value={weight.currentWeight} decimals={1} duration={300} />
       </div>
 
       {/* 중량 단위 표시 (kg 등) */}

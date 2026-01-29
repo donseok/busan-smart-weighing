@@ -186,4 +186,74 @@ apiClient.interceptors.response.use(
   },
 );
 
+/**
+ * 구조화된 API 에러 인터페이스
+ *
+ * 에러 유형별로 분류하여 UI에서 적절한 메시지를 표시할 수 있도록 합니다.
+ * - NETWORK: 서버 연결 불가 (오프라인, 타임아웃 등)
+ * - BUSINESS: 비즈니스 로직 에러 (중복, 유효성 등)
+ * - AUTH: 인증/권한 에러 (401, 403)
+ * - UNKNOWN: 분류 불가 에러
+ */
+export interface ApiError {
+  type: 'NETWORK' | 'BUSINESS' | 'AUTH' | 'UNKNOWN';
+  code?: string;
+  message: string;
+  status?: number;
+}
+
+/**
+ * API 에러를 구조화된 ApiError 객체로 파싱하는 함수
+ *
+ * Axios 에러, 네트워크 에러, 비즈니스 에러 등을 분류하여
+ * 일관된 에러 객체로 변환합니다.
+ *
+ * @param error - catch 블록에서 받은 에러 객체
+ * @returns 구조화된 ApiError 객체
+ */
+export function parseApiError(error: unknown): ApiError {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<{ error?: { code?: string; message?: string }; message?: string }>;
+
+    if (!axiosError.response) {
+      return {
+        type: 'NETWORK',
+        message: '서버에 연결할 수 없습니다. 네트워크 상태를 확인해주세요.',
+      };
+    }
+
+    const status = axiosError.response.status;
+    const data = axiosError.response.data;
+
+    if (status === 401 || status === 403) {
+      return {
+        type: 'AUTH',
+        code: data?.error?.code,
+        message: data?.error?.message || '인증이 만료되었습니다. 다시 로그인해주세요.',
+        status,
+      };
+    }
+
+    if (data?.error) {
+      return {
+        type: 'BUSINESS',
+        code: data.error.code,
+        message: data.error.message || '요청을 처리할 수 없습니다.',
+        status,
+      };
+    }
+
+    return {
+      type: 'UNKNOWN',
+      message: data?.message || `서버 오류가 발생했습니다. (${status})`,
+      status,
+    };
+  }
+
+  return {
+    type: 'UNKNOWN',
+    message: '알 수 없는 오류가 발생했습니다.',
+  };
+}
+
 export default apiClient;

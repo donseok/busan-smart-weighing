@@ -25,4 +25,13 @@ class AppColors {
   static const slate = Color(0xFF94A3B8);
   static const slateLight = Color(0xFFCBD5E1);
   static const slateFooter = Color(0xFF475569);
+
+  // ── 라이트 테마 ──
+  static const Color lightBackground = Color(0xFFF8FAFC);
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightSurfaceVariant = Color(0xFFF1F5F9);
+  static const Color lightTextPrimary = Color(0xFF0F172A);
+  static const Color lightTextSecondary = Color(0xFF64748B);
+  static const Color lightBorder = Color(0xFFE2E8F0);
+  static const Color lightPrimary = Color(0xFF0891B2);
 }

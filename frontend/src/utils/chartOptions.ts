@@ -178,8 +178,9 @@ export function buildCompanyBarChartOption(companyStats: CompanyStatistics[], ct
     tooltip: {
       trigger: 'axis' as const,
       ...tooltipBase(ctx),
-      formatter: (params: { name: string; value: number; seriesName: string }[]) => {
-        const p = params[0];
+      formatter: (params: unknown) => {
+        const arr = params as { name: string; value: number; seriesName: string }[];
+        const p = arr[0];
         const stat = sorted.find((s) => s.companyName === p.name);
         return `${p.name}<br/>계량 건수: ${p.value}건<br/>총 중량: ${stat?.totalNetWeightTon.toFixed(2) || 0} 톤`;
       },
@@ -223,8 +224,9 @@ export function buildCompanyTopChartOption(companyStats: CompanyStatistics[], ct
     tooltip: {
       trigger: 'axis' as const,
       ...tooltipBase(ctx),
-      formatter: (params: { name: string; value: number }[]) => {
-        const p = params[0];
+      formatter: (params: unknown) => {
+        const arr = params as { name: string; value: number }[];
+        const p = arr[0];
         const stat = top5.find((s) => s.companyName === p.name);
         return `${p.name}<br/>계량 건수: ${p.value}건<br/>총 중량: ${stat?.totalNetWeightTon.toFixed(2) || 0} 톤`;
       },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Table, Button, Tooltip } from 'antd';
+import { Table, Button, Tooltip, Skeleton } from 'antd';
 import { HolderOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { TableProps, ColumnsType } from 'antd/es/table';
 import type { ColumnType } from 'antd/es/table';
@@ -32,12 +32,14 @@ import { CSS } from '@dnd-kit/utilities';
  * @property tableKey - 로컬스토리지에 컬럼 순서를 저장할 고유 키
  * @property enableSort - 컬럼별 정렬 기능 활성화 여부 (기본값: true)
  * @property enableColumnDrag - 컬럼 드래그 재배치 기능 활성화 여부 (기본값: true)
+ * @property skeletonRows - 초기 로딩 시 표시할 스켈레톤 행 수 (기본값: 5)
  */
 interface SortableTableProps<T> extends Omit<TableProps<T>, 'columns'> {
   columns: ColumnsType<T>;
   tableKey: string;
   enableSort?: boolean;
   enableColumnDrag?: boolean;
+  skeletonRows?: number;
 }
 
 /**
@@ -150,6 +152,7 @@ function SortableTable<T extends object>({
   tableKey,
   enableSort = true,
   enableColumnDrag = true,
+  skeletonRows = 5,
   ...tableProps
 }: SortableTableProps<T>) {
   /** 현재 컬럼 순서 상태 (컬럼 키 배열) */
@@ -349,6 +352,37 @@ function SortableTable<T extends object>({
       } as ColumnType<T>;
     });
   }, [orderedColumns]);
+
+  /** 초기 로딩 상태: 데이터가 없고 loading 중이면 스켈레톤 표시 */
+  const isInitialLoading = tableProps.loading && (!tableProps.dataSource || tableProps.dataSource.length === 0);
+
+  if (isInitialLoading) {
+    return (
+      <div>
+        {enableColumnDrag && (
+          <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-end' }}>
+            <Tooltip title="컬럼 순서 초기화">
+              <Button size="small" icon={<ReloadOutlined />} onClick={handleResetColumnOrder}>
+                컬럼 순서 초기화
+              </Button>
+            </Tooltip>
+          </div>
+        )}
+        <Table<T>
+          columns={finalColumns}
+          dataSource={[]}
+          locale={{ emptyText: (
+            <div style={{ padding: '12px 0' }}>
+              {Array.from({ length: skeletonRows }).map((_, i) => (
+                <Skeleton key={i} active title={false} paragraph={{ rows: 1, width: '100%' }} style={{ marginBottom: 8 }} />
+              ))}
+            </div>
+          )}}
+          pagination={false}
+        />
+      </div>
+    );
+  }
 
   /* 컬럼 드래그가 비활성화된 경우 DndContext 없이 일반 테이블만 렌더링 */
   if (!enableColumnDrag) {

@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/weighing_record.dart';
 import '../../providers/dispatch_provider.dart';
+import '../../theme/app_colors.dart';
 import '../../widgets/status_badge.dart';
 import '../../widgets/weight_display_card.dart';
 import 'otp_input_screen.dart';
@@ -32,6 +33,12 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
 
   /// 이전에 완료 상태였던 기록 ID 집합 (새 완료 감지용)
   Set<String> _previouslyCompletedIds = {};
+
+  /// 마지막 업데이트 시각
+  DateTime? _lastUpdated;
+
+  /// 수동 새로고침 진행 중 여부
+  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -107,6 +114,38 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
     }
 
     _previouslyCompletedIds = currentCompleted;
+
+    // 업데이트 시각 갱신
+    if (mounted) {
+      setState(() {
+        _lastUpdated = DateTime.now();
+      });
+    }
+  }
+
+  /// 수동 새로고침 핸들러
+  Future<void> _handleRefresh() async {
+    setState(() => _isRefreshing = true);
+    final provider = context.read<DispatchProvider>();
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    await provider.fetchWeighingRecords(
+      startDate: today,
+      endDate: today,
+    );
+    if (mounted) {
+      setState(() {
+        _isRefreshing = false;
+        _lastUpdated = DateTime.now();
+      });
+    }
+  }
+
+  /// 마지막 업데이트 시각을 상대 시간 문자열로 변환
+  String _formatLastUpdated(DateTime time) {
+    final diff = DateTime.now().difference(time);
+    if (diff.inSeconds < 60) return '방금 전';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+    return '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -114,9 +153,75 @@ class _WeighingProgressScreenState extends State<WeighingProgressScreen> {
     final provider = context.watch<DispatchProvider>();
     final theme = Theme.of(context);
 
-    return RefreshIndicator(
-      onRefresh: _loadRecords,
-      child: _buildBody(provider, theme),
+    return Column(
+      children: [
+        // 새로고침 툴바 (마지막 업데이트 시각 + 수동 새로고침 버튼)
+        _buildRefreshToolbar(theme),
+        // 본문 영역 (RefreshIndicator로 Pull-to-Refresh 지원)
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadRecords,
+            child: _buildBody(provider, theme),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 새로고침 툴바 빌드 (마지막 업데이트 시각 + 새로고침 버튼)
+  Widget _buildRefreshToolbar(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.access_time,
+            size: 14,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _lastUpdated != null
+                ? '최종 업데이트: ${_formatLastUpdated(_lastUpdated!)}'
+                : '로딩 중...',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontSize: 11,
+            ),
+          ),
+          const Spacer(),
+          SizedBox(
+            height: 32,
+            width: 32,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              iconSize: 20,
+              icon: _isRefreshing
+                  ? SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    )
+                  : Icon(
+                      Icons.refresh,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+              onPressed: _isRefreshing ? null : _handleRefresh,
+              tooltip: '새로고침',
+            ),
+          ),
+        ],
+      ),
     );
   }
 

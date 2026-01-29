@@ -15,10 +15,12 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/client';
 import { darkColors, lightColors } from '../theme/themeConfig';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { themeMode } = useTheme();
+  const { login } = useAuth();
   const colors = themeMode === 'dark' ? darkColors : lightColors;
   const isDark = themeMode === 'dark';
 
@@ -30,8 +32,7 @@ const LoginPage: React.FC = () => {
         password: values.password,
         deviceType: 'WEB',
       });
-      localStorage.setItem('accessToken', res.data.data.accessToken);
-      localStorage.setItem('refreshToken', res.data.data.refreshToken);
+      login(res.data.data.accessToken, res.data.data.refreshToken);
       navigate('/dashboard');
     } catch {
       message.error('로그인에 실패했습니다.');

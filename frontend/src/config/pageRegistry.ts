@@ -56,6 +56,7 @@ export interface PageConfig {
   title: string;        // 탭/메뉴 표시 제목
   icon: React.ReactNode; // 메뉴 아이콘
   closable: boolean;     // 탭 닫기 가능 여부
+  roles?: ('ADMIN' | 'MANAGER' | 'DRIVER')[]; // 접근 가능 역할 (미지정 시 전체 접근)
 }
 
 /** 전체 페이지 레지스트리 - 라우트 경로를 키로 사용 */
@@ -119,24 +120,28 @@ export const PAGE_REGISTRY: Record<string, PageConfig> = {
     title: '코드 관리',
     icon: React.createElement(TagsOutlined),
     closable: true,
+    roles: ['ADMIN', 'MANAGER'],
   },
   '/master/companies': {
     component: MasterCompanyPage,
     title: '운송사',
     icon: React.createElement(BankOutlined),
     closable: true,
+    roles: ['ADMIN', 'MANAGER'],
   },
   '/master/vehicles': {
     component: MasterVehiclePage,
     title: '차량',
     icon: React.createElement(CarOutlined),
     closable: true,
+    roles: ['ADMIN', 'MANAGER'],
   },
   '/master/scales': {
     component: MasterScalePage,
     title: '계량대',
     icon: React.createElement(ToolOutlined),
     closable: true,
+    roles: ['ADMIN', 'MANAGER'],
   },
   '/notices': {
     component: NoticePage,
@@ -155,18 +160,21 @@ export const PAGE_REGISTRY: Record<string, PageConfig> = {
     title: '사용자 관리',
     icon: React.createElement(UserOutlined),
     closable: true,
+    roles: ['ADMIN'],
   },
   '/admin/settings': {
     component: AdminSettingsPage,
     title: '시스템 설정',
     icon: React.createElement(ControlOutlined),
     closable: true,
+    roles: ['ADMIN'],
   },
   '/admin/audit-logs': {
     component: AdminAuditLogPage,
     title: '감사 로그',
     icon: React.createElement(FileSearchOutlined),
     closable: true,
+    roles: ['ADMIN'],
   },
   '/mypage': {
     component: MyPage,

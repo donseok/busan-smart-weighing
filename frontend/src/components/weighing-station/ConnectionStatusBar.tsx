@@ -71,6 +71,9 @@ const ConnectionStatusBar: React.FC<ConnectionStatusBarProps> = ({ devices }) =>
 
   return (
     <div
+      role="status"
+      aria-live="polite"
+      aria-label="장비 연결 상태"
       style={{
         background: `linear-gradient(135deg, ${token.colorBgContainer}, ${token.colorSuccess}08)`,
         border: `1px solid ${token.colorBorder}`,
@@ -92,6 +95,7 @@ const ConnectionStatusBar: React.FC<ConnectionStatusBarProps> = ({ devices }) =>
         return (
           <Tooltip key={item.key} title={`${item.label}: ${STATUS_LABELS[status]}`}>
             <div
+              aria-label={`${item.label}: ${STATUS_LABELS[status]}`}
               style={{
                 display: 'flex',
                 flexDirection: 'column',

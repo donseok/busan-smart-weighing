@@ -31,6 +31,22 @@ public partial class MainForm : Form
     // -- Dispatch search results cache ----------------------------------------
     private List<DispatchInfo> _searchResults = new();
 
+    // -- History sort state ------------------------------------------------
+    private int _lastSortColumn = -1;
+    private SortOrder _lastSortOrder = SortOrder.None;
+
+    // -- Dark theme colors ------------------------------------------------
+    private static readonly Color ThemeBgBase = Color.FromArgb(11, 17, 32);       // #0B1120
+    private static readonly Color ThemeBgSurface = Color.FromArgb(30, 41, 59);    // #1E293B
+    private static readonly Color ThemeBgElevated = Color.FromArgb(15, 23, 42);   // #0F172A
+    private static readonly Color ThemePrimary = Color.FromArgb(6, 182, 212);     // #06B6D4
+    private static readonly Color ThemeSuccess = Color.FromArgb(16, 185, 129);    // #10B981
+    private static readonly Color ThemeWarning = Color.FromArgb(245, 158, 11);    // #F59E0B
+    private static readonly Color ThemeError = Color.FromArgb(244, 63, 94);       // #F43E5E
+    private static readonly Color ThemeTextPrimary = Color.FromArgb(248, 250, 252); // #F8FAFC
+    private static readonly Color ThemeTextSecondary = Color.FromArgb(148, 163, 184); // #94A3B8
+    private static readonly Color ThemeBorder = Color.FromArgb(51, 65, 85);       // #334155
+
     // -- Constructor -----------------------------------------------------------
 
     public MainForm()
@@ -322,6 +338,32 @@ public partial class MainForm : Form
         btnReWeigh.Click += OnReWeighClick;
         btnReset.Click += OnResetClick;
         btnBarrierOpen.Click += OnBarrierOpenClick;
+        txtSearchPlate.TextChanged += OnSearchPlateTextChanged;
+        lvHistory.ColumnClick += OnHistoryColumnClick;
+        this.Resize += OnFormResize;
+    }
+
+    private void OnFormResize(object? sender, EventArgs e)
+    {
+        // Adjust weight display font size based on form width
+        float scaleFactor = Math.Max(0.6f, Math.Min(1.2f, ClientSize.Width / 1200f));
+        float weightFontSize = Math.Max(40f, 80f * scaleFactor);
+
+        if (Math.Abs(lblWeight.Font.Size - weightFontSize) > 2f)
+        {
+            lblWeight.Font = new Font("Consolas", weightFontSize, FontStyle.Bold);
+        }
+
+        // Adjust splitter proportionally
+        if (splitMain.Width > 0)
+        {
+            int targetDistance = (int)(splitMain.Width * 0.35);
+            targetDistance = Math.Max(300, Math.Min(500, targetDistance));
+            if (Math.Abs(splitMain.SplitterDistance - targetDistance) > 20)
+            {
+                splitMain.SplitterDistance = targetDistance;
+            }
+        }
     }
 
     // -- UI event handlers ----------------------------------------------------
@@ -348,6 +390,14 @@ public partial class MainForm : Form
         if (string.IsNullOrEmpty(plate))
         {
             AppendLog("검색할 차량번호를 입력하세요.");
+            txtSearchPlate.Focus();
+            return;
+        }
+
+        if (!IsValidPlateNumber(plate))
+        {
+            AppendLog($"[경고] 차량번호 형식이 올바르지 않습니다: {plate} (예: 12가1234, 서울12가1234)");
+            txtSearchPlate.Focus();
             return;
         }
 
@@ -465,6 +515,27 @@ public partial class MainForm : Form
         }
     }
 
+    private void OnSearchPlateTextChanged(object? sender, EventArgs e)
+    {
+        string plate = txtSearchPlate.Text.Trim();
+        if (string.IsNullOrEmpty(plate))
+        {
+            lblPlateValidation.Text = "";
+            return;
+        }
+
+        if (IsValidPlateNumber(plate))
+        {
+            lblPlateValidation.Text = "✓ 유효한 형식";
+            lblPlateValidation.ForeColor = ThemeSuccess;
+        }
+        else
+        {
+            lblPlateValidation.Text = "형식: 12가1234, 서울12가1234";
+            lblPlateValidation.ForeColor = ThemeWarning;
+        }
+    }
+
     // -- Service event handlers (thread-safe) ---------------------------------
 
     private void OnWeightReceived(object? sender, WeightEventArgs e)
@@ -488,7 +559,26 @@ public partial class MainForm : Form
             lblWeight.Text = e.Weight.ToString("F1");
             lblStability.Text = "안정";
             lblStability.BackColor = Color.Green;
+
+            // Audio alert: system beep for weight stabilization
+            System.Media.SystemSounds.Beep.Play();
+
+            // Visual flash effect on weight display
+            FlashWeightDisplay();
         });
+    }
+
+    private async void FlashWeightDisplay()
+    {
+        var originalColor = lblWeight.ForeColor;
+        for (int i = 0; i < 3; i++)
+        {
+            lblWeight.ForeColor = ThemeSuccess;
+            await Task.Delay(200);
+            lblWeight.ForeColor = originalColor;
+            await Task.Delay(200);
+        }
+        lblWeight.ForeColor = originalColor;
     }
 
     private void OnIndicatorError(object? sender, CommunicationErrorEventArgs e)
@@ -555,7 +645,20 @@ public partial class MainForm : Form
 
     private void SetConnectionIndicator(Panel indicator, bool connected)
     {
-        indicator.BackColor = connected ? Color.LimeGreen : Color.Red;
+        indicator.BackColor = connected ? ThemeSuccess : ThemeError;
+
+        // Update associated text label
+        Label? textLabel = null;
+        if (indicator == indIndicator) textLabel = lblIndicatorText;
+        else if (indicator == indDisplay) textLabel = lblDisplayText;
+        else if (indicator == indBarrier) textLabel = lblBarrierText;
+        else if (indicator == indNetwork) textLabel = lblNetworkText;
+
+        if (textLabel is not null)
+        {
+            textLabel.Text = connected ? "연결됨" : "끊김";
+            textLabel.ForeColor = connected ? ThemeSuccess : ThemeError;
+        }
     }
 
     private void AddHistoryEntry(WeighingRecord record)
@@ -575,30 +678,111 @@ public partial class MainForm : Form
         }
     }
 
+    private void OnHistoryColumnClick(object? sender, ColumnClickEventArgs e)
+    {
+        if (e.Column == _lastSortColumn)
+        {
+            _lastSortOrder = _lastSortOrder == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+        }
+        else
+        {
+            _lastSortColumn = e.Column;
+            _lastSortOrder = SortOrder.Ascending;
+        }
+
+        lvHistory.ListViewItemSorter = new ListViewItemComparer(e.Column, _lastSortOrder);
+        lvHistory.Sort();
+    }
+
+    private void OnExportCsvClick(object? sender, EventArgs e)
+    {
+        if (lvHistory.Items.Count == 0)
+        {
+            AppendLog("내보낼 계량 기록이 없습니다.");
+            return;
+        }
+
+        using var dialog = new SaveFileDialog();
+        dialog.Filter = "CSV 파일 (*.csv)|*.csv";
+        dialog.FileName = $"계량기록_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+
+        if (dialog.ShowDialog() == DialogResult.OK)
+        {
+            try
+            {
+                using var writer = new System.IO.StreamWriter(dialog.FileName, false, System.Text.Encoding.UTF8);
+                writer.WriteLine("시간,차량번호,중량(kg),모드,상태");
+
+                foreach (ListViewItem item in lvHistory.Items)
+                {
+                    var values = new string[item.SubItems.Count];
+                    for (int i = 0; i < item.SubItems.Count; i++)
+                    {
+                        values[i] = item.SubItems[i].Text;
+                    }
+                    writer.WriteLine(string.Join(",", values));
+                }
+
+                AppendLog($"CSV 내보내기 완료: {dialog.FileName}");
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"CSV 내보내기 실패: {ex.Message}");
+            }
+        }
+    }
+
+    private void OnPrintHistoryClick(object? sender, EventArgs e)
+    {
+        AppendLog("[정보] 인쇄 기능은 추후 업데이트 예정입니다.");
+    }
+
     private void AppendLog(string message)
     {
         string line = $"[{DateTime.Now:HH:mm:ss}] {message}";
 
         if (txtLog.InvokeRequired)
         {
-            txtLog.BeginInvoke(() => AppendLogInternal(line));
+            txtLog.BeginInvoke(() => AppendLogInternal(line, message));
         }
         else
         {
-            AppendLogInternal(line);
+            AppendLogInternal(line, message);
         }
     }
 
-    private void AppendLogInternal(string line)
+    private void AppendLogInternal(string line, string originalMessage)
     {
+        // Determine color based on message content
+        Color color;
+        if (originalMessage.Contains("오류") || originalMessage.Contains("실패") || originalMessage.Contains("[오류]") || originalMessage.Contains("ERROR"))
+        {
+            color = ThemeError;      // Rose for errors
+        }
+        else if (originalMessage.Contains("경고") || originalMessage.Contains("WARNING") || originalMessage.Contains("오프라인"))
+        {
+            color = ThemeWarning;    // Amber for warnings
+        }
+        else if (originalMessage.Contains("완료") || originalMessage.Contains("연결됨") || originalMessage.Contains("성공"))
+        {
+            color = ThemeSuccess;    // Emerald for success
+        }
+        else
+        {
+            color = ThemeSuccess;    // Default: emerald green for info
+        }
+
+        txtLog.SelectionStart = txtLog.TextLength;
+        txtLog.SelectionLength = 0;
+        txtLog.SelectionColor = color;
         txtLog.AppendText(line + Environment.NewLine);
 
         // Keep log from growing unbounded.
         if (txtLog.TextLength > 50000)
         {
-            txtLog.Text = txtLog.Text[20000..];
-            txtLog.SelectionStart = txtLog.TextLength;
-            txtLog.ScrollToCaret();
+            txtLog.Clear();
+            txtLog.SelectionColor = ThemeTextSecondary;
+            txtLog.AppendText("[로그가 정리되었습니다]" + Environment.NewLine);
         }
     }
 
@@ -626,29 +810,92 @@ public partial class MainForm : Form
         }
     }
 
-    /// <summary>
-    /// Shows a simple input dialog and returns the user's input.
-    /// </summary>
     private static string? ShowInputDialog(string title, string prompt)
     {
         using var form = new Form();
         form.Text = title;
-        form.ClientSize = new Size(350, 130);
+        form.ClientSize = new Size(400, 180);
         form.StartPosition = FormStartPosition.CenterParent;
         form.FormBorderStyle = FormBorderStyle.FixedDialog;
         form.MaximizeBox = false;
         form.MinimizeBox = false;
+        form.BackColor = Color.FromArgb(11, 17, 32);
+        form.ForeColor = Color.FromArgb(248, 250, 252);
 
-        var label = new Label { Text = prompt, Left = 10, Top = 15, AutoSize = true };
-        var textBox = new TextBox { Left = 10, Top = 40, Width = 320 };
-        var btnOk = new Button { Text = "확인", Left = 160, Top = 80, Width = 80, DialogResult = DialogResult.OK };
-        var btnCancel = new Button { Text = "취소", Left = 250, Top = 80, Width = 80, DialogResult = DialogResult.Cancel };
+        var label = new Label
+        {
+            Text = prompt,
+            Left = 20,
+            Top = 20,
+            AutoSize = true,
+            ForeColor = Color.FromArgb(148, 163, 184),
+            Font = new Font("Segoe UI", 10F),
+        };
+
+        var textBox = new TextBox
+        {
+            Left = 20,
+            Top = 50,
+            Width = 355,
+            Height = 32,
+            Font = new Font("Segoe UI", 11F),
+            BackColor = Color.FromArgb(15, 23, 42),
+            ForeColor = Color.FromArgb(248, 250, 252),
+            BorderStyle = BorderStyle.FixedSingle,
+        };
+
+        var btnOk = new Button
+        {
+            Text = "확인",
+            Left = 190,
+            Top = 100,
+            Width = 90,
+            Height = 36,
+            DialogResult = DialogResult.OK,
+            BackColor = Color.FromArgb(6, 182, 212),
+            ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat,
+            Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+        };
+        btnOk.FlatAppearance.BorderSize = 0;
+
+        var btnCancel = new Button
+        {
+            Text = "취소",
+            Left = 290,
+            Top = 100,
+            Width = 85,
+            Height = 36,
+            DialogResult = DialogResult.Cancel,
+            BackColor = Color.FromArgb(30, 41, 59),
+            ForeColor = Color.FromArgb(248, 250, 252),
+            FlatStyle = FlatStyle.Flat,
+            Font = new Font("Segoe UI", 10F),
+        };
+        btnCancel.FlatAppearance.BorderColor = Color.FromArgb(51, 65, 85);
 
         form.Controls.AddRange(new Control[] { label, textBox, btnOk, btnCancel });
         form.AcceptButton = btnOk;
         form.CancelButton = btnCancel;
 
         return form.ShowDialog() == DialogResult.OK ? textBox.Text : null;
+    }
+
+    /// <summary>
+    /// Validates a Korean vehicle plate number format.
+    /// Supports formats: 12가1234, 서울12가1234, 123가1234
+    /// </summary>
+    private static bool IsValidPlateNumber(string plate)
+    {
+        if (string.IsNullOrWhiteSpace(plate)) return false;
+        // Korean plate formats:
+        // Standard: 12가1234 (2digits + Korean + 4digits)
+        // Regional: 서울12가1234 (region + 2digits + Korean + 4digits)
+        // New: 123가1234 (3digits + Korean + 4digits)
+        return System.Text.RegularExpressions.Regex.IsMatch(
+            plate.Trim(),
+            @"^([가-힣]{2})?\d{2,3}[가-힣]\d{4}$"
+        );
     }
 
     // -- Service disposal -----------------------------------------------------
@@ -661,5 +908,42 @@ public partial class MainForm : Form
         _display?.Dispose();
         _indicator?.Dispose();
         _api?.Dispose();
+    }
+}
+
+/// <summary>
+/// ListView column sorter for history list.
+/// </summary>
+internal class ListViewItemComparer : System.Collections.IComparer
+{
+    private readonly int _column;
+    private readonly SortOrder _order;
+
+    public ListViewItemComparer(int column, SortOrder order)
+    {
+        _column = column;
+        _order = order;
+    }
+
+    public int Compare(object? x, object? y)
+    {
+        if (x is not ListViewItem itemX || y is not ListViewItem itemY)
+            return 0;
+
+        string textX = itemX.SubItems[_column].Text;
+        string textY = itemY.SubItems[_column].Text;
+
+        int result;
+        // Try numeric comparison for weight column (index 2)
+        if (_column == 2 && decimal.TryParse(textX, out decimal numX) && decimal.TryParse(textY, out decimal numY))
+        {
+            result = numX.CompareTo(numY);
+        }
+        else
+        {
+            result = string.Compare(textX, textY, StringComparison.CurrentCulture);
+        }
+
+        return _order == SortOrder.Descending ? -result : result;
     }
 }

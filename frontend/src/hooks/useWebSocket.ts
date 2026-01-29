@@ -6,6 +6,8 @@
  * 대시보드, 계량 현황, 모니터링 등의 페이지에서
  * 실시간 데이터 갱신 트리거로 사용됩니다.
  *
+ * FULL: 전체 데이터 갱신, DELTA: 부분 데이터 갱신, EVENT: 이벤트 알림
+ *
  * @param onMessage - WebSocket 메시지 수신 시 호출되는 콜백 함수
  */
 
@@ -13,9 +15,22 @@ import { useEffect, useRef } from 'react';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
-export function useWebSocket(onMessage?: (msg: any) => void) {
+export interface WebSocketMessage {
+  type: 'FULL' | 'DELTA' | 'EVENT';
+  topic?: string;
+  data?: unknown;
+  timestamp?: string;
+}
+
+export function useWebSocket(onMessage?: (msg: WebSocketMessage) => void) {
   /** STOMP 클라이언트 인스턴스 참조 */
   const clientRef = useRef<Client | null>(null);
+  const callbackRef = useRef(onMessage);
+
+  // Keep callback ref updated without reconnecting
+  useEffect(() => {
+    callbackRef.current = onMessage;
+  }, [onMessage]);
 
   useEffect(() => {
     const client = new Client({
@@ -25,9 +40,14 @@ export function useWebSocket(onMessage?: (msg: any) => void) {
       onConnect: () => {
         // 계량 업데이트 토픽 구독 - 메시지 수신 시 콜백 호출
         client.subscribe('/topic/weighing-updates', (message) => {
-          if (onMessage && message.body) {
+          if (callbackRef.current && message.body) {
             try {
-              onMessage(JSON.parse(message.body));
+              const parsed = JSON.parse(message.body);
+              // Support both legacy (raw data) and new (typed) message formats
+              const wsMessage: WebSocketMessage = parsed.type
+                ? parsed
+                : { type: 'FULL', data: parsed };
+              callbackRef.current(wsMessage);
             } catch {
               /* JSON 파싱 에러 무시 */
             }
@@ -46,5 +66,5 @@ export function useWebSocket(onMessage?: (msg: any) => void) {
         clientRef.current.deactivate();
       }
     };
-  }, [onMessage]);
+  }, []); // Only connect once
 }

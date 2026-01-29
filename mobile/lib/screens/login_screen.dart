@@ -18,7 +18,7 @@ import '../theme/app_colors.dart';
 /// - 시안 글로우 효과 (우상단/좌하단)
 /// - 로고 섹션 (트럭 아이콘, 앱 제목)
 /// - 글래스 카드 폼 (아이디, 비밀번호, 자동로그인, 로그인/OTP 버튼)
-/// - 푸터 (아이디/비밀번호 찾기, 버전)
+/// - 푸터 (관리자 문의 안내, 버전)
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -504,19 +504,27 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// 하단 푸터 (아이디/비밀번호 찾기 링크 + 버전 정보)
+  /// 하단 푸터 (관리자 문의 안내 + 버전 정보)
   Widget _buildFooter() {
     return Column(
       children: [
-        // 푸터 링크 목록
+        // 관리자 문의 안내
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildFooterLink('아이디 찾기'),
-            _buildFooterDivider(),
-            _buildFooterLink('비밀번호 찾기'),
-            _buildFooterDivider(),
-            _buildFooterLink('회원가입'),
+            Icon(
+              Icons.support_agent_outlined,
+              color: AppColors.slateFooter,
+              size: 14,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '계정 문의: 시스템 관리자에게 연락하세요',
+              style: TextStyle(
+                color: AppColors.slateFooter,
+                fontSize: 12,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
@@ -532,34 +540,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  /// 푸터 링크 텍스트
-  Widget _buildFooterLink(String text) {
-    return GestureDetector(
-      onTap: () {
-        // TODO: Navigate to respective page
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: AppColors.slateFooter,
-            fontSize: 12,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 푸터 구분선
-  Widget _buildFooterDivider() {
-    return Container(
-      width: 1,
-      height: 12,
-      color: AppColors.slateFooter.withValues(alpha: 0.3),
     );
   }
 }

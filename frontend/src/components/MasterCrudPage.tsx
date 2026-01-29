@@ -7,16 +7,18 @@
  *
  * @module components/MasterCrudPage
  */
-import React, { useEffect, useCallback, type ReactNode } from 'react';
+import { useEffect, useCallback, type ReactNode } from 'react';
 import { Button, Space, Typography, Modal, Form, Popconfirm, message, Input } from 'antd';
 import SortableTable from './SortableTable';
+import EmptyState from './EmptyState';
 import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import apiClient from '../api/client';
+import apiClient, { parseApiError } from '../api/client';
 import { useCrudState } from '../hooks/useCrudState';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 /** 개별 Master 페이지에서 전달하는 설정 */
-export interface MasterCrudPageConfig<T extends Record<string, unknown>> {
+export interface MasterCrudPageConfig<T extends object> {
   /** 페이지 제목 (e.g. "운송사 관리") */
   title: string;
   /** API 엔드포인트 (e.g. "/master/companies") */
@@ -61,7 +63,7 @@ export interface MasterCrudPageConfig<T extends Record<string, unknown>> {
  * @param config - 페이지 설정 (엔드포인트, 컬럼, 폼 필드 등)
  * @returns 마스터 데이터 관리 페이지 JSX
  */
-export default function MasterCrudPage<T extends Record<string, unknown>>({
+export default function MasterCrudPage<T extends object>({
   title,
   endpoint,
   rowKey,
@@ -105,11 +107,12 @@ export default function MasterCrudPage<T extends Record<string, unknown>>({
         : { size: 50, ...(keyword ? { filter: keyword } : {}) };
       const res = await apiClient.get(endpoint, { params });
       setData(extract(res.data));
-    } catch {
-      console.error(`[${entityName}] 데이터 조회 실패`);
+    } catch (err) {
+      const apiError = parseApiError(err);
+      message.error(apiError.message);
     }
     setLoading(false);
-  }, [endpoint, buildFetchParams, entityName, extract, setData, setLoading]);
+  }, [endpoint, buildFetchParams, extract, setData, setLoading]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -122,7 +125,11 @@ export default function MasterCrudPage<T extends Record<string, unknown>>({
       message.success(`${entityName}가 등록되었습니다.`);
       closeCreateModal();
       fetchData(searchKeyword);
-    } catch { /* validation error */ }
+    } catch (err) {
+      if (err && typeof err === 'object' && 'errorFields' in err) return;
+      const apiError = parseApiError(err);
+      message.error(apiError.message);
+    }
   };
 
   const handleEdit = (record: T) => {
@@ -137,7 +144,11 @@ export default function MasterCrudPage<T extends Record<string, unknown>>({
       message.success(`${entityName}가 수정되었습니다.`);
       closeEditModal();
       fetchData(searchKeyword);
-    } catch { /* validation error */ }
+    } catch (err) {
+      if (err && typeof err === 'object' && 'errorFields' in err) return;
+      const apiError = parseApiError(err);
+      message.error(apiError.message);
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -177,6 +188,15 @@ export default function MasterCrudPage<T extends Record<string, unknown>>({
 
   const displayData = filterData ? filterData(data, searchKeyword) : data;
 
+  useKeyboardShortcuts([
+    {
+      key: 'n',
+      ctrl: true,
+      handler: openCreateModal,
+      description: `${entityName} 등록`,
+    },
+  ]);
+
   return (
     <>
       <Typography.Title level={4}>{title}</Typography.Title>
@@ -209,6 +229,16 @@ export default function MasterCrudPage<T extends Record<string, unknown>>({
         loading={loading}
         size="middle"
         tableKey={tableKey}
+        locale={{
+          emptyText: (
+            <EmptyState
+              title={`등록된 ${entityName}가 없습니다`}
+              description={`${entityName} 등록 버튼을 클릭하여 새로운 ${entityName}를 추가하세요.`}
+              actionText={`${entityName} 등록`}
+              onAction={openCreateModal}
+            />
+          ),
+        }}
       />
 
       <Modal

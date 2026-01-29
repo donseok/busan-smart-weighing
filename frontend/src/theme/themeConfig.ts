@@ -48,6 +48,58 @@ const lightColors = {
 // 기존 호환성을 위한 colors (다크 테마 기본)
 const colors = darkColors;
 
+/** 디자인 토큰: 타이포그래피 */
+export const typography = {
+  /** 페이지 제목 */
+  titleLg: { fontSize: 20, fontWeight: 600, lineHeight: 1.4 },
+  /** 섹션 제목 */
+  titleMd: { fontSize: 16, fontWeight: 600, lineHeight: 1.5 },
+  /** 카드/그룹 제목 */
+  titleSm: { fontSize: 14, fontWeight: 600, lineHeight: 1.5 },
+  /** 본문 기본 */
+  bodyMd: { fontSize: 14, lineHeight: 1.6 },
+  /** 본문 작은 */
+  bodySm: { fontSize: 13, lineHeight: 1.5 },
+  /** 캡션/보조 */
+  caption: { fontSize: 12, lineHeight: 1.4 },
+  /** 라벨 */
+  label: { fontSize: 12, fontWeight: 500, letterSpacing: '0.02em' },
+} as const;
+
+/** 디자인 토큰: 간격 */
+export const spacing = {
+  /** 최소 간격 (4px) */
+  xs: 4,
+  /** 작은 간격 (8px) */
+  sm: 8,
+  /** 기본 간격 (12px) */
+  md: 12,
+  /** 넓은 간격 (16px) */
+  lg: 16,
+  /** 큰 간격 (24px) */
+  xl: 24,
+  /** 최대 간격 (32px) */
+  xxl: 32,
+  /** 페이지 마진 */
+  page: 24,
+  /** 카드 내부 패딩 */
+  card: 16,
+  /** 섹션 간격 */
+  section: 20,
+} as const;
+
+/** 디자인 토큰: 아이콘 크기 */
+export const iconSize = {
+  /** 인라인 아이콘 */
+  sm: 14,
+  /** 기본 아이콘 */
+  md: 16,
+  /** 버튼 아이콘 */
+  lg: 20,
+  /** 헤더/타이틀 아이콘 */
+  xl: 24,
+} as const;
+
 export const darkTheme: ThemeConfig = {
   algorithm: theme.darkAlgorithm,
   token: {
@@ -68,6 +120,8 @@ export const darkTheme: ThemeConfig = {
     colorLink: colors.primary,
     colorLinkHover: '#22D3EE',
     controlHeight: 36,
+    controlOutline: 'rgba(6, 182, 212, 0.25)',
+    controlOutlineWidth: 2,
     wireframe: false,
   },
   components: {
@@ -174,6 +228,8 @@ export const lightTheme: ThemeConfig = {
     colorLink: lightColors.primary,
     colorLinkHover: '#0E7490',
     controlHeight: 36,
+    controlOutline: 'rgba(8, 145, 178, 0.2)',
+    controlOutlineWidth: 2,
     wireframe: false,
   },
   components: {

@@ -15,6 +15,7 @@ import { ConfigProvider } from 'antd';
 import koKR from 'antd/locale/ko_KR';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { TabProvider } from './context/TabContext';
+import { AuthProvider } from './context/AuthContext';
 import { darkTheme, lightTheme } from './theme/themeConfig';
 import App from './App';
 
@@ -26,9 +27,11 @@ const ThemedApp: React.FC = () => {
   return (
     <ConfigProvider locale={koKR} theme={currentTheme}>
       <BrowserRouter>
-        <TabProvider>
-          <App />
-        </TabProvider>
+        <AuthProvider>
+          <TabProvider>
+            <App />
+          </TabProvider>
+        </AuthProvider>
       </BrowserRouter>
     </ConfigProvider>
   );

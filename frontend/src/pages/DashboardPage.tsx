@@ -8,10 +8,12 @@
  * @module pages/DashboardPage
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Card, Spin, Typography, Tabs, Space, Modal } from 'antd';
+import { Card, Spin, Typography, Tabs, Space, Modal, Skeleton, Row, Col } from 'antd';
 import { NotificationOutlined } from '@ant-design/icons';
 import apiClient from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
+import type { WebSocketMessage } from '../hooks/useWebSocket';
+import { useTabVisible } from '../hooks/useTabVisible';
 import type {
   ApiResponse,
   WeighingStatistics,
@@ -44,6 +46,7 @@ const DashboardPage: React.FC = () => {
   const { themeMode } = useTheme();
   const colors = themeMode === 'dark' ? darkColors : lightColors;
   const chartCtx = useMemo(() => ({ colors, themeMode: themeMode as 'dark' | 'light' }), [colors, themeMode]);
+  const isVisible = useTabVisible('/dashboard');
 
   const [statistics, setStatistics] = useState<WeighingStatistics | null>(null);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -118,11 +121,34 @@ const DashboardPage: React.FC = () => {
 
   useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
-  const handleWebSocketMessage = useCallback(() => {
-    fetchStatistics();
-    fetchSummary();
-    fetchInProgressWeighings();
-  }, [fetchStatistics, fetchSummary, fetchInProgressWeighings]);
+  const handleWebSocketMessage = useCallback((msg: WebSocketMessage) => {
+    if (!isVisible) return;
+
+    if (msg.type === 'DELTA' && msg.topic) {
+      // Delta update - refresh only the affected data
+      switch (msg.topic) {
+        case 'statistics':
+          fetchStatistics();
+          break;
+        case 'summary':
+          fetchSummary();
+          break;
+        case 'in-progress':
+          fetchInProgressWeighings();
+          break;
+        default:
+          // Unknown topic - refresh all
+          fetchStatistics();
+          fetchSummary();
+          fetchInProgressWeighings();
+      }
+    } else {
+      // Full update or legacy format - refresh everything
+      fetchStatistics();
+      fetchSummary();
+      fetchInProgressWeighings();
+    }
+  }, [isVisible, fetchStatistics, fetchSummary, fetchInProgressWeighings]);
 
   useWebSocket(handleWebSocketMessage);
 
@@ -177,9 +203,23 @@ const DashboardPage: React.FC = () => {
   return (
     <>
       <Typography.Title level={4} style={{ marginBottom: 20 }}>대시보드</Typography.Title>
-      <Spin spinning={loading}>
+      {loading ? (
+        <div>
+          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+            {[1, 2, 3, 4].map(i => (
+              <Col span={6} key={i}>
+                <Card><Skeleton active paragraph={{ rows: 1 }} /></Card>
+              </Col>
+            ))}
+          </Row>
+          <Row gutter={[16, 16]}>
+            <Col span={12}><Card><Skeleton active paragraph={{ rows: 6 }} /></Card></Col>
+            <Col span={12}><Card><Skeleton active paragraph={{ rows: 6 }} /></Card></Col>
+          </Row>
+        </div>
+      ) : (
         <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} style={{ marginBottom: 24 }} />
-      </Spin>
+      )}
       <Modal
         title={<Space><NotificationOutlined />{selectedNotice?.title}</Space>}
         open={noticeModalVisible}

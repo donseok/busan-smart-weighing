@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/dispatch_provider.dart';
+import '../../utils/toast_utils.dart';
 
 /// OTP 인증 입력 화면 위젯
 ///
@@ -154,18 +155,16 @@ class _OtpInputScreenState extends State<OtpInputScreen> {
     });
 
     if (response.success && response.data == true) {
-      // 인증 성공: 스낵바 표시 후 결과 반환
+      // 인증 성공: 토스트 표시 후 결과 반환
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('OTP 인증이 완료되었습니다.'),
-            backgroundColor: Color(0xFF10B981),
-          ),
-        );
+        ToastUtils.showSuccess(context, 'OTP 인증이 완료되었습니다.');
         Navigator.pop(context, true);
       }
     } else {
-      // 인증 실패: 에러 메시지 표시 및 코드 초기화
+      // 인증 실패: 토스트 + 에러 메시지 표시 및 코드 초기화
+      if (mounted) {
+        ToastUtils.showError(context, 'OTP 인증에 실패했습니다. 다시 시도해주세요.');
+      }
       setState(() {
         _errorMessage =
             response.error?.message ?? 'OTP 인증에 실패했습니다. 다시 시도해주세요.';

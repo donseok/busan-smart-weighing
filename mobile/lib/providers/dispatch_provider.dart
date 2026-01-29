@@ -11,6 +11,7 @@ import '../models/weighing_slip.dart';
 import '../models/api_response.dart';
 import '../services/api_service.dart';
 import '../services/mock_api_service.dart';
+import '../services/offline_cache_service.dart';
 
 /// 배차/계량/계량표 상태 관리 Provider
 ///
@@ -53,6 +54,20 @@ class DispatchProvider extends ChangeNotifier {
   /// 오류 메시지
   String? _errorMessage;
 
+  /// 오프라인 모드 여부 (캐시 데이터 사용 중)
+  bool _isOfflineMode = false;
+
+  // ── 페이지네이션 ──
+
+  /// 현재 페이지 번호 (0-based)
+  int _currentPage = 0;
+
+  /// 추가 데이터 존재 여부
+  bool _hasMore = true;
+
+  /// 페이지당 항목 수
+  static const int _pageSize = 20;
+
   /// 실제 API를 사용하는 기본 생성자
   DispatchProvider(ApiService apiService)
       : _apiService = apiService,
@@ -83,6 +98,12 @@ class DispatchProvider extends ChangeNotifier {
 
   /// 오류 메시지 (없으면 null)
   String? get errorMessage => _errorMessage;
+
+  /// 추가 페이지 데이터 존재 여부
+  bool get hasMore => _hasMore;
+
+  /// 오프라인 모드 여부 (캐시 데이터를 표시 중인지)
+  bool get isOfflineMode => _isOfflineMode;
 
   // ── 내부 API 호출 헬퍼 ──
 
@@ -119,6 +140,9 @@ class DispatchProvider extends ChangeNotifier {
   Future<void> fetchDispatches({bool isManager = false}) async {
     _isLoading = true;
     _errorMessage = null;
+    _isOfflineMode = false;
+    _currentPage = 0;
+    _hasMore = true;
     notifyListeners();
 
     try {
@@ -126,7 +150,11 @@ class DispatchProvider extends ChangeNotifier {
           isManager ? ApiConfig.dispatchesUrl : ApiConfig.myDispatchesUrl;
       final response = await _get<List<Dispatch>>(
         url,
-        queryParameters: {'date': DateTime.now().toIso8601String().split('T')[0]},
+        queryParameters: {
+          'date': DateTime.now().toIso8601String().split('T')[0],
+          'page': 0,
+          'size': _pageSize,
+        },
         fromData: (data) {
           // 단순 배열 응답 처리
           if (data is List) {
@@ -146,15 +174,98 @@ class DispatchProvider extends ChangeNotifier {
 
       if (response.success && response.data != null) {
         _dispatches = response.data!;
+        _hasMore = _dispatches.length >= _pageSize;
+        // 성공 시 캐시에 저장
+        try {
+          final cacheData = _dispatches.map((d) => d.toJson()).toList();
+          await OfflineCacheService.save('dispatches', cacheData);
+        } catch (_) {
+          // 캐시 저장 실패는 무시
+        }
       } else {
         _errorMessage = response.error?.message ?? '배차 목록을 불러올 수 없습니다.';
       }
     } catch (e) {
-      _errorMessage = '배차 목록 조회 중 오류가 발생했습니다.';
+      // 오프라인 폴백: 캐시된 데이터 로드 시도
+      try {
+        final cached = await OfflineCacheService.load('dispatches');
+        if (cached != null && cached is List) {
+          _dispatches = cached
+              .map((e) => Dispatch.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList();
+          _isOfflineMode = true;
+          _errorMessage = null;
+        } else {
+          _errorMessage = '배차 목록 조회 중 오류가 발생했습니다.';
+        }
+      } catch (_) {
+        _errorMessage = '배차 목록 조회 중 오류가 발생했습니다.';
+      }
     }
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// 배차 목록 추가 페이지 조회 (무한 스크롤)
+  ///
+  /// [isManager]가 true이면 전체 배차를, false이면 내 배차만 조회합니다.
+  /// [date]를 지정하면 해당 날짜 기준으로 필터링합니다.
+  /// 더 이상 로드할 데이터가 없거나 이미 로딩 중이면 요청을 무시합니다.
+  Future<void> fetchMoreDispatches({
+    bool isManager = false,
+    String? date,
+  }) async {
+    if (!_hasMore || _isLoading) return;
+
+    _isLoading = true;
+    _currentPage++;
+    notifyListeners();
+
+    try {
+      final url =
+          isManager ? ApiConfig.dispatchesUrl : ApiConfig.myDispatchesUrl;
+      final response = await _get<List<Dispatch>>(
+        url,
+        queryParameters: {
+          'date': date ?? DateTime.now().toIso8601String().split('T')[0],
+          'page': _currentPage,
+          'size': _pageSize,
+        },
+        fromData: (data) {
+          if (data is List) {
+            return data
+                .map((e) => Dispatch.fromJson(e as Map<String, dynamic>))
+                .toList();
+          }
+          if (data is Map<String, dynamic> && data.containsKey('content')) {
+            return (data['content'] as List)
+                .map((e) => Dispatch.fromJson(e as Map<String, dynamic>))
+                .toList();
+          }
+          return <Dispatch>[];
+        },
+      );
+
+      if (response.success && response.data != null) {
+        final newItems = response.data!;
+        _dispatches = [..._dispatches, ...newItems];
+        _hasMore = newItems.length >= _pageSize;
+      } else {
+        _currentPage--;
+      }
+    } catch (e) {
+      _currentPage--;
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// 페이지네이션 상태 초기화
+  void resetPagination() {
+    _currentPage = 0;
+    _hasMore = true;
   }
 
   /// 배차 상세 조회
