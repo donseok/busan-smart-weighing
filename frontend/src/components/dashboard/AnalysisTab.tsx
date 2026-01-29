@@ -1,3 +1,11 @@
+/**
+ * @fileoverview 대시보드 분석 탭 컴포넌트
+ *
+ * 운송사별 계량 현황 바 차트, 운송사별 상세 테이블,
+ * 일별 계량 추이 라인 차트를 표시하는 분석 전용 탭입니다.
+ *
+ * @module components/dashboard/AnalysisTab
+ */
 import React from 'react';
 import { Card, Col, Row, Table } from 'antd';
 import { TeamOutlined } from '@ant-design/icons';
@@ -15,6 +23,12 @@ interface AnalysisTabProps {
   };
 }
 
+/**
+ * 대시보드 분석 탭 컴포넌트
+ *
+ * @param props - 운송사 통계 데이터, 차트 옵션, 테마 색상
+ * @returns 운송사별 분석 차트와 상세 테이블이 포함된 JSX
+ */
 const AnalysisTab: React.FC<AnalysisTabProps> = ({
   companyStats,
   companyBarChartOption,

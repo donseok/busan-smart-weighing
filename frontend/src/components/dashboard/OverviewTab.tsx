@@ -1,3 +1,12 @@
+/**
+ * @fileoverview 대시보드 개요 탭 컴포넌트
+ *
+ * 오늘/이번 달 계량 통계 요약 카드, 일별 추이 라인 차트,
+ * 품목별 파이 차트, 계량 방식별 바 차트, 운송사 Top 5 차트를 표시합니다.
+ * 고정 공지사항이 있을 경우 상단에 알림 배너를 노출합니다.
+ *
+ * @module components/dashboard/OverviewTab
+ */
 import React from 'react';
 import { Card, Col, Row, Statistic, Alert, Space, Tag } from 'antd';
 import {
@@ -37,6 +46,12 @@ const statCards = [
   { key: 'monthTotal', title: '이번 달 전체', icon: <CalendarOutlined />, field: 'monthTotalCount', suffix: '건', colorKey: 'fixed' },
 ] as const;
 
+/**
+ * 대시보드 개요 탭 컴포넌트
+ *
+ * @param props - 계량 통계, 공지사항, 차트 옵션 및 테마 색상
+ * @returns 통계 카드와 ECharts 차트가 포함된 개요 탭 JSX
+ */
 const OverviewTab: React.FC<OverviewTabProps> = ({
   statistics,
   pinnedNotices,

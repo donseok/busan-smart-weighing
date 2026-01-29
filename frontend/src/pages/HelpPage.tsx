@@ -31,6 +31,7 @@ import {
 } from '@ant-design/icons';
 import apiClient from '../api/client';
 
+/** FAQ 데이터 구조 */
 interface Faq {
   faqId: number;
   question: string;

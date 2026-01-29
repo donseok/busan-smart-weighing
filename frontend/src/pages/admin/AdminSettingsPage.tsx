@@ -35,11 +35,11 @@ const categoryLabels: Record<string, string> = {
 };
 
 const AdminSettingsPage: React.FC = () => {
-  const [settings, setSettings] = useState<SystemSetting[]>([]);
+  const [settings, setSettings] = useState<SystemSetting[]>([]);              // 전체 설정 목록
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [editedValues, setEditedValues] = useState<Record<number, string>>({});
-  const [activeTab, setActiveTab] = useState('GENERAL');
+  const [editedValues, setEditedValues] = useState<Record<number, string>>({}); // 수정된 설정값 (settingId → 새 값)
+  const [activeTab, setActiveTab] = useState('GENERAL');                       // 현재 카테고리 탭
 
   const fetchSettings = async () => {
     setLoading(true);

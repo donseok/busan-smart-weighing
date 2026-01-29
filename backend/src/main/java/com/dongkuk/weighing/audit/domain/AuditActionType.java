@@ -3,6 +3,16 @@ package com.dongkuk.weighing.audit.domain;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 감사 로그 작업 유형 열거형
+ *
+ * 감사 로그에 기록되는 사용자 작업 유형을 정의한다.
+ * 로그인/로그아웃, CRUD 작업, 비밀번호 초기화, 역할 변경,
+ * 활성화/비활성화, 잠금 해제 등을 포함한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @Getter
 @RequiredArgsConstructor
 public enum AuditActionType {

@@ -55,16 +55,16 @@ const entityTypeOptions = [
 ];
 
 const AdminAuditLogPage: React.FC = () => {
-  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [logs, setLogs] = useState<AuditLog[]>([]);                      // 감사 로그 목록
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 20, total: 0 });
-  const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);   // 상세 모달
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null); // 상세 보기 대상
 
-  // 필터 상태
-  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
-  const [actionType, setActionType] = useState('');
-  const [entityType, setEntityType] = useState('');
+  // 검색 필터 상태
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]); // 기간
+  const [actionType, setActionType] = useState('');   // 작업 유형 (CREATE/UPDATE/DELETE 등)
+  const [entityType, setEntityType] = useState('');   // 엔티티 유형 (USER/DISPATCH 등)
 
   const fetchLogs = async (page = 1, size = 20) => {
     setLoading(true);

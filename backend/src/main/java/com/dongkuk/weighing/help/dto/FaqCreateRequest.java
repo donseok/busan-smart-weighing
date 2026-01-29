@@ -4,6 +4,15 @@ import com.dongkuk.weighing.help.domain.FaqCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * FAQ 등록 요청 DTO
+ *
+ * FAQ 등록 시 필요한 정보를 전달하는 요청 객체.
+ * 질문, 답변, 카테고리, 정렬 순서를 포함한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 public record FaqCreateRequest(
         @NotBlank(message = "질문을 입력하세요")
         String question,

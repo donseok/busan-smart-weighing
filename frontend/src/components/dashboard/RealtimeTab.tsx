@@ -1,3 +1,12 @@
+/**
+ * @fileoverview 대시보드 실시간 현황 탭 컴포넌트
+ *
+ * 배차 현황, 출문증 현황, 계량 현황을 카드 형태로 표시하고,
+ * 현재 진행 중인 계량 목록을 테이블로 제공합니다.
+ * 각 현황 카드에는 완료율 프로그레스 바가 포함됩니다.
+ *
+ * @module components/dashboard/RealtimeTab
+ */
 import React from 'react';
 import { Card, Col, Row, Space, Badge, Tag, Table, Progress } from 'antd';
 import {
@@ -25,6 +34,12 @@ interface RealtimeTabProps {
   };
 }
 
+/**
+ * 실시간 현황 탭 컴포넌트
+ *
+ * @param props - 대시보드 요약 데이터, 진행 중 계량 목록, 테마 색상
+ * @returns 배차/출문증/계량 현황 카드와 실시간 계량 테이블 JSX
+ */
 const RealtimeTab: React.FC<RealtimeTabProps> = ({ summary, inProgressWeighings, colors }) => {
   const inProgressColumns: ColumnsType<WeighingRecord> = [
     { title: 'ID', dataIndex: 'weighingId', width: 60 },

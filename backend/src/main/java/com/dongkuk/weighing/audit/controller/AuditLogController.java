@@ -18,6 +18,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+/**
+ * 감사 로그 컨트롤러
+ *
+ * 시스템 감사 로그를 조회하는 REST API 엔드포인트를 제공한다.
+ * 관리자(ADMIN) 권한이 필요하며, 수행자/작업유형/대상엔티티/기간별
+ * 필터링과 페이징 조회를 지원한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @RestController
 @RequestMapping("/api/v1/admin/audit-logs")
 @RequiredArgsConstructor
@@ -26,6 +36,7 @@ public class AuditLogController {
 
     private final AuditLogService auditLogService;
 
+    /** 감사 로그 목록을 조건 필터링 및 페이징으로 조회한다. */
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AuditLogResponse>>> getAuditLogs(
             @RequestParam(required = false) Long actorId,
@@ -42,6 +53,7 @@ public class AuditLogController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
+    /** 특정 감사 로그의 상세 정보를 조회한다. */
     @GetMapping("/{auditLogId}")
     public ResponseEntity<ApiResponse<AuditLogResponse>> getAuditLog(
             @PathVariable Long auditLogId

@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Ant Design Form 유효성 검증 규칙 모음
+ *
+ * 전화번호, 사업자번호, 비밀번호 강도, 차량번호, 이메일 등
+ * 공통 유효성 검증 패턴과 날짜/교차 필드 검증기를 제공합니다.
+ *
+ * @module utils/validators
+ */
 import type { RuleObject } from 'antd/es/form';
 import dayjs from 'dayjs';
 
@@ -9,22 +17,34 @@ const PLATE_NUMBER_PATTERN = /^[가-힣]{0,2}\d{2,3}[가-힣]\d{4}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // --- Length Rules ---
+/**
+ * 최대 글자 수 유효성 검증 규칙을 생성합니다.
+ * @param n - 허용 최대 글자 수
+ * @returns Ant Design Form 규칙 객체
+ */
 export const maxLengthRule = (n: number): RuleObject => ({
   max: n,
   message: `${n}자 이하로 입력하세요`,
 });
 
+/**
+ * 최소 글자 수 유효성 검증 규칙을 생성합니다.
+ * @param n - 필수 최소 글자 수
+ * @returns Ant Design Form 규칙 객체
+ */
 export const minLengthRule = (n: number): RuleObject => ({
   min: n,
   message: `${n}자 이상 입력하세요`,
 });
 
 // --- Pattern Rules ---
+/** 전화번호 형식 유효성 검증 규칙 (예: 010-1234-5678) */
 export const phoneNumberRule: RuleObject = {
   pattern: PHONE_PATTERN,
   message: '올바른 전화번호 형식을 입력하세요 (예: 010-1234-5678)',
 };
 
+/** 사업자번호 유효성 검증 규칙 (숫자 10자리) */
 export const businessNumberRule: RuleObject = {
   pattern: BUSINESS_NUMBER_PATTERN,
   message: '사업자번호는 숫자 10자리를 입력하세요',

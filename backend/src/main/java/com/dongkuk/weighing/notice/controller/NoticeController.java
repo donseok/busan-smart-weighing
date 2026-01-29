@@ -21,6 +21,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 공지사항 컨트롤러
+ *
+ * 공지사항 CRUD 및 발행/고정 관리를 위한 REST API 엔드포인트를 제공한다.
+ * 관리자 전용 기능(등록/수정/삭제/발행/고정)과
+ * 일반 사용자 기능(목록 조회/카테고리별 조회/검색/상세 조회)을 포함한다.
+ *
+ * @author 시스템
+ * @since 1.0
+ */
 @RestController
 @RequestMapping("/api/v1/notices")
 @RequiredArgsConstructor
@@ -28,9 +38,7 @@ public class NoticeController {
 
     private final NoticeService noticeService;
 
-    /**
-     * 공지사항 등록 (관리자 전용)
-     */
+    /** 공지사항을 등록한다. 관리자 전용. */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<NoticeResponse>> createNotice(
@@ -42,9 +50,7 @@ public class NoticeController {
                 .body(ApiResponse.ok(response));
     }
 
-    /**
-     * 공지사항 수정 (관리자 전용)
-     */
+    /** 공지사항을 수정한다. 관리자 전용. */
     @PutMapping("/{noticeId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<NoticeResponse>> updateNotice(
@@ -54,9 +60,7 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    /**
-     * 공지사항 삭제 (관리자 전용)
-     */
+    /** 공지사항을 삭제한다. 관리자 전용. */
     @DeleteMapping("/{noticeId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteNotice(@PathVariable Long noticeId) {
@@ -64,9 +68,7 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.ok(null, "공지사항이 삭제되었습니다"));
     }
 
-    /**
-     * 공지사항 발행/비발행 토글 (관리자 전용)
-     */
+    /** 공지사항 발행/비발행 상태를 토글한다. 관리자 전용. */
     @PatchMapping("/{noticeId}/publish")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<NoticeResponse>> togglePublish(@PathVariable Long noticeId) {
@@ -74,9 +76,7 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    /**
-     * 공지사항 고정/해제 토글 (관리자 전용)
-     */
+    /** 공지사항 고정/해제 상태를 토글한다. 관리자 전용. */
     @PatchMapping("/{noticeId}/pin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<NoticeResponse>> togglePin(@PathVariable Long noticeId) {
@@ -84,9 +84,7 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    /**
-     * 공개된 공지사항 목록 조회 (모든 사용자)
-     */
+    /** 공개된 공지사항 목록을 페이징 조회한다. 고정 공지가 우선 표시된다. */
     @GetMapping
     public ResponseEntity<ApiResponse<Page<NoticeResponse>>> getPublishedNotices(
             @PageableDefault(size = 10, sort = "publishedAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -94,9 +92,7 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    /**
-     * 카테고리별 공지사항 목록 조회 (모든 사용자)
-     */
+    /** 카테고리별 공개된 공지사항 목록을 페이징 조회한다. */
     @GetMapping("/category/{category}")
     public ResponseEntity<ApiResponse<Page<NoticeResponse>>> getNoticesByCategory(
             @PathVariable NoticeCategory category,
@@ -105,9 +101,7 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    /**
-     * 전체 공지사항 목록 조회 (관리자 전용 - 비공개 포함)
-     */
+    /** 전체 공지사항 목록을 조회한다 (비공개 포함). 관리자 전용. */
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Page<NoticeResponse>>> getAllNotices(
@@ -116,9 +110,7 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    /**
-     * 공지사항 검색 (모든 사용자)
-     */
+    /** 제목 키워드로 공개된 공지사항을 검색한다. */
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<NoticeResponse>>> searchNotices(
             @RequestParam String keyword,
@@ -127,18 +119,14 @@ public class NoticeController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    /**
-     * 공지사항 상세 조회 (모든 사용자)
-     */
+    /** 공지사항 상세 정보를 조회한다. 조회수가 자동 증가한다. */
     @GetMapping("/{noticeId}")
     public ResponseEntity<ApiResponse<NoticeResponse>> getNoticeDetail(@PathVariable Long noticeId) {
         NoticeResponse response = noticeService.getNoticeDetail(noticeId);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-    /**
-     * 고정된 공지사항 목록 (모든 사용자)
-     */
+    /** 고정된 공개 공지사항 목록을 조회한다. */
     @GetMapping("/pinned")
     public ResponseEntity<ApiResponse<List<NoticeResponse>>> getPinnedNotices() {
         List<NoticeResponse> response = noticeService.getPinnedNotices();

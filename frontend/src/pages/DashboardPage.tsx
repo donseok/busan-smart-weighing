@@ -1,3 +1,12 @@
+/**
+ * @fileoverview 대시보드 페이지 컴포넌트
+ *
+ * 계량 통계, 실시간 현황, 분석 탭을 포함하는 메인 대시보드 페이지입니다.
+ * WebSocket을 통해 실시간 계량 데이터를 수신하고, 차트 옵션을 생성하여
+ * 개요(OverviewTab), 실시간(RealtimeTab), 분석(AnalysisTab) 탭에 전달합니다.
+ *
+ * @module pages/DashboardPage
+ */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, Spin, Typography, Tabs, Space, Modal } from 'antd';
 import { NotificationOutlined } from '@ant-design/icons';
@@ -24,6 +33,13 @@ import OverviewTab from '../components/dashboard/OverviewTab';
 import RealtimeTab from '../components/dashboard/RealtimeTab';
 import AnalysisTab from '../components/dashboard/AnalysisTab';
 
+/**
+ * 대시보드 페이지 컴포넌트
+ *
+ * 계량 통계, 배차/출문증 현황, 운송사별 통계 등 종합 대시보드를 렌더링합니다.
+ * 개요, 실시간 현황, 분석 세 개의 탭으로 구성되며,
+ * WebSocket 메시지 수신 시 통계 데이터를 자동 갱신합니다.
+ */
 const DashboardPage: React.FC = () => {
   const { themeMode } = useTheme();
   const colors = themeMode === 'dark' ? darkColors : lightColors;

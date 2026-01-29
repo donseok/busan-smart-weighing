@@ -30,6 +30,7 @@ import {
 import apiClient from '../api/client';
 import { phoneNumberRule, emailRule, maxLengthRule, passwordStrengthRule } from '../utils/validators';
 
+/** 사용자 프로필 데이터 구조 */
 interface MyProfile {
   userId: number;
   loginId: string;
