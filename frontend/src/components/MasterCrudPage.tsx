@@ -7,7 +7,7 @@
  *
  * @module components/MasterCrudPage
  */
-import { useEffect, useCallback, type ReactNode } from 'react';
+import { useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { Button, Space, Typography, Modal, Form, Popconfirm, message, Input } from 'antd';
 import SortableTable from './SortableTable';
 import EmptyState from './EmptyState';
@@ -91,28 +91,32 @@ export default function MasterCrudPage<T extends object>({
     resetSearch,
   } = useCrudState<T>();
 
-  const defaultExtract = (resData: unknown): T[] => {
+  const extractRef = useRef(extractData);
+  extractRef.current = extractData;
+  const buildParamsRef = useRef(buildFetchParams);
+  buildParamsRef.current = buildFetchParams;
+
+  const defaultExtract = useCallback((resData: unknown): T[] => {
     const d = resData as { data?: { content?: T[] } | T[] };
     if (Array.isArray(d.data)) return d.data;
     return (d.data as { content?: T[] })?.content || [];
-  };
-
-  const extract = extractData || defaultExtract;
+  }, []);
 
   const fetchData = useCallback(async (keyword?: string) => {
     setLoading(true);
     try {
-      const params = buildFetchParams
-        ? buildFetchParams(keyword)
+      const params = buildParamsRef.current
+        ? buildParamsRef.current(keyword)
         : { size: 50, ...(keyword ? { filter: keyword } : {}) };
       const res = await apiClient.get(endpoint, { params });
+      const extract = extractRef.current || defaultExtract;
       setData(extract(res.data));
     } catch (err) {
       const apiError = parseApiError(err);
       message.error(apiError.message);
     }
     setLoading(false);
-  }, [endpoint, buildFetchParams, extract, setData, setLoading]);
+  }, [endpoint, defaultExtract, setData, setLoading]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

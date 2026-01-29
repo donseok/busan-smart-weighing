@@ -17,7 +17,7 @@ import java.util.List;
  * 계량대 관리 컨트롤러
  *
  * 계량대(Scale) 등록, 조회, 수정, 상태 변경 기능을 제공하는 REST API 컨트롤러.
- * 모든 엔드포인트는 관리자(ADMIN) 권한이 필요하다.
+ * 모든 엔드포인트는 관리자(ADMIN) 또는 담당자(MANAGER) 권한이 필요하다.
  *
  * @author 시스템
  * @since 1.0
@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/master/scales")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
 public class ScaleController {
 
     private final ScaleService scaleService;
