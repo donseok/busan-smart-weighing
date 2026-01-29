@@ -7,6 +7,7 @@ import type { Dispatch } from '../types';
 import dayjs, { type Dayjs } from 'dayjs';
 import { colors } from '../theme/themeConfig';
 import SortableTable from '../components/SortableTable';
+import { maxLengthRule, futureOrPresentDateValidator } from '../utils/validators';
 
 const { RangePicker } = DatePicker;
 
@@ -182,10 +183,10 @@ const DispatchPage: React.FC = () => {
       <Form.Item name="itemType" label="품목유형" rules={[{ required: true }]}>
         <Select options={itemTypeOptions} />
       </Form.Item>
-      <Form.Item name="itemName" label="품목명" rules={[{ required: true }]}><Input /></Form.Item>
-      <Form.Item name="dispatchDate" label="배차일" rules={[{ required: true }]}><DatePicker style={{ width: '100%' }} /></Form.Item>
-      <Form.Item name="originLocation" label="출발지"><Input /></Form.Item>
-      <Form.Item name="destination" label="도착지"><Input /></Form.Item>
+      <Form.Item name="itemName" label="품목명" rules={[{ required: true }, maxLengthRule(100)]}><Input /></Form.Item>
+      <Form.Item name="dispatchDate" label="배차일" rules={[{ required: true }, { validator: futureOrPresentDateValidator }]}><DatePicker style={{ width: '100%' }} /></Form.Item>
+      <Form.Item name="originLocation" label="출발지" rules={[maxLengthRule(100)]}><Input /></Form.Item>
+      <Form.Item name="destination" label="도착지" rules={[maxLengthRule(100)]}><Input /></Form.Item>
       <Form.Item name="remarks" label="비고"><Input.TextArea rows={2} /></Form.Item>
     </>
   );

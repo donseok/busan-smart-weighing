@@ -5,6 +5,7 @@ import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutli
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
 import type { Company } from '../../types';
+import { maxLengthRule, businessNumberRule, phoneNumberRule } from '../../utils/validators';
 
 const MasterCompanyPage: React.FC = () => {
   const [data, setData] = useState<Company[]>([]);
@@ -152,12 +153,12 @@ const MasterCompanyPage: React.FC = () => {
         cancelText="취소"
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="companyName" label="운송사명" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="companyType" label="유형" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="businessNumber" label="사업자번호"><Input /></Form.Item>
-          <Form.Item name="representative" label="대표자"><Input /></Form.Item>
-          <Form.Item name="phoneNumber" label="연락처"><Input /></Form.Item>
-          <Form.Item name="address" label="주소"><Input /></Form.Item>
+          <Form.Item name="companyName" label="운송사명" rules={[{ required: true }, maxLengthRule(100)]}><Input /></Form.Item>
+          <Form.Item name="companyType" label="유형" rules={[{ required: true }, maxLengthRule(20)]}><Input /></Form.Item>
+          <Form.Item name="businessNumber" label="사업자번호" rules={[businessNumberRule]}><Input /></Form.Item>
+          <Form.Item name="representative" label="대표자" rules={[maxLengthRule(50)]}><Input /></Form.Item>
+          <Form.Item name="phoneNumber" label="연락처" rules={[phoneNumberRule]}><Input placeholder="010-0000-0000" /></Form.Item>
+          <Form.Item name="address" label="주소" rules={[maxLengthRule(200)]}><Input /></Form.Item>
         </Form>
       </Modal>
 
@@ -170,12 +171,12 @@ const MasterCompanyPage: React.FC = () => {
         cancelText="취소"
       >
         <Form form={editForm} layout="vertical">
-          <Form.Item name="companyName" label="운송사명" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="companyType" label="유형" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="businessNumber" label="사업자번호"><Input /></Form.Item>
-          <Form.Item name="representative" label="대표자"><Input /></Form.Item>
-          <Form.Item name="phoneNumber" label="연락처"><Input /></Form.Item>
-          <Form.Item name="address" label="주소"><Input /></Form.Item>
+          <Form.Item name="companyName" label="운송사명" rules={[{ required: true }, maxLengthRule(100)]}><Input /></Form.Item>
+          <Form.Item name="companyType" label="유형" rules={[{ required: true }, maxLengthRule(20)]}><Input /></Form.Item>
+          <Form.Item name="businessNumber" label="사업자번호" rules={[businessNumberRule]}><Input /></Form.Item>
+          <Form.Item name="representative" label="대표자" rules={[maxLengthRule(50)]}><Input /></Form.Item>
+          <Form.Item name="phoneNumber" label="연락처" rules={[phoneNumberRule]}><Input placeholder="010-0000-0000" /></Form.Item>
+          <Form.Item name="address" label="주소" rules={[maxLengthRule(200)]}><Input /></Form.Item>
         </Form>
       </Modal>
     </>

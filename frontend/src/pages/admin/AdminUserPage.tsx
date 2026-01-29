@@ -23,6 +23,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { User, ApiResponse, PageResponse } from '../../types';
 import apiClient from '../../api/client';
+import { minLengthRule, maxLengthRule, passwordStrengthRule, phoneNumberRule } from '../../utils/validators';
 
 const { Title } = Typography;
 
@@ -327,7 +328,7 @@ const AdminUserPage: React.FC = () => {
           <Form.Item
             name="loginId"
             label="로그인 ID"
-            rules={[{ required: true, message: '로그인 ID를 입력하세요' }]}
+            rules={[{ required: true, message: '로그인 ID를 입력하세요' }, minLengthRule(3), maxLengthRule(50)]}
           >
             <Input />
           </Form.Item>
@@ -337,6 +338,8 @@ const AdminUserPage: React.FC = () => {
             rules={[
               { required: true, message: '비밀번호를 입력하세요' },
               { min: 8, message: '8자 이상 입력하세요' },
+              maxLengthRule(100),
+              passwordStrengthRule,
             ]}
           >
             <Input.Password />
@@ -344,14 +347,14 @@ const AdminUserPage: React.FC = () => {
           <Form.Item
             name="userName"
             label="이름"
-            rules={[{ required: true, message: '이름을 입력하세요' }]}
+            rules={[{ required: true, message: '이름을 입력하세요' }, maxLengthRule(50)]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="phoneNumber"
             label="연락처"
-            rules={[{ required: true, message: '연락처를 입력하세요' }]}
+            rules={[{ required: true, message: '연락처를 입력하세요' }, phoneNumberRule]}
           >
             <Input placeholder="010-0000-0000" />
           </Form.Item>
@@ -407,6 +410,8 @@ const AdminUserPage: React.FC = () => {
             rules={[
               { required: true, message: '새 비밀번호를 입력하세요' },
               { min: 8, message: '8자 이상 입력하세요' },
+              maxLengthRule(100),
+              passwordStrengthRule,
             ]}
           >
             <Input.Password />

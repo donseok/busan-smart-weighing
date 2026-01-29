@@ -6,6 +6,7 @@ import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
 import type { Scale } from '../../types';
 import { colors } from '../../theme/themeConfig';
+import { maxLengthRule, positiveNumberRule, mustBeLessThanField } from '../../utils/validators';
 
 const scaleStatusColors: Record<string, string> = {
   IDLE: colors.textSecondary, WEIGHING: colors.warning, COMPLETED: colors.success, ERROR: colors.error,
@@ -151,10 +152,10 @@ const MasterScalePage: React.FC = () => {
         cancelText="취소"
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="scaleName" label="계량대명" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="location" label="위치"><Input /></Form.Item>
-          <Form.Item name="maxCapacity" label="최대용량(kg)"><InputNumber style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="minCapacity" label="최소용량(kg)"><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="scaleName" label="계량대명" rules={[{ required: true }, maxLengthRule(50)]}><Input /></Form.Item>
+          <Form.Item name="location" label="위치" rules={[maxLengthRule(100)]}><Input /></Form.Item>
+          <Form.Item name="maxCapacity" label="최대용량(kg)" rules={[positiveNumberRule]}><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="minCapacity" label="최소용량(kg)" dependencies={['maxCapacity']} rules={[positiveNumberRule, mustBeLessThanField('maxCapacity', '최대용량')]}><InputNumber style={{ width: '100%' }} /></Form.Item>
         </Form>
       </Modal>
 
@@ -167,10 +168,10 @@ const MasterScalePage: React.FC = () => {
         cancelText="취소"
       >
         <Form form={editForm} layout="vertical">
-          <Form.Item name="scaleName" label="계량대명" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="location" label="위치"><Input /></Form.Item>
-          <Form.Item name="maxCapacity" label="최대용량(kg)"><InputNumber style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="minCapacity" label="최소용량(kg)"><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="scaleName" label="계량대명" rules={[{ required: true }, maxLengthRule(50)]}><Input /></Form.Item>
+          <Form.Item name="location" label="위치" rules={[maxLengthRule(100)]}><Input /></Form.Item>
+          <Form.Item name="maxCapacity" label="최대용량(kg)" rules={[positiveNumberRule]}><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="minCapacity" label="최소용량(kg)" dependencies={['maxCapacity']} rules={[positiveNumberRule, mustBeLessThanField('maxCapacity', '최대용량')]}><InputNumber style={{ width: '100%' }} /></Form.Item>
         </Form>
       </Modal>
     </>

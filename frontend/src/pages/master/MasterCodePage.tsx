@@ -5,6 +5,7 @@ import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutli
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
 import type { CommonCode } from '../../types';
+import { maxLengthRule } from '../../utils/validators';
 
 const MasterCodePage: React.FC = () => {
   const [data, setData] = useState<CommonCode[]>([]);
@@ -206,7 +207,7 @@ const MasterCodePage: React.FC = () => {
           <Form.Item
             name="codeGroup"
             label="코드그룹"
-            rules={[{ required: true, message: '코드그룹을 입력하세요' }]}
+            rules={[{ required: true, message: '코드그룹을 입력하세요' }, maxLengthRule(50)]}
             extra="예: ITEM_TYPE, VEHICLE_TYPE, COMPANY_TYPE"
           >
             <Input placeholder="대문자와 언더스코어 사용 권장" />
@@ -214,7 +215,7 @@ const MasterCodePage: React.FC = () => {
           <Form.Item
             name="codeValue"
             label="코드값"
-            rules={[{ required: true, message: '코드값을 입력하세요' }]}
+            rules={[{ required: true, message: '코드값을 입력하세요' }, maxLengthRule(50)]}
             extra="예: BY_PRODUCT, CARGO, TRANSPORT"
           >
             <Input placeholder="대문자와 언더스코어 사용 권장" />
@@ -222,7 +223,7 @@ const MasterCodePage: React.FC = () => {
           <Form.Item
             name="codeName"
             label="코드명"
-            rules={[{ required: true, message: '코드명을 입력하세요' }]}
+            rules={[{ required: true, message: '코드명을 입력하세요' }, maxLengthRule(100)]}
           >
             <Input placeholder="사용자에게 표시될 이름" />
           </Form.Item>
@@ -251,7 +252,7 @@ const MasterCodePage: React.FC = () => {
           <Form.Item
             name="codeName"
             label="코드명"
-            rules={[{ required: true, message: '코드명을 입력하세요' }]}
+            rules={[{ required: true, message: '코드명을 입력하세요' }, maxLengthRule(100)]}
           >
             <Input />
           </Form.Item>

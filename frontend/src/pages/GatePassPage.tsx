@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Space, Typography, Tag, Modal, Input, message, Popconfirm, Card, Row, Col } from 'antd';
+import { Button, Space, Typography, Tag, Modal, Input, Form, message, Popconfirm, Card, Row, Col } from 'antd';
 import SortableTable from '../components/SortableTable';
 import { CheckOutlined, CloseOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -21,7 +21,7 @@ const GatePassPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
+  const [rejectForm] = Form.useForm();
 
   const fetchData = async () => {
     setLoading(true);
@@ -42,13 +42,13 @@ const GatePassPage: React.FC = () => {
     } catch { message.error('출문 승인에 실패했습니다.'); }
   };
 
-  const handleReject = async () => {
+  const handleReject = async (values: { reason: string }) => {
     if (!selectedId) return;
     try {
-      await apiClient.put(`/gate-passes/${selectedId}/reject`, { reason: rejectReason });
+      await apiClient.put(`/gate-passes/${selectedId}/reject`, { reason: values.reason });
       message.success('출문이 반려되었습니다.');
       setRejectModalOpen(false);
-      setRejectReason('');
+      rejectForm.resetFields();
       setSelectedId(null);
       fetchData();
     } catch { message.error('출문 반려에 실패했습니다.'); }
@@ -95,8 +95,12 @@ const GatePassPage: React.FC = () => {
       </Card>
       <SortableTable columns={columns} dataSource={data} rowKey="gatePassId" loading={loading} size="middle" tableKey="gatePass" />
 
-      <Modal title="출문 반려" open={rejectModalOpen} onOk={handleReject} onCancel={() => { setRejectModalOpen(false); setRejectReason(''); }} okText="반려" cancelText="취소">
-        <Input.TextArea rows={3} placeholder="반려 사유를 입력하세요" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} />
+      <Modal title="출문 반려" open={rejectModalOpen} onOk={() => rejectForm.submit()} onCancel={() => { setRejectModalOpen(false); rejectForm.resetFields(); }} okText="반려" cancelText="취소">
+        <Form form={rejectForm} onFinish={handleReject}>
+          <Form.Item name="reason" rules={[{ required: true, message: '반려 사유를 입력하세요' }]}>
+            <Input.TextArea rows={3} placeholder="반려 사유를 입력하세요" />
+          </Form.Item>
+        </Form>
       </Modal>
     </>
   );

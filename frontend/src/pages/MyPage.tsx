@@ -18,6 +18,7 @@ import {
   SaveOutlined,
 } from '@ant-design/icons';
 import apiClient from '../api/client';
+import { phoneNumberRule, emailRule, maxLengthRule, passwordStrengthRule } from '../utils/validators';
 
 interface MyProfile {
   userId: number;
@@ -171,11 +172,11 @@ const MyPage: React.FC = () => {
                       <Form.Item
                         name="phoneNumber"
                         label="연락처"
-                        rules={[{ required: true, message: '연락처를 입력하세요' }]}
+                        rules={[{ required: true, message: '연락처를 입력하세요' }, phoneNumberRule]}
                       >
                         <Input placeholder="010-0000-0000" />
                       </Form.Item>
-                      <Form.Item name="email" label="이메일">
+                      <Form.Item name="email" label="이메일" rules={[emailRule]}>
                         <Input type="email" placeholder="email@example.com" />
                       </Form.Item>
                       <Form.Item>
@@ -224,6 +225,8 @@ const MyPage: React.FC = () => {
                     rules={[
                       { required: true, message: '새 비밀번호를 입력하세요' },
                       { min: 8, message: '비밀번호는 8자 이상이어야 합니다' },
+                      maxLengthRule(100),
+                      passwordStrengthRule,
                     ]}
                   >
                     <Input.Password prefix={<LockOutlined />} />

@@ -5,6 +5,7 @@ import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutli
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
 import type { Vehicle } from '../../types';
+import { maxLengthRule, plateNumberRule, phoneNumberRule, positiveNumberRule, mustBeGreaterThanField } from '../../utils/validators';
 
 const MasterVehiclePage: React.FC = () => {
   const [data, setData] = useState<Vehicle[]>([]);
@@ -153,13 +154,13 @@ const MasterVehiclePage: React.FC = () => {
         cancelText="취소"
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="plateNumber" label="차량번호" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="vehicleType" label="차종" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="plateNumber" label="차량번호" rules={[{ required: true }, maxLengthRule(20), plateNumberRule]}><Input /></Form.Item>
+          <Form.Item name="vehicleType" label="차종" rules={[{ required: true }, maxLengthRule(20)]}><Input /></Form.Item>
           <Form.Item name="companyId" label="운송사 ID"><Input type="number" /></Form.Item>
-          <Form.Item name="defaultTareWeight" label="기본 공차중량(kg)"><InputNumber style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="maxLoadWeight" label="최대 적재중량(kg)"><InputNumber style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="driverName" label="기사명"><Input /></Form.Item>
-          <Form.Item name="driverPhone" label="기사 연락처"><Input /></Form.Item>
+          <Form.Item name="defaultTareWeight" label="기본 공차중량(kg)" rules={[positiveNumberRule]}><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="maxLoadWeight" label="최대 적재중량(kg)" dependencies={['defaultTareWeight']} rules={[positiveNumberRule, mustBeGreaterThanField('defaultTareWeight', '기본 공차중량')]}><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="driverName" label="기사명" rules={[maxLengthRule(50)]}><Input /></Form.Item>
+          <Form.Item name="driverPhone" label="기사 연락처" rules={[phoneNumberRule]}><Input placeholder="010-0000-0000" /></Form.Item>
         </Form>
       </Modal>
 
@@ -172,13 +173,13 @@ const MasterVehiclePage: React.FC = () => {
         cancelText="취소"
       >
         <Form form={editForm} layout="vertical">
-          <Form.Item name="plateNumber" label="차량번호" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="vehicleType" label="차종" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="plateNumber" label="차량번호" rules={[{ required: true }, maxLengthRule(20), plateNumberRule]}><Input /></Form.Item>
+          <Form.Item name="vehicleType" label="차종" rules={[{ required: true }, maxLengthRule(20)]}><Input /></Form.Item>
           <Form.Item name="companyId" label="운송사 ID"><Input type="number" /></Form.Item>
-          <Form.Item name="defaultTareWeight" label="기본 공차중량(kg)"><InputNumber style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="maxLoadWeight" label="최대 적재중량(kg)"><InputNumber style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="driverName" label="기사명"><Input /></Form.Item>
-          <Form.Item name="driverPhone" label="기사 연락처"><Input /></Form.Item>
+          <Form.Item name="defaultTareWeight" label="기본 공차중량(kg)" rules={[positiveNumberRule]}><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="maxLoadWeight" label="최대 적재중량(kg)" dependencies={['defaultTareWeight']} rules={[positiveNumberRule, mustBeGreaterThanField('defaultTareWeight', '기본 공차중량')]}><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="driverName" label="기사명" rules={[maxLengthRule(50)]}><Input /></Form.Item>
+          <Form.Item name="driverPhone" label="기사 연락처" rules={[phoneNumberRule]}><Input placeholder="010-0000-0000" /></Form.Item>
         </Form>
       </Modal>
     </>
