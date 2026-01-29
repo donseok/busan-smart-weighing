@@ -48,8 +48,8 @@ public partial class MainForm : Form
         LoadSettings();
         InitializeServices();
 
-        AppendLog("Busan Smart Weighing CS starting...");
-        AppendLog($"Scale ID: {_settings.Scale.ScaleId} | COM: {_settings.Scale.ComPort} | Baud: {_settings.Scale.BaudRate}");
+        AppendLog("부산 스마트 계량 시스템 시작 중...");
+        AppendLog($"계량대 ID: {_settings.Scale.ScaleId} | COM: {_settings.Scale.ComPort} | 전송속도: {_settings.Scale.BaudRate}");
 
         InitializeSimulators();
         await InitializeCacheAsync();
@@ -60,7 +60,7 @@ public partial class MainForm : Form
     {
         base.OnFormClosing(e);
 
-        AppendLog("Shutting down...");
+        AppendLog("시스템 종료 중...");
 
         try
         {
@@ -79,7 +79,7 @@ public partial class MainForm : Form
         }
         catch (Exception ex)
         {
-            AppendLog($"Shutdown warning: {ex.Message}");
+            AppendLog($"종료 경고: {ex.Message}");
         }
     }
 
@@ -95,16 +95,16 @@ public partial class MainForm : Form
             {
                 string json = File.ReadAllText(settingsPath);
                 _settings = JsonConvert.DeserializeObject<AppSettings>(json) ?? new AppSettings();
-                AppendLog("Configuration loaded from appsettings.json");
+                AppendLog("appsettings.json에서 설정을 불러왔습니다.");
             }
             else
             {
-                AppendLog("appsettings.json not found. Using defaults.");
+                AppendLog("appsettings.json 파일을 찾을 수 없습니다. 기본값 사용.");
             }
         }
         catch (Exception ex)
         {
-            AppendLog($"Failed to load settings: {ex.Message}. Using defaults.");
+            AppendLog($"설정 불러오기 실패: {ex.Message}. 기본값 사용.");
         }
     }
 
@@ -126,27 +126,27 @@ public partial class MainForm : Form
         _indicator.ConnectionStateChanged += (_, connected) => InvokeUI(() => SetConnectionIndicator(indIndicator, connected));
 
         _display.ConnectionStateChanged += (_, connected) => InvokeUI(() => SetConnectionIndicator(indDisplay, connected));
-        _display.ErrorOccurred += (_, msg) => InvokeUI(() => AppendLog($"[DISPLAY] {msg}"));
+        _display.ErrorOccurred += (_, msg) => InvokeUI(() => AppendLog($"[전광판] {msg}"));
 
         _barrier.ConnectionStateChanged += (_, connected) => InvokeUI(() => SetConnectionIndicator(indBarrier, connected));
-        _barrier.BarrierStateChanged += (_, open) => InvokeUI(() => AppendLog($"[BARRIER] {(open ? "OPENED" : "CLOSED")}"));
-        _barrier.ErrorOccurred += (_, msg) => InvokeUI(() => AppendLog($"[BARRIER] {msg}"));
+        _barrier.BarrierStateChanged += (_, open) => InvokeUI(() => AppendLog($"[차단기] {(open ? "열림" : "닫힘")}"));
+        _barrier.ErrorOccurred += (_, msg) => InvokeUI(() => AppendLog($"[차단기] {msg}"));
 
         _api.NetworkStatusChanged += (_, available) => InvokeUI(() =>
         {
             SetConnectionIndicator(indNetwork, available);
-            AppendLog(available ? "[NETWORK] Connected" : "[NETWORK] Offline - caching enabled");
+            AppendLog(available ? "[네트워크] 연결됨" : "[네트워크] 오프라인 - 캐시 활성화");
         });
-        _api.ApiError += (_, msg) => InvokeUI(() => AppendLog($"[API] {msg}"));
+        _api.ApiError += (_, msg) => InvokeUI(() => AppendLog($"[API 오류] {msg}"));
 
-        _cache.PendingSyncCountChanged += (_, count) => InvokeUI(() => AppendLog($"[CACHE] Pending sync: {count} records"));
-        _cache.SyncError += (_, msg) => InvokeUI(() => AppendLog($"[CACHE] {msg}"));
-        _cache.RecordSynced += (_, record) => InvokeUI(() => AppendLog($"[CACHE] Synced weighing {record.WeighingId}"));
+        _cache.PendingSyncCountChanged += (_, count) => InvokeUI(() => AppendLog($"[캐시] 동기화 대기: {count}건"));
+        _cache.SyncError += (_, msg) => InvokeUI(() => AppendLog($"[캐시] {msg}"));
+        _cache.RecordSynced += (_, record) => InvokeUI(() => AppendLog($"[캐시] 계량 동기화 완료 {record.WeighingId}"));
 
         _process.StateChanged += OnProcessStateChanged;
         _process.WeighingCompleted += OnWeighingCompleted;
         _process.ProcessError += OnProcessError;
-        _process.StatusMessage += (_, msg) => InvokeUI(() => AppendLog($"[PROCESS] {msg}"));
+        _process.StatusMessage += (_, msg) => InvokeUI(() => AppendLog($"[프로세스] {msg}"));
     }
 
     // -- Simulator initialization ----------------------------------------------
@@ -160,24 +160,24 @@ public partial class MainForm : Form
         // Wire simulator pipeline: sensor detection -> LPR capture -> auto weigh
         _sensorSimulator.VehicleDetected += async (s, e) =>
         {
-            InvokeUI(() => AppendLog($"[SIM] Vehicle detected by sensor {e.SensorId} at {e.DetectedAt:HH:mm:ss}"));
+            InvokeUI(() => AppendLog($"[시뮬] 센서 {e.SensorId}에서 차량 감지 ({e.DetectedAt:HH:mm:ss})"));
 
             if (_lprSimulator is not null && _process is not null)
             {
                 var lpr = await _lprSimulator.CaptureAsync();
-                InvokeUI(() => AppendLog($"[SIM] LPR captured: {lpr.PlateNumber} (confidence: {lpr.Confidence:P1})"));
+                InvokeUI(() => AppendLog($"[시뮬] LPR 촬영: {lpr.PlateNumber} (신뢰도: {lpr.Confidence:P1})"));
                 await _process.AutoWeighAsync(lpr.PlateNumber, lpr.Confidence, lpr.CaptureImageUrl);
             }
         };
 
         _detectorSimulator.PositionChanged += (s, e) =>
         {
-            InvokeUI(() => AppendLog($"[SIM] Vehicle position: {(e.IsInPosition ? "IN POSITION" : "NOT IN POSITION")}"));
+            InvokeUI(() => AppendLog($"[시뮬] 차량 위치: {(e.IsInPosition ? "정위치" : "미정위치")}"));
         };
 
         _lprSimulator.PlateCaptured += (s, e) =>
         {
-            InvokeUI(() => AppendLog($"[SIM] LPR plate event: {e.PlateNumber} (confidence: {e.Confidence:P1})"));
+            InvokeUI(() => AppendLog($"[시뮬] LPR 번호판 이벤트: {e.PlateNumber} (신뢰도: {e.Confidence:P1})"));
         };
 
         // Wire simulator button events
@@ -195,7 +195,7 @@ public partial class MainForm : Form
         btnSimLpr.Enabled = enabled;
         btnSimPosition.Enabled = enabled;
         btnSyncNow.Enabled = enabled;
-        AppendLog(enabled ? "[SIM] Simulator mode ENABLED" : "[SIM] Simulator mode DISABLED");
+        AppendLog(enabled ? "[시뮬] 시뮬레이터 모드 활성화" : "[시뮬] 시뮬레이터 모드 비활성화");
     }
 
     private void OnSimSensorClick(object? sender, EventArgs e)
@@ -208,7 +208,7 @@ public partial class MainForm : Form
         if (_lprSimulator is null) return;
 
         var result = await _lprSimulator.CaptureAsync();
-        AppendLog($"[SIM] Manual LPR capture: {result.PlateNumber} (confidence: {result.Confidence:P1})");
+        AppendLog($"[시뮬] 수동 LPR 촬영: {result.PlateNumber} (신뢰도: {result.Confidence:P1})");
     }
 
     private void OnSimPositionClick(object? sender, EventArgs e)
@@ -220,7 +220,7 @@ public partial class MainForm : Form
     {
         if (_cache is null) return;
 
-        AppendLog("[CACHE] Manual sync triggered...");
+        AppendLog("[캐시] 수동 동기화 시작...");
         await _cache.SyncPendingRecordsAsync();
     }
 
@@ -232,12 +232,12 @@ public partial class MainForm : Form
             {
                 await _cache.InitializeAsync();
                 _cache.StartSyncLoop();
-                AppendLog("Local cache initialized.");
+                AppendLog("로컬 캐시 초기화 완료.");
             }
         }
         catch (Exception ex)
         {
-            AppendLog($"Cache initialization error: {ex.Message}");
+            AppendLog($"캐시 초기화 오류: {ex.Message}");
         }
     }
 
@@ -250,12 +250,12 @@ public partial class MainForm : Form
             {
                 bool loggedIn = await _api.LoginAsync();
                 SetConnectionIndicator(indNetwork, loggedIn);
-                AppendLog(loggedIn ? "API authenticated." : "API authentication failed.");
+                AppendLog(loggedIn ? "API 인증 완료." : "API 인증 실패.");
             }
         }
         catch (Exception ex)
         {
-            AppendLog($"API login error: {ex.Message}");
+            AppendLog($"API 로그인 오류: {ex.Message}");
             SetConnectionIndicator(indNetwork, false);
         }
 
@@ -265,12 +265,12 @@ public partial class MainForm : Form
             if (_indicator is not null)
             {
                 await _indicator.ConnectAsync();
-                AppendLog($"Indicator connected on {_settings.Scale.ComPort}.");
+                AppendLog($"계량기 연결 완료 ({_settings.Scale.ComPort}).");
             }
         }
         catch (Exception ex)
         {
-            AppendLog($"Indicator connection failed: {ex.Message}");
+            AppendLog($"계량기 연결 실패: {ex.Message}");
             SetConnectionIndicator(indIndicator, false);
         }
 
@@ -281,12 +281,12 @@ public partial class MainForm : Form
             {
                 await _display.ConnectAsync();
                 await _display.ShowWaitingAsync();
-                AppendLog("Display board connected.");
+                AppendLog("전광판 연결 완료.");
             }
         }
         catch (Exception ex)
         {
-            AppendLog($"Display board connection failed: {ex.Message}");
+            AppendLog($"전광판 연결 실패: {ex.Message}");
             SetConnectionIndicator(indDisplay, false);
         }
 
@@ -296,12 +296,12 @@ public partial class MainForm : Form
             if (_barrier is not null)
             {
                 await _barrier.ConnectAsync();
-                AppendLog("Barrier connected.");
+                AppendLog("차단기 연결 완료.");
             }
         }
         catch (Exception ex)
         {
-            AppendLog($"Barrier connection failed: {ex.Message}");
+            AppendLog($"차단기 연결 실패: {ex.Message}");
             SetConnectionIndicator(indBarrier, false);
         }
     }
@@ -327,13 +327,13 @@ public partial class MainForm : Form
         {
             grpManual.Enabled = false;
             _process?.SwitchMode(WeighingProcessService.WeighingMode.Auto);
-            AppendLog("Switched to AUTO mode.");
+            AppendLog("자동 모드로 전환되었습니다.");
         }
         else
         {
             grpManual.Enabled = true;
             _process?.SwitchMode(WeighingProcessService.WeighingMode.Manual);
-            AppendLog("Switched to MANUAL mode.");
+            AppendLog("수동 모드로 전환되었습니다.");
         }
     }
 
@@ -342,14 +342,14 @@ public partial class MainForm : Form
         string plate = txtSearchPlate.Text.Trim();
         if (string.IsNullOrEmpty(plate))
         {
-            AppendLog("Enter a plate number to search.");
+            AppendLog("검색할 차량번호를 입력하세요.");
             return;
         }
 
         try
         {
             btnSearch.Enabled = false;
-            AppendLog($"Searching dispatches for plate: {plate}...");
+            AppendLog($"차량번호 {plate} 배차 검색 중...");
 
             var dispatches = await _api!.GetDispatchesAsync(plateNumber: plate);
             _searchResults = dispatches ?? new List<DispatchInfo>();
@@ -363,16 +363,16 @@ public partial class MainForm : Form
             if (_searchResults.Count > 0)
             {
                 cboDispatches.SelectedIndex = 0;
-                AppendLog($"Found {_searchResults.Count} dispatch(es).");
+                AppendLog($"{_searchResults.Count}건의 배차를 찾았습니다.");
             }
             else
             {
-                AppendLog("No dispatches found for this plate.");
+                AppendLog("해당 차량번호의 배차 정보가 없습니다.");
             }
         }
         catch (Exception ex)
         {
-            AppendLog($"Search failed: {ex.Message}");
+            AppendLog($"검색 실패: {ex.Message}");
         }
         finally
         {
@@ -386,7 +386,7 @@ public partial class MainForm : Form
 
         if (cboDispatches.SelectedIndex < 0 || cboDispatches.SelectedIndex >= _searchResults.Count)
         {
-            AppendLog("Select a dispatch first.");
+            AppendLog("먼저 배차를 선택하세요.");
             return;
         }
 
@@ -404,7 +404,7 @@ public partial class MainForm : Form
             decimal weight = _indicator.CurrentWeight;
             if (weight <= 0)
             {
-                AppendLog("Cannot confirm: weight is zero or negative.");
+                AppendLog("확인 불가: 중량이 0 이하입니다.");
                 return;
             }
 
@@ -417,17 +417,17 @@ public partial class MainForm : Form
         if (_process is null) return;
 
         // Prompt for original weighing ID and reason.
-        string? idInput = ShowInputDialog("Re-Weigh", "Enter the original Weighing ID:");
+        string? idInput = ShowInputDialog("재계량", "원래 계량 ID를 입력하세요:");
         if (string.IsNullOrWhiteSpace(idInput) || !long.TryParse(idInput, out long originalId))
         {
-            AppendLog("Re-weigh cancelled or invalid ID.");
+            AppendLog("재계량이 취소되었거나 잘못된 ID입니다.");
             return;
         }
 
-        string? reason = ShowInputDialog("Re-Weigh Reason", "Enter the reason for re-weighing:");
+        string? reason = ShowInputDialog("재계량 사유", "재계량 사유를 입력하세요:");
         if (string.IsNullOrWhiteSpace(reason))
         {
-            AppendLog("Re-weigh cancelled: no reason provided.");
+            AppendLog("재계량 취소: 사유가 입력되지 않았습니다.");
             return;
         }
 
@@ -442,7 +442,7 @@ public partial class MainForm : Form
         }
 
         ClearVehicleInfo();
-        AppendLog("Process reset.");
+        AppendLog("프로세스가 초기화되었습니다.");
     }
 
     private async void OnBarrierOpenClick(object? sender, EventArgs e)
@@ -452,11 +452,11 @@ public partial class MainForm : Form
         try
         {
             bool opened = await _barrier.OpenAsync(vehiclePositionConfirmed: true);
-            AppendLog(opened ? "Barrier opened manually." : "Barrier open failed.");
+            AppendLog(opened ? "차단기를 수동으로 열었습니다." : "차단기 열기 실패.");
         }
         catch (Exception ex)
         {
-            AppendLog($"Barrier error: {ex.Message}");
+            AppendLog($"차단기 오류: {ex.Message}");
         }
     }
 
@@ -470,7 +470,7 @@ public partial class MainForm : Form
 
             if (!e.IsStable)
             {
-                lblStability.Text = "UNSTABLE";
+                lblStability.Text = "불안정";
                 lblStability.BackColor = Color.Orange;
             }
         });
@@ -481,7 +481,7 @@ public partial class MainForm : Form
         InvokeUI(() =>
         {
             lblWeight.Text = e.Weight.ToString("F1");
-            lblStability.Text = "STABLE";
+            lblStability.Text = "안정";
             lblStability.BackColor = Color.Green;
         });
     }
@@ -490,8 +490,8 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            AppendLog($"[INDICATOR] {e.Message}");
-            lblStability.Text = "ERROR";
+            AppendLog($"[계량기] {e.Message}");
+            lblStability.Text = "오류";
             lblStability.BackColor = Color.Red;
         });
     }
@@ -500,8 +500,8 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            lblProcessState.Text = $"State: {e.NewState}";
-            AppendLog($"Process state: {e.OldState} -> {e.NewState}");
+            lblProcessState.Text = $"상태: {e.NewState}";
+            AppendLog($"프로세스 상태: {e.OldState} -> {e.NewState}");
 
             // Update vehicle info when dispatch is set.
             if (_process?.ActiveDispatch is not null)
@@ -515,7 +515,7 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            AppendLog($"Weighing completed: {record.GrossWeight:F1} kg | Mode: {record.WeighingMode} | ID: {record.WeighingId}");
+            AppendLog($"계량 완료: {record.GrossWeight:F1} kg | 모드: {record.WeighingMode} | ID: {record.WeighingId}");
             AddHistoryEntry(record);
         });
     }
@@ -524,7 +524,7 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            AppendLog($"[ERROR] {e.Message} (state: {e.State})");
+            AppendLog($"[오류] {e.Message} (상태: {e.State})");
         });
     }
 
@@ -636,8 +636,8 @@ public partial class MainForm : Form
 
         var label = new Label { Text = prompt, Left = 10, Top = 15, AutoSize = true };
         var textBox = new TextBox { Left = 10, Top = 40, Width = 320 };
-        var btnOk = new Button { Text = "OK", Left = 160, Top = 80, Width = 80, DialogResult = DialogResult.OK };
-        var btnCancel = new Button { Text = "Cancel", Left = 250, Top = 80, Width = 80, DialogResult = DialogResult.Cancel };
+        var btnOk = new Button { Text = "확인", Left = 160, Top = 80, Width = 80, DialogResult = DialogResult.OK };
+        var btnCancel = new Button { Text = "취소", Left = 250, Top = 80, Width = 80, DialogResult = DialogResult.Cancel };
 
         form.Controls.AddRange(new Control[] { label, textBox, btnOk, btnCancel });
         form.AcceptButton = btnOk;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Space, Typography, Tag, Modal, Input, message, Popconfirm } from 'antd';
+import { Button, Space, Typography, Tag, Modal, Input, message, Popconfirm, Card, Row, Col } from 'antd';
 import SortableTable from '../components/SortableTable';
 import { CheckOutlined, CloseOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -60,13 +60,13 @@ const GatePassPage: React.FC = () => {
   };
 
   const columns: ColumnsType<GatePass> = [
-    { title: 'ID', dataIndex: 'gatePassId', width: 60 },
-    { title: '계량 ID', dataIndex: 'weighingId', width: 80 },
-    { title: '배차 ID', dataIndex: 'dispatchId', width: 80 },
-    { title: '상태', dataIndex: 'passStatus', render: (v: string) => <Tag color={statusColors[v]}>{statusLabels[v]}</Tag> },
-    { title: '처리일시', dataIndex: 'passedAt', render: (v?: string) => v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '-' },
-    { title: '반려사유', dataIndex: 'rejectReason', render: (v?: string) => v || '-' },
-    { title: '등록일', dataIndex: 'createdAt', render: (v: string) => dayjs(v).format('YYYY-MM-DD HH:mm') },
+    { title: 'ID', dataIndex: 'gatePassId', width: 80 },
+    { title: '계량 ID', dataIndex: 'weighingId', width: 100 },
+    { title: '배차 ID', dataIndex: 'dispatchId', width: 100 },
+    { title: '상태', dataIndex: 'passStatus', width: 90, render: (v: string) => <Tag color={statusColors[v]}>{statusLabels[v]}</Tag> },
+    { title: '처리일시', dataIndex: 'passedAt', width: 160, render: (v?: string) => v ? dayjs(v).format('YYYY-MM-DD HH:mm') : '-' },
+    { title: '반려사유', dataIndex: 'rejectReason', width: 130, render: (v?: string) => v || '-' },
+    { title: '등록일', dataIndex: 'createdAt', width: 160, render: (v: string) => dayjs(v).format('YYYY-MM-DD HH:mm') },
     {
       title: '처리', width: 160, render: (_, record) => record.passStatus === 'PENDING' ? (
         <Space>
@@ -82,9 +82,17 @@ const GatePassPage: React.FC = () => {
   return (
     <>
       <Typography.Title level={4}>출문 관리</Typography.Title>
-      <Space style={{ marginBottom: 16 }}>
-        <Button icon={<ReloadOutlined />} onClick={fetchData}>새로고침</Button>
-      </Space>
+      <Card
+        size="small"
+        style={{ marginBottom: 16 }}
+        styles={{ body: { padding: '16px 24px' } }}
+      >
+        <Row align="middle">
+          <Col flex="auto" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading}>새로고침</Button>
+          </Col>
+        </Row>
+      </Card>
       <SortableTable columns={columns} dataSource={data} rowKey="gatePassId" loading={loading} size="middle" tableKey="gatePass" />
 
       <Modal title="출문 반려" open={rejectModalOpen} onOk={handleReject} onCancel={() => { setRejectModalOpen(false); setRejectReason(''); }} okText="반려" cancelText="취소">

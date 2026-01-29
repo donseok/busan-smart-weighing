@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../config/api_config.dart';
@@ -15,9 +15,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class NotificationService {
   final ApiService _apiService;
 
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
+  late final FirebaseMessaging _messaging;
+  late final FlutterLocalNotificationsPlugin _localNotifications;
 
   int _badgeCount = 0;
   int get badgeCount => _badgeCount;
@@ -28,6 +27,9 @@ class NotificationService {
 
   /// Initialize Firebase Messaging, local notifications, and listeners.
   Future<void> initialize() async {
+    _messaging = FirebaseMessaging.instance;
+    _localNotifications = FlutterLocalNotificationsPlugin();
+
     // Request permission (iOS and Android 13+)
     await _requestPermission();
 
@@ -89,7 +91,7 @@ class NotificationService {
     );
 
     // Create Android notification channel
-    if (Platform.isAndroid) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       const channel = AndroidNotificationChannel(
         'busan_weighing_channel',
         '부산 스마트 계량 알림',

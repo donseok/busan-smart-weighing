@@ -22,6 +22,7 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { User, ApiResponse, PageResponse } from '../../types';
+import apiClient from '../../api/client';
 
 const { Title } = Typography;
 
@@ -46,14 +47,10 @@ const AdminUserPage: React.FC = () => {
   const fetchUsers = async (page = 1, size = 10) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(
-        `/api/v1/users?page=${page - 1}&size=${size}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const result: ApiResponse<PageResponse<User>> = await response.json();
+      const response = await apiClient.get('/users', {
+        params: { page: page - 1, size },
+      });
+      const result: ApiResponse<PageResponse<User>> = response.data;
       if (result.success) {
         setUsers(result.data.content);
         setPagination({
@@ -75,16 +72,8 @@ const AdminUserPage: React.FC = () => {
 
   const handleCreate = async (values: any) => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch('/api/v1/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(values),
-      });
-      const result = await response.json();
+      const response = await apiClient.post('/users', values);
+      const result = response.data;
       if (result.success) {
         message.success('사용자가 생성되었습니다');
         setCreateModalVisible(false);
@@ -100,12 +89,8 @@ const AdminUserPage: React.FC = () => {
 
   const handleToggleActive = async (userId: number) => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(`/api/v1/users/${userId}/toggle-active`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const result = await response.json();
+      const response = await apiClient.put(`/users/${userId}/toggle-active`);
+      const result = response.data;
       if (result.success) {
         message.success('상태가 변경되었습니다');
         fetchUsers(pagination.current);
@@ -119,12 +104,8 @@ const AdminUserPage: React.FC = () => {
 
   const handleUnlock = async (userId: number) => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(`/api/v1/users/${userId}/unlock`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const result = await response.json();
+      const response = await apiClient.put(`/users/${userId}/unlock`);
+      const result = response.data;
       if (result.success) {
         message.success('잠금이 해제되었습니다');
         fetchUsers(pagination.current);
@@ -139,16 +120,8 @@ const AdminUserPage: React.FC = () => {
   const handleRoleChange = async (values: { userRole: string }) => {
     if (!selectedUser) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(`/api/v1/users/${selectedUser.userId}/role`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(values),
-      });
-      const result = await response.json();
+      const response = await apiClient.put(`/users/${selectedUser.userId}/role`, values);
+      const result = response.data;
       if (result.success) {
         message.success('역할이 변경되었습니다');
         setRoleModalVisible(false);
@@ -165,16 +138,8 @@ const AdminUserPage: React.FC = () => {
   const handlePasswordReset = async (values: { newPassword: string }) => {
     if (!selectedUser) return;
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(`/api/v1/users/${selectedUser.userId}/reset-password`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(values),
-      });
-      const result = await response.json();
+      const response = await apiClient.put(`/users/${selectedUser.userId}/reset-password`, values);
+      const result = response.data;
       if (result.success) {
         message.success('비밀번호가 초기화되었습니다');
         setPasswordModalVisible(false);
@@ -189,12 +154,8 @@ const AdminUserPage: React.FC = () => {
 
   const handleDelete = async (userId: number) => {
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch(`/api/v1/users/${userId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const result = await response.json();
+      const response = await apiClient.delete(`/users/${userId}`);
+      const result = response.data;
       if (result.success) {
         message.success('사용자가 삭제되었습니다');
         fetchUsers(pagination.current);
@@ -210,12 +171,12 @@ const AdminUserPage: React.FC = () => {
     {
       title: 'ID',
       dataIndex: 'userId',
-      width: 60,
+      width: 80,
     },
     {
       title: '로그인 ID',
       dataIndex: 'loginId',
-      width: 120,
+      width: 130,
     },
     {
       title: '이름',

@@ -88,13 +88,13 @@ const MasterVehiclePage: React.FC = () => {
   };
 
   const columns: ColumnsType<Vehicle> = [
-    { title: 'ID', dataIndex: 'vehicleId', width: 60 },
-    { title: '차량번호', dataIndex: 'plateNumber' },
-    { title: '차종', dataIndex: 'vehicleType' },
-    { title: '기본공차(kg)', dataIndex: 'defaultTareWeight', render: (v?: number) => v?.toLocaleString() ?? '-' },
-    { title: '최대적재(kg)', dataIndex: 'maxLoadWeight', render: (v?: number) => v?.toLocaleString() ?? '-' },
-    { title: '기사명', dataIndex: 'driverName' },
-    { title: '기사연락처', dataIndex: 'driverPhone' },
+    { title: 'ID', dataIndex: 'vehicleId', width: 80 },
+    { title: '차량번호', dataIndex: 'plateNumber', width: 110 },
+    { title: '차종', dataIndex: 'vehicleType', width: 90 },
+    { title: '기본공차(kg)', dataIndex: 'defaultTareWeight', width: 130, align: 'right', render: (v?: number) => v?.toLocaleString() ?? '-' },
+    { title: '최대적재(kg)', dataIndex: 'maxLoadWeight', width: 130, align: 'right', render: (v?: number) => v?.toLocaleString() ?? '-' },
+    { title: '기사명', dataIndex: 'driverName', width: 100 },
+    { title: '기사연락처', dataIndex: 'driverPhone', width: 130 },
     {
       title: '관리',
       key: 'actions',

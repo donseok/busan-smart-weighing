@@ -163,38 +163,44 @@ const InquiryPage: React.FC = () => {
   };
 
   const columns: ColumnsType<WeighingRecord> = [
-    { title: 'ID', dataIndex: 'weighingId', width: 70 },
-    { title: '배차ID', dataIndex: 'dispatchId', width: 80 },
+    { title: 'ID', dataIndex: 'weighingId', width: 80 },
+    { title: '배차ID', dataIndex: 'dispatchId', width: 100 },
     {
       title: '차량번호',
       dataIndex: 'lprPlateNumber',
+      width: 110,
       render: (v?: string) => v || '-',
     },
     {
       title: '계량방식',
       dataIndex: 'weighingMode',
+      width: 120,
       render: (v: string) => modeLabels[v] || v,
     },
     {
       title: '계량단계',
       dataIndex: 'weighingStep',
+      width: 110,
       render: (v: string) => stepLabels[v] || v,
     },
     {
       title: '총중량(kg)',
       dataIndex: 'grossWeight',
+      width: 120,
       align: 'right',
       render: (v?: number) => v?.toLocaleString() ?? '-',
     },
     {
       title: '공차중량(kg)',
       dataIndex: 'tareWeight',
+      width: 130,
       align: 'right',
       render: (v?: number) => v?.toLocaleString() ?? '-',
     },
     {
       title: '순중량(kg)',
       dataIndex: 'netWeight',
+      width: 120,
       align: 'right',
       render: (v?: number) => (
         <span style={{ color: colors.primary, fontWeight: 600 }}>
@@ -213,7 +219,7 @@ const InquiryPage: React.FC = () => {
     {
       title: '일시',
       dataIndex: 'createdAt',
-      width: 150,
+      width: 160,
       render: (v: string) => dayjs(v).format('YYYY-MM-DD HH:mm'),
     },
   ];
@@ -311,22 +317,21 @@ const InquiryPage: React.FC = () => {
               />
             </Space>
           </Col>
-        </Row>
-
-        <Row style={{ marginTop: 12 }} justify="end">
-          <Space>
-            <Button icon={<ClearOutlined />} onClick={handleReset}>
-              초기화
-            </Button>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={handleSearch}
-              loading={loading}
-            >
-              조회
-            </Button>
-          </Space>
+          <Col flex="auto" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Space>
+              <Button icon={<ClearOutlined />} onClick={handleReset}>
+                초기화
+              </Button>
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+                loading={loading}
+              >
+                조회
+              </Button>
+            </Space>
+          </Col>
         </Row>
       </Card>
 
@@ -368,7 +373,7 @@ const InquiryPage: React.FC = () => {
       />
 
       {searched && totalElements > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
           <Pagination
             current={currentPage}
             pageSize={pageSize}

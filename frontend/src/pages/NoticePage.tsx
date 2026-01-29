@@ -194,7 +194,7 @@ const NoticePage: React.FC = () => {
       title: '상태',
       dataIndex: 'isPublished',
       key: 'isPublished',
-      width: 80,
+      width: 90,
       render: (isPublished: boolean, record: Notice) => (
         <Space direction="vertical" size={2}>
           {record.isPinned && <Tag color="gold"><PushpinOutlined /> 고정</Tag>}
@@ -208,7 +208,7 @@ const NoticePage: React.FC = () => {
       title: '카테고리',
       dataIndex: 'categoryDescription',
       key: 'category',
-      width: 100,
+      width: 120,
       render: (text: string, record: Notice) => {
         const colorMap: Record<string, string> = {
           SYSTEM: 'blue',
@@ -234,20 +234,20 @@ const NoticePage: React.FC = () => {
       title: '작성자',
       dataIndex: 'authorName',
       key: 'authorName',
-      width: 100,
+      width: 120,
     },
     {
       title: '조회수',
       dataIndex: 'viewCount',
       key: 'viewCount',
-      width: 80,
+      width: 90,
       render: (count: number) => count.toLocaleString(),
     },
     {
       title: '발행일',
       dataIndex: 'publishedAt',
       key: 'publishedAt',
-      width: 150,
+      width: 180,
       render: (date: string) => date ? new Date(date).toLocaleString('ko-KR') : '-',
     },
     {

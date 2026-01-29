@@ -139,14 +139,14 @@ const DispatchPage: React.FC = () => {
   };
 
   const columns: ColumnsType<Dispatch> = [
-    { title: 'ID', dataIndex: 'dispatchId', width: 60 },
-    { title: '품목유형', dataIndex: 'itemType', render: (v: string) => itemTypeLabels[v] || v },
-    { title: '품목명', dataIndex: 'itemName' },
-    { title: '배차일', dataIndex: 'dispatchDate' },
-    { title: '출발지', dataIndex: 'originLocation' },
-    { title: '도착지', dataIndex: 'destination' },
-    { title: '상태', dataIndex: 'dispatchStatus', render: (v: string) => <Tag color={statusColors[v]}>{statusLabels[v]}</Tag> },
-    { title: '등록일', dataIndex: 'createdAt', render: (v: string) => dayjs(v).format('YYYY-MM-DD HH:mm') },
+    { title: 'ID', dataIndex: 'dispatchId', width: 80 },
+    { title: '품목유형', dataIndex: 'itemType', width: 100, render: (v: string) => itemTypeLabels[v] || v },
+    { title: '품목명', dataIndex: 'itemName', width: 110 },
+    { title: '배차일', dataIndex: 'dispatchDate', width: 110 },
+    { title: '출발지', dataIndex: 'originLocation', width: 110 },
+    { title: '도착지', dataIndex: 'destination', width: 110 },
+    { title: '상태', dataIndex: 'dispatchStatus', width: 90, render: (v: string) => <Tag color={statusColors[v]}>{statusLabels[v]}</Tag> },
+    { title: '등록일', dataIndex: 'createdAt', width: 160, render: (v: string) => dayjs(v).format('YYYY-MM-DD HH:mm') },
     {
       title: '작업',
       key: 'actions',
@@ -245,22 +245,21 @@ const DispatchPage: React.FC = () => {
               />
             </Space>
           </Col>
-        </Row>
-
-        <Row style={{ marginTop: 12 }} justify="end">
-          <Space>
-            <Button icon={<ClearOutlined />} onClick={handleReset}>
-              초기화
-            </Button>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={handleSearch}
-              loading={loading}
-            >
-              조회
-            </Button>
-          </Space>
+          <Col flex="auto" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Space>
+              <Button icon={<ClearOutlined />} onClick={handleReset}>
+                초기화
+              </Button>
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+                loading={loading}
+              >
+                조회
+              </Button>
+            </Space>
+          </Col>
         </Row>
       </Card>
 
@@ -299,7 +298,7 @@ const DispatchPage: React.FC = () => {
       />
 
       {searched && totalElements > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
           <Pagination
             current={currentPage}
             pageSize={pageSize}

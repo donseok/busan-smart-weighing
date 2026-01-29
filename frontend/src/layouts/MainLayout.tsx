@@ -36,6 +36,10 @@ const menuItems = [
   { key: '/dispatch', icon: <CarOutlined />, label: '배차 관리' },
   { key: '/weighing', icon: <ExperimentOutlined />, label: '계량 현황' },
   { key: '/inquiry', icon: <FileSearchOutlined />, label: '계량 조회' },
+  { key: '/gate-pass', icon: <CheckCircleOutlined />, label: '출문 관리' },
+  { key: '/slips', icon: <FileTextOutlined />, label: '전자 계량표' },
+  { key: '/statistics', icon: <BarChartOutlined />, label: '통계/보고서' },
+  { key: '/monitoring', icon: <MonitorOutlined />, label: '장비 관제' },
   {
     key: 'master',
     icon: <DatabaseOutlined />,
@@ -47,11 +51,7 @@ const menuItems = [
       { key: '/master/scales', icon: <ToolOutlined />, label: '계량대' },
     ],
   },
-  { key: '/gate-pass', icon: <CheckCircleOutlined />, label: '출문 관리' },
-  { key: '/slips', icon: <FileTextOutlined />, label: '전자 계량표' },
   { key: '/notices', icon: <NotificationOutlined />, label: '공지사항' },
-  { key: '/statistics', icon: <BarChartOutlined />, label: '통계/보고서' },
-  { key: '/monitoring', icon: <MonitorOutlined />, label: '장비 관제' },
   { key: '/help', icon: <QuestionCircleOutlined />, label: '이용 안내' },
   {
     key: 'admin',
@@ -137,7 +137,7 @@ const MainLayout: React.FC = () => {
         <div
           onClick={() => navigate('/dashboard')}
           style={{
-            height: 64,
+            height: 80,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

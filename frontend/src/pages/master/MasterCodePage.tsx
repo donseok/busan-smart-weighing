@@ -118,7 +118,7 @@ const MasterCodePage: React.FC = () => {
   };
 
   const columns: ColumnsType<CommonCode> = [
-    { title: 'ID', dataIndex: 'codeId', width: 60 },
+    { title: 'ID', dataIndex: 'codeId', width: 80 },
     {
       title: '코드그룹',
       dataIndex: 'codeGroup',
@@ -127,7 +127,7 @@ const MasterCodePage: React.FC = () => {
     },
     { title: '코드값', dataIndex: 'codeValue', width: 120 },
     { title: '코드명', dataIndex: 'codeName' },
-    { title: '정렬순서', dataIndex: 'sortOrder', width: 80, align: 'center' },
+    { title: '정렬순서', dataIndex: 'sortOrder', width: 100, align: 'center' },
     {
       title: '상태',
       dataIndex: 'isActive',
@@ -167,9 +167,7 @@ const MasterCodePage: React.FC = () => {
     <>
       <Typography.Title level={4}>코드 관리</Typography.Title>
       <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} align="center">
-        <Space>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>코드 등록</Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>코드 등록</Button>
         <Space>
           <Select
             style={{ width: 180 }}

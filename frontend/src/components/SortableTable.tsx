@@ -71,7 +71,7 @@ const DraggableHeaderCell: React.FC<DraggableHeaderCellProps> = ({
       {...listeners}
       {...rest}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
         <HolderOutlined style={{ color: '#999', fontSize: 12 }} />
         {children}
       </div>
@@ -86,7 +86,7 @@ const NormalHeaderCell: React.FC<{ children: React.ReactNode; style?: React.CSSP
   className,
   ...rest
 }) => (
-  <th style={style} className={className} {...rest}>
+  <th style={{ ...style, whiteSpace: 'nowrap' }} className={className} {...rest}>
     {children}
   </th>
 );

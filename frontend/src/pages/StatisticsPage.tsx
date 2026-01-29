@@ -15,13 +15,14 @@ import {
 } from 'antd';
 import {
   DownloadOutlined,
-  ReloadOutlined,
+  SearchOutlined,
   BarChartOutlined,
   LineChartOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import dayjs, { type Dayjs } from 'dayjs';
+import { colors } from '../theme/themeConfig';
 
 const { RangePicker } = DatePicker;
 
@@ -233,28 +234,30 @@ const StatisticsPage: React.FC = () => {
       {summary && (
         <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col span={6}>
-            <Card>
+            <Card style={{ borderTop: `3px solid ${colors.primary}` }}>
               <Statistic
                 title="총 계량 건수"
                 value={summary.totalCount}
                 prefix={<BarChartOutlined />}
                 suffix="건"
+                valueStyle={{ color: colors.primary }}
               />
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card style={{ borderTop: `3px solid ${colors.success}` }}>
               <Statistic
                 title="총 중량 (톤)"
                 value={summary.totalWeightTon}
                 prefix={<LineChartOutlined />}
                 precision={2}
                 suffix="톤"
+                valueStyle={{ color: colors.success }}
               />
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card style={{ borderTop: `3px solid ${colors.warning}` }}>
               <Statistic
                 title="품목별 최다"
                 value={
@@ -262,11 +265,12 @@ const StatisticsPage: React.FC = () => {
                     ? Object.entries(summary.countByItemType).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
                     : '-'
                 }
+                valueStyle={{ color: colors.warning }}
               />
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card style={{ borderTop: `3px solid ${colors.error}` }}>
               <Statistic
                 title="업체별 최다"
                 value={
@@ -274,6 +278,7 @@ const StatisticsPage: React.FC = () => {
                     ? Object.entries(summary.countByCompany).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
                     : '-'
                 }
+                valueStyle={{ color: colors.error }}
               />
             </Card>
           </Col>
@@ -281,43 +286,74 @@ const StatisticsPage: React.FC = () => {
       )}
 
       {/* Filters */}
-      <Space style={{ marginBottom: 16 }} wrap>
-        <RangePicker
-          value={dateRange}
-          onChange={handleDateRangeChange}
-          allowClear={false}
-          style={{ width: 280 }}
-        />
-        <Select
-          placeholder="업체 선택"
-          allowClear
-          style={{ width: 180 }}
-          onChange={setCompanyId}
-          value={companyId}
-          options={companies.map((c) => ({
-            value: c.companyId,
-            label: c.companyName,
-          }))}
-        />
-        <Select
-          placeholder="품목유형"
-          allowClear
-          style={{ width: 140 }}
-          onChange={setItemType}
-          value={itemType}
-          options={itemTypeOptions}
-        />
-        <Button icon={<ReloadOutlined />} onClick={fetchStatistics}>
-          조회
-        </Button>
-        <Button
-          type="primary"
-          icon={<DownloadOutlined />}
-          onClick={handleExport}
-        >
-          Excel 다운로드
-        </Button>
-      </Space>
+      <Card
+        size="small"
+        style={{ marginBottom: 16 }}
+        styles={{ body: { padding: '16px 24px' } }}
+      >
+        <Row gutter={[16, 12]} align="middle">
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+                기간
+              </Typography.Text>
+              <RangePicker
+                value={dateRange}
+                onChange={handleDateRangeChange}
+                allowClear={false}
+                style={{ width: 280 }}
+              />
+            </Space>
+          </Col>
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+                업체
+              </Typography.Text>
+              <Select
+                placeholder="전체"
+                allowClear
+                style={{ width: 180 }}
+                onChange={setCompanyId}
+                value={companyId}
+                options={companies.map((c) => ({
+                  value: c.companyId,
+                  label: c.companyName,
+                }))}
+              />
+            </Space>
+          </Col>
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 60, display: 'inline-block' }}>
+                품목유형
+              </Typography.Text>
+              <Select
+                placeholder="전체"
+                allowClear
+                style={{ width: 140 }}
+                onChange={setItemType}
+                value={itemType}
+                options={itemTypeOptions}
+              />
+            </Space>
+          </Col>
+          <Col flex="auto" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Space>
+              <Button icon={<SearchOutlined />} onClick={fetchStatistics} loading={loading}>
+                조회
+              </Button>
+              <Button
+                type="primary"
+                icon={<DownloadOutlined />}
+                onClick={handleExport}
+              >
+                Excel 다운로드
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
 
       {/* Data Tables */}
       <Tabs

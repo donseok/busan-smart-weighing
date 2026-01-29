@@ -8,9 +8,12 @@ import {
   DatePicker,
   Modal,
   Descriptions,
+  Card,
+  Row,
+  Col,
 } from 'antd';
 import SortableTable from '../components/SortableTable';
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import type { WeighingRecord } from '../types';
@@ -53,36 +56,44 @@ const stepLabels: Record<string, string> = {
 };
 
 const columns: ColumnsType<WeighingRecord> = [
-  { title: 'ID', dataIndex: 'weighingId', width: 60 },
-  { title: '배차ID', dataIndex: 'dispatchId', width: 80 },
+  { title: 'ID', dataIndex: 'weighingId', width: 80 },
+  { title: '배차ID', dataIndex: 'dispatchId', width: 100 },
   {
     title: '계량방식',
     dataIndex: 'weighingMode',
+    width: 120,
     render: (v: string) => modeLabels[v] || v,
   },
   {
     title: '총중량(kg)',
     dataIndex: 'grossWeight',
+    width: 120,
+    align: 'right',
     render: (v?: number) => v?.toLocaleString() ?? '-',
   },
   {
     title: '공차중량(kg)',
     dataIndex: 'tareWeight',
+    width: 130,
+    align: 'right',
     render: (v?: number) => v?.toLocaleString() ?? '-',
   },
   {
     title: '순중량(kg)',
     dataIndex: 'netWeight',
+    width: 120,
+    align: 'right',
     render: (v?: number) => (
       <span style={{ color: colors.primary, fontWeight: 600 }}>
         {v?.toLocaleString() ?? '-'}
       </span>
     ),
   },
-  { title: '차량번호', dataIndex: 'lprPlateNumber' },
+  { title: '차량번호', dataIndex: 'lprPlateNumber', width: 110 },
   {
     title: '상태',
     dataIndex: 'weighingStatus',
+    width: 90,
     render: (v: string) => (
       <Tag color={statusColors[v]}>{statusLabels[v] || v}</Tag>
     ),
@@ -90,6 +101,7 @@ const columns: ColumnsType<WeighingRecord> = [
   {
     title: '일시',
     dataIndex: 'createdAt',
+    width: 160,
     render: (v: string) => dayjs(v).format('YYYY-MM-DD HH:mm'),
   },
 ];
@@ -161,40 +173,72 @@ const WeighingPage: React.FC = () => {
   return (
     <>
       <Typography.Title level={4}>계량 현황</Typography.Title>
-      <Space style={{ marginBottom: 16 }} wrap>
-        <RangePicker
-          value={dateRange}
-          placeholder={['시작일', '종료일']}
-          onChange={handleDateRangeChange}
-          allowClear
-          style={{ width: 260 }}
-        />
-        <Select
-          value={statusFilter}
-          placeholder="상태 필터"
-          allowClear
-          style={{ width: 150 }}
-          onChange={setStatusFilter}
-          options={Object.entries(statusLabels).map(([k, v]) => ({
-            value: k,
-            label: v,
-          }))}
-        />
-        <Select
-          value={modeFilter}
-          placeholder="계량방식"
-          allowClear
-          style={{ width: 160 }}
-          onChange={setModeFilter}
-          options={modeOptions}
-        />
-        <Button type="primary" icon={<SearchOutlined />} onClick={fetchData}>
-          조회
-        </Button>
-        <Button icon={<ReloadOutlined />} onClick={handleReset}>
-          초기화
-        </Button>
-      </Space>
+
+      <Card
+        size="small"
+        style={{ marginBottom: 16 }}
+        styles={{ body: { padding: '16px 24px' } }}
+      >
+        <Row gutter={[16, 12]} align="middle">
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+                기간
+              </Typography.Text>
+              <RangePicker
+                value={dateRange}
+                placeholder={['시작일', '종료일']}
+                onChange={handleDateRangeChange}
+                allowClear
+                style={{ width: 260 }}
+              />
+            </Space>
+          </Col>
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+                상태
+              </Typography.Text>
+              <Select
+                value={statusFilter}
+                placeholder="전체"
+                allowClear
+                style={{ width: 150 }}
+                onChange={setStatusFilter}
+                options={Object.entries(statusLabels).map(([k, v]) => ({
+                  value: k,
+                  label: v,
+                }))}
+              />
+            </Space>
+          </Col>
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 60, display: 'inline-block' }}>
+                계량방식
+              </Typography.Text>
+              <Select
+                value={modeFilter}
+                placeholder="전체"
+                allowClear
+                style={{ width: 160 }}
+                onChange={setModeFilter}
+                options={modeOptions}
+              />
+            </Space>
+          </Col>
+          <Col flex="auto" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Space>
+              <Button icon={<ClearOutlined />} onClick={handleReset}>
+                초기화
+              </Button>
+              <Button type="primary" icon={<SearchOutlined />} onClick={fetchData} loading={loading}>
+                조회
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
 
       <SortableTable
         columns={columns}

@@ -9,9 +9,12 @@ import {
   DatePicker,
   Descriptions,
   message,
+  Card,
+  Row,
+  Col,
 } from 'antd';
 import SortableTable from '../components/SortableTable';
-import { SearchOutlined, ReloadOutlined, ShareAltOutlined } from '@ant-design/icons';
+import { SearchOutlined, ClearOutlined, ShareAltOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import type { WeighingSlip } from '../types';
@@ -96,50 +99,61 @@ const SlipPage: React.FC = () => {
   };
 
   const columns: ColumnsType<WeighingSlip> = [
-    { title: 'ID', dataIndex: 'slipId', width: 60 },
-    { title: '전표번호', dataIndex: 'slipNumber' },
+    { title: 'ID', dataIndex: 'slipId', width: 80 },
+    { title: '전표번호', dataIndex: 'slipNumber', width: 120 },
     {
       title: '차량번호',
       dataIndex: 'vehiclePlateNumber',
+      width: 110,
       render: (v?: string) => v || '-',
     },
     {
       title: '운송사',
       dataIndex: 'companyName',
+      width: 100,
       render: (v?: string) => v || '-',
     },
     {
       title: '품목명',
       dataIndex: 'itemName',
+      width: 100,
       render: (v?: string) => v || '-',
     },
     {
       title: '총중량(kg)',
       dataIndex: 'grossWeightKg',
-      render: (v?: string) => (v ? Number(v).toLocaleString() : '-'),
+      width: 120,
+      align: 'right',
+      render: (v?: number) => (v != null && !isNaN(v) ? v.toLocaleString() : '-'),
     },
     {
       title: '차량중량(kg)',
       dataIndex: 'tareWeightKg',
-      render: (v?: string) => (v ? Number(v).toLocaleString() : '-'),
+      width: 130,
+      align: 'right',
+      render: (v?: number) => (v != null && !isNaN(v) ? v.toLocaleString() : '-'),
     },
     {
       title: '순중량(kg)',
       dataIndex: 'netWeightKg',
-      render: (v?: string) => (
+      width: 120,
+      align: 'right',
+      render: (v?: number) => (
         <span style={{ color: colors.primary, fontWeight: 600 }}>
-          {v ? Number(v).toLocaleString() : '-'}
+          {v != null && !isNaN(v) ? v.toLocaleString() : '-'}
         </span>
       ),
     },
     {
       title: '공유',
       dataIndex: 'sharedVia',
+      width: 80,
       render: (v?: string) => (v ? <Tag color={colors.primary}>{v}</Tag> : '-'),
     },
     {
       title: '발행일',
       dataIndex: 'createdAt',
+      width: 160,
       render: (v: string) => dayjs(v).format('YYYY-MM-DD HH:mm'),
     },
     {
@@ -160,21 +174,39 @@ const SlipPage: React.FC = () => {
   return (
     <>
       <Typography.Title level={4}>전자계량표 관리</Typography.Title>
-      <Space style={{ marginBottom: 16 }} wrap>
-        <RangePicker
-          value={dateRange}
-          placeholder={['시작일', '종료일']}
-          onChange={handleDateRangeChange}
-          allowClear
-          style={{ width: 260 }}
-        />
-        <Button type="primary" icon={<SearchOutlined />} onClick={fetchData}>
-          조회
-        </Button>
-        <Button icon={<ReloadOutlined />} onClick={handleReset}>
-          초기화
-        </Button>
-      </Space>
+
+      <Card
+        size="small"
+        style={{ marginBottom: 16 }}
+        styles={{ body: { padding: '16px 24px' } }}
+      >
+        <Row gutter={[16, 12]} align="middle">
+          <Col>
+            <Space size={8}>
+              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+                기간
+              </Typography.Text>
+              <RangePicker
+                value={dateRange}
+                placeholder={['시작일', '종료일']}
+                onChange={handleDateRangeChange}
+                allowClear
+                style={{ width: 260 }}
+              />
+            </Space>
+          </Col>
+          <Col flex="auto" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Space>
+              <Button icon={<ClearOutlined />} onClick={handleReset}>
+                초기화
+              </Button>
+              <Button type="primary" icon={<SearchOutlined />} onClick={fetchData} loading={loading}>
+                조회
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
 
       <SortableTable
         columns={columns}
@@ -224,19 +256,19 @@ const SlipPage: React.FC = () => {
               {selectedSlip.itemName || '-'}
             </Descriptions.Item>
             <Descriptions.Item label="총중량(kg)">
-              {selectedSlip.grossWeightKg
-                ? Number(selectedSlip.grossWeightKg).toLocaleString()
+              {selectedSlip.grossWeightKg != null && !isNaN(selectedSlip.grossWeightKg)
+                ? selectedSlip.grossWeightKg.toLocaleString()
                 : '-'}
             </Descriptions.Item>
             <Descriptions.Item label="차량중량(kg)">
-              {selectedSlip.tareWeightKg
-                ? Number(selectedSlip.tareWeightKg).toLocaleString()
+              {selectedSlip.tareWeightKg != null && !isNaN(selectedSlip.tareWeightKg)
+                ? selectedSlip.tareWeightKg.toLocaleString()
                 : '-'}
             </Descriptions.Item>
             <Descriptions.Item label="순중량(kg)">
               <span style={{ color: colors.primary, fontWeight: 600 }}>
-                {selectedSlip.netWeightKg
-                  ? Number(selectedSlip.netWeightKg).toLocaleString()
+                {selectedSlip.netWeightKg != null && !isNaN(selectedSlip.netWeightKg)
+                  ? selectedSlip.netWeightKg.toLocaleString()
                   : '-'}
               </span>
             </Descriptions.Item>

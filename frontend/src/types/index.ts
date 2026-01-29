@@ -97,9 +97,9 @@ export interface WeighingSlip {
   vehiclePlateNumber?: string;
   companyName?: string;
   itemName?: string;
-  grossWeightKg?: string;
-  tareWeightKg?: string;
-  netWeightKg?: string;
+  grossWeightKg?: number;
+  tareWeightKg?: number;
+  netWeightKg?: number;
   sharedVia?: string;
   createdAt: string;
 }

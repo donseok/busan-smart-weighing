@@ -25,7 +25,7 @@ partial class MainForm
         // =====================================================================
         this.splitMain = new SplitContainer();
         this.splitMain.Dock = DockStyle.Fill;
-        this.splitMain.SplitterDistance = 520;
+        this.splitMain.SplitterDistance = 730;
         this.splitMain.FixedPanel = FixedPanel.Panel1;
 
         // =====================================================================
@@ -36,24 +36,24 @@ partial class MainForm
 
         // -- Weight display group ---------------------------------------------
         this.grpWeight = new GroupBox();
-        this.grpWeight.Text = "Weight (kg)";
+        this.grpWeight.Text = "중량 (kg)";
         this.grpWeight.Dock = DockStyle.Top;
-        this.grpWeight.Height = 180;
+        this.grpWeight.Height = 300;
         this.grpWeight.Padding = new Padding(10);
 
         this.lblWeight = new Label();
         this.lblWeight.Text = "0.0";
-        this.lblWeight.Font = new Font("Consolas", 60F, FontStyle.Bold);
+        this.lblWeight.Font = new Font("Consolas", 80F, FontStyle.Bold);
         this.lblWeight.TextAlign = ContentAlignment.MiddleCenter;
         this.lblWeight.Dock = DockStyle.Fill;
         this.lblWeight.ForeColor = Color.DarkGreen;
 
         this.lblStability = new Label();
-        this.lblStability.Text = "UNSTABLE";
-        this.lblStability.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
+        this.lblStability.Text = "불안정";
+        this.lblStability.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
         this.lblStability.TextAlign = ContentAlignment.MiddleCenter;
         this.lblStability.Dock = DockStyle.Bottom;
-        this.lblStability.Height = 30;
+        this.lblStability.Height = 40;
         this.lblStability.BackColor = Color.Red;
         this.lblStability.ForeColor = Color.White;
 
@@ -62,7 +62,7 @@ partial class MainForm
 
         // -- Vehicle / dispatch info group ------------------------------------
         this.grpVehicle = new GroupBox();
-        this.grpVehicle.Text = "Vehicle / Dispatch Info";
+        this.grpVehicle.Text = "차량 / 배차 정보";
         this.grpVehicle.Dock = DockStyle.Top;
         this.grpVehicle.Height = 160;
         this.grpVehicle.Padding = new Padding(10);
@@ -77,15 +77,15 @@ partial class MainForm
         for (int i = 0; i < 5; i++)
             this.tableVehicle.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
 
-        this.lblPlateLabel = new Label { Text = "Plate:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
+        this.lblPlateLabel = new Label { Text = "차량번호:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
         this.lblPlateValue = new Label { Text = "-", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
-        this.lblCompanyLabel = new Label { Text = "Company:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
+        this.lblCompanyLabel = new Label { Text = "업체:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
         this.lblCompanyValue = new Label { Text = "-", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
-        this.lblItemLabel = new Label { Text = "Item:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
+        this.lblItemLabel = new Label { Text = "품목:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
         this.lblItemValue = new Label { Text = "-", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
-        this.lblDispatchLabel = new Label { Text = "Dispatch ID:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
+        this.lblDispatchLabel = new Label { Text = "배차 ID:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
         this.lblDispatchValue = new Label { Text = "-", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
-        this.lblDriverLabel = new Label { Text = "Driver:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
+        this.lblDriverLabel = new Label { Text = "운전자:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Font = new Font("Segoe UI", 9.5F, FontStyle.Bold) };
         this.lblDriverValue = new Label { Text = "-", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft };
 
         this.tableVehicle.Controls.Add(this.lblPlateLabel, 0, 0);
@@ -103,7 +103,7 @@ partial class MainForm
 
         // -- Connection status group ------------------------------------------
         this.grpConnections = new GroupBox();
-        this.grpConnections.Text = "Connections";
+        this.grpConnections.Text = "연결 상태";
         this.grpConnections.Dock = DockStyle.Top;
         this.grpConnections.Height = 80;
         this.grpConnections.Top = 360;
@@ -119,10 +119,10 @@ partial class MainForm
         this.tableConnections.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
         this.tableConnections.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
 
-        this.lblIndicatorStatus = new Label { Text = "Indicator", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
-        this.lblDisplayStatus = new Label { Text = "Display", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
-        this.lblBarrierStatus = new Label { Text = "Barrier", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
-        this.lblNetworkStatus = new Label { Text = "Network", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
+        this.lblIndicatorStatus = new Label { Text = "계량기", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
+        this.lblDisplayStatus = new Label { Text = "전광판", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
+        this.lblBarrierStatus = new Label { Text = "차단기", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
+        this.lblNetworkStatus = new Label { Text = "네트워크", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter, Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
 
         this.indIndicator = new Panel { BackColor = Color.Gray, Dock = DockStyle.Fill, Margin = new Padding(15, 4, 15, 4) };
         this.indDisplay = new Panel { BackColor = Color.Gray, Dock = DockStyle.Fill, Margin = new Padding(15, 4, 15, 4) };
@@ -142,7 +142,7 @@ partial class MainForm
 
         // -- Recent history list ----------------------------------------------
         this.grpHistory = new GroupBox();
-        this.grpHistory.Text = "Recent Weighings";
+        this.grpHistory.Text = "최근 계량 기록";
         this.grpHistory.Dock = DockStyle.Fill;
 
         this.lvHistory = new ListView();
@@ -151,11 +151,11 @@ partial class MainForm
         this.lvHistory.FullRowSelect = true;
         this.lvHistory.GridLines = true;
         this.lvHistory.Font = new Font("Segoe UI", 9F);
-        this.lvHistory.Columns.Add("Time", 80);
-        this.lvHistory.Columns.Add("Plate", 100);
-        this.lvHistory.Columns.Add("Weight (kg)", 90);
-        this.lvHistory.Columns.Add("Mode", 70);
-        this.lvHistory.Columns.Add("Status", 80);
+        this.lvHistory.Columns.Add("시간", 80);
+        this.lvHistory.Columns.Add("차량번호", 100);
+        this.lvHistory.Columns.Add("중량(kg)", 90);
+        this.lvHistory.Columns.Add("모드", 70);
+        this.lvHistory.Columns.Add("상태", 80);
 
         this.grpHistory.Controls.Add(this.lvHistory);
 
@@ -175,19 +175,19 @@ partial class MainForm
 
         // -- Mode toggle group ------------------------------------------------
         this.grpMode = new GroupBox();
-        this.grpMode.Text = "Weighing Mode";
+        this.grpMode.Text = "계량 모드";
         this.grpMode.Dock = DockStyle.Top;
         this.grpMode.Height = 60;
 
         this.rbAuto = new RadioButton();
-        this.rbAuto.Text = "Auto (LPR)";
+        this.rbAuto.Text = "자동 (LPR)";
         this.rbAuto.Location = new Point(20, 25);
         this.rbAuto.AutoSize = true;
         this.rbAuto.Checked = true;
         this.rbAuto.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
 
         this.rbManual = new RadioButton();
-        this.rbManual.Text = "Manual";
+        this.rbManual.Text = "수동";
         this.rbManual.Location = new Point(180, 25);
         this.rbManual.AutoSize = true;
         this.rbManual.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
@@ -197,13 +197,13 @@ partial class MainForm
 
         // -- Manual controls group --------------------------------------------
         this.grpManual = new GroupBox();
-        this.grpManual.Text = "Manual Weighing Controls";
+        this.grpManual.Text = "수동 계량 컨트롤";
         this.grpManual.Dock = DockStyle.Top;
         this.grpManual.Height = 160;
         this.grpManual.Enabled = false;
 
         this.lblSearchPlate = new Label();
-        this.lblSearchPlate.Text = "Plate No:";
+        this.lblSearchPlate.Text = "차량번호:";
         this.lblSearchPlate.Location = new Point(10, 28);
         this.lblSearchPlate.AutoSize = true;
 
@@ -212,12 +212,12 @@ partial class MainForm
         this.txtSearchPlate.Width = 140;
 
         this.btnSearch = new Button();
-        this.btnSearch.Text = "Search";
+        this.btnSearch.Text = "검색";
         this.btnSearch.Location = new Point(230, 24);
         this.btnSearch.Width = 80;
 
         this.lblSelectDispatch = new Label();
-        this.lblSelectDispatch.Text = "Dispatch:";
+        this.lblSelectDispatch.Text = "배차:";
         this.lblSelectDispatch.Location = new Point(10, 63);
         this.lblSelectDispatch.AutoSize = true;
 
@@ -227,7 +227,7 @@ partial class MainForm
         this.cboDispatches.DropDownStyle = ComboBoxStyle.DropDownList;
 
         this.btnConfirmWeight = new Button();
-        this.btnConfirmWeight.Text = "Confirm Weight";
+        this.btnConfirmWeight.Text = "중량 확인";
         this.btnConfirmWeight.Location = new Point(80, 100);
         this.btnConfirmWeight.Width = 230;
         this.btnConfirmWeight.Height = 40;
@@ -245,26 +245,26 @@ partial class MainForm
 
         // -- Action buttons group ---------------------------------------------
         this.grpActions = new GroupBox();
-        this.grpActions.Text = "Actions";
+        this.grpActions.Text = "작업";
         this.grpActions.Dock = DockStyle.Top;
         this.grpActions.Height = 90;
 
         this.btnReWeigh = new Button();
-        this.btnReWeigh.Text = "Re-Weigh";
+        this.btnReWeigh.Text = "재계량";
         this.btnReWeigh.Location = new Point(10, 30);
         this.btnReWeigh.Width = 120;
         this.btnReWeigh.Height = 40;
         this.btnReWeigh.Font = new Font("Segoe UI", 10F);
 
         this.btnReset = new Button();
-        this.btnReset.Text = "Reset";
+        this.btnReset.Text = "초기화";
         this.btnReset.Location = new Point(140, 30);
         this.btnReset.Width = 80;
         this.btnReset.Height = 40;
         this.btnReset.Font = new Font("Segoe UI", 10F);
 
         this.btnBarrierOpen = new Button();
-        this.btnBarrierOpen.Text = "Barrier Open";
+        this.btnBarrierOpen.Text = "차단기 열기";
         this.btnBarrierOpen.Location = new Point(230, 30);
         this.btnBarrierOpen.Width = 100;
         this.btnBarrierOpen.Height = 40;
@@ -322,8 +322,8 @@ partial class MainForm
 
         // -- Process state label ----------------------------------------------
         this.lblProcessState = new Label();
-        this.lblProcessState.Text = "State: Idle";
-        this.lblProcessState.Dock = DockStyle.Top;
+        this.lblProcessState.Text = "상태: 대기";
+        this.lblProcessState.Dock = DockStyle.Bottom;
         this.lblProcessState.Height = 30;
         this.lblProcessState.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
         this.lblProcessState.TextAlign = ContentAlignment.MiddleLeft;
@@ -332,27 +332,29 @@ partial class MainForm
 
         // -- Status / log area ------------------------------------------------
         this.grpLog = new GroupBox();
-        this.grpLog.Text = "Status Log";
-        this.grpLog.Dock = DockStyle.Fill;
+        this.grpLog.Text = "상태 로그";
+        this.grpLog.Dock = DockStyle.Bottom;
+        this.grpLog.Height = 150;
 
         this.txtLog = new TextBox();
         this.txtLog.Dock = DockStyle.Fill;
         this.txtLog.Multiline = true;
         this.txtLog.ReadOnly = true;
         this.txtLog.ScrollBars = ScrollBars.Vertical;
-        this.txtLog.Font = new Font("Consolas", 9F);
+        this.txtLog.Font = new Font("Consolas", 8F);
         this.txtLog.BackColor = Color.FromArgb(20, 20, 20);
         this.txtLog.ForeColor = Color.Lime;
 
         this.grpLog.Controls.Add(this.txtLog);
 
-        // Assemble right panel (order matters for Dock.Top: add bottom-first)
-        this.panelRight.Controls.Add(this.grpLog);
-        this.panelRight.Controls.Add(this.lblProcessState);
-        this.panelRight.Controls.Add(this.grpSimulator);
-        this.panelRight.Controls.Add(this.grpActions);
-        this.panelRight.Controls.Add(this.grpManual);
-        this.panelRight.Controls.Add(this.grpMode);
+        // Assemble right panel
+        // Bottom-docked items first (lowest index), then top-docked (highest index docks first)
+        this.panelRight.Controls.Add(this.lblProcessState);   // Bottom - above log
+        this.panelRight.Controls.Add(this.grpLog);            // Bottom - very bottom
+        this.panelRight.Controls.Add(this.grpSimulator);      // Top
+        this.panelRight.Controls.Add(this.grpActions);        // Top
+        this.panelRight.Controls.Add(this.grpManual);         // Top
+        this.panelRight.Controls.Add(this.grpMode);           // Top
 
         this.splitMain.Panel2.Controls.Add(this.panelRight);
 
@@ -361,10 +363,10 @@ partial class MainForm
         // =====================================================================
         this.AutoScaleDimensions = new SizeF(7F, 15F);
         this.AutoScaleMode = AutoScaleMode.Font;
-        this.ClientSize = new Size(1100, 700);
+        this.ClientSize = new Size(1180, 870);
         this.Controls.Add(this.splitMain);
-        this.Text = "Busan Smart Weighing CS";
-        this.MinimumSize = new Size(900, 600);
+        this.Text = "부산 스마트 계량 시스템";
+        this.MinimumSize = new Size(1100, 700);
         this.StartPosition = FormStartPosition.CenterScreen;
         this.Font = new Font("Segoe UI", 9F);
     }

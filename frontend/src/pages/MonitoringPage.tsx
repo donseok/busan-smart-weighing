@@ -200,16 +200,17 @@ const MonitoringPage: React.FC = () => {
       {summary && (
         <Row gutter={16} style={{ marginBottom: 24 }}>
           <Col span={6}>
-            <Card>
+            <Card style={{ borderTop: '3px solid #06B6D4', background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, transparent 60%)' }}>
               <Statistic
                 title="전체 장비"
                 value={summary.totalDevices}
+                valueStyle={{ color: '#06B6D4' }}
                 suffix="대"
               />
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card style={{ borderTop: '3px solid #10B981', background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, transparent 60%)' }}>
               <Statistic
                 title={
                   <Space>
@@ -218,13 +219,13 @@ const MonitoringPage: React.FC = () => {
                   </Space>
                 }
                 value={summary.onlineCount}
-                valueStyle={{ color: '#52c41a' }}
+                valueStyle={{ color: '#10B981' }}
                 suffix="대"
               />
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card style={{ borderTop: '3px solid #F59E0B', background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, transparent 60%)' }}>
               <Statistic
                 title={
                   <Space>
@@ -233,13 +234,13 @@ const MonitoringPage: React.FC = () => {
                   </Space>
                 }
                 value={summary.offlineCount}
-                valueStyle={{ color: '#999' }}
+                valueStyle={{ color: '#F59E0B' }}
                 suffix="대"
               />
             </Card>
           </Col>
           <Col span={6}>
-            <Card>
+            <Card style={{ borderTop: '3px solid #F43F5E', background: 'linear-gradient(135deg, rgba(244,63,94,0.08) 0%, transparent 60%)' }}>
               <Statistic
                 title={
                   <Space>
@@ -248,7 +249,7 @@ const MonitoringPage: React.FC = () => {
                   </Space>
                 }
                 value={summary.errorCount}
-                valueStyle={{ color: '#ff4d4f' }}
+                valueStyle={{ color: '#F43F5E' }}
                 suffix="대"
               />
             </Card>
@@ -261,7 +262,11 @@ const MonitoringPage: React.FC = () => {
         <Row gutter={16} style={{ marginBottom: 24 }}>
           {Object.entries(summary.countByTypeAndStatus).map(([type, statusCounts]) => (
             <Col span={6} key={type}>
-              <Card size="small" title={type}>
+              <Card
+                size="small"
+                title={<span style={{ color: '#06B6D4' }}>{type}</span>}
+                style={{ borderLeft: '3px solid #06B6D4' }}
+              >
                 <Space direction="vertical" size={4}>
                   {Object.entries(statusCounts).map(([status, count]) => (
                     <div key={status}>
@@ -271,7 +276,11 @@ const MonitoringPage: React.FC = () => {
                           status === '오류' ? 'error' : 'default'
                         }
                       />
-                      <span style={{ marginLeft: 8 }}>
+                      <span style={{
+                        marginLeft: 8,
+                        color: status === '온라인' ? '#10B981' :
+                               status === '오류' ? '#F43F5E' : '#F59E0B',
+                      }}>
                         {status}: {count}대
                       </span>
                     </div>

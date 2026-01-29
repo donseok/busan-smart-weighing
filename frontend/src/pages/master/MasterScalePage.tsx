@@ -88,12 +88,12 @@ const MasterScalePage: React.FC = () => {
   };
 
   const columns: ColumnsType<Scale> = [
-    { title: 'ID', dataIndex: 'scaleId', width: 60 },
-    { title: '계량대명', dataIndex: 'scaleName' },
-    { title: '위치', dataIndex: 'location' },
-    { title: '최대용량(kg)', dataIndex: 'maxCapacity', render: (v?: number) => v?.toLocaleString() ?? '-' },
-    { title: '최소용량(kg)', dataIndex: 'minCapacity', render: (v?: number) => v?.toLocaleString() ?? '-' },
-    { title: '상태', dataIndex: 'scaleStatus', render: (v: string) => <Tag color={scaleStatusColors[v]}>{v}</Tag> },
+    { title: 'ID', dataIndex: 'scaleId', width: 80 },
+    { title: '계량대명', dataIndex: 'scaleName', width: 130 },
+    { title: '위치', dataIndex: 'location', width: 110 },
+    { title: '최대용량(kg)', dataIndex: 'maxCapacity', width: 130, align: 'right', render: (v?: number) => v?.toLocaleString() ?? '-' },
+    { title: '최소용량(kg)', dataIndex: 'minCapacity', width: 130, align: 'right', render: (v?: number) => v?.toLocaleString() ?? '-' },
+    { title: '상태', dataIndex: 'scaleStatus', width: 100, render: (v: string) => <Tag color={scaleStatusColors[v]}>{v}</Tag> },
     {
       title: '관리',
       key: 'actions',

@@ -179,7 +179,7 @@ const AdminAuditLogPage: React.FC = () => {
     {
       title: '대상 ID',
       dataIndex: 'entityId',
-      width: 80,
+      width: 100,
       render: (id: number) => id ?? '-',
     },
     {

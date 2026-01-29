@@ -87,12 +87,12 @@ const MasterCompanyPage: React.FC = () => {
   };
 
   const columns: ColumnsType<Company> = [
-    { title: 'ID', dataIndex: 'companyId', width: 60 },
-    { title: '운송사명', dataIndex: 'companyName' },
-    { title: '유형', dataIndex: 'companyType' },
-    { title: '사업자번호', dataIndex: 'businessNumber' },
-    { title: '대표자', dataIndex: 'representative' },
-    { title: '연락처', dataIndex: 'phoneNumber' },
+    { title: 'ID', dataIndex: 'companyId', width: 80 },
+    { title: '운송사명', dataIndex: 'companyName', width: 130 },
+    { title: '유형', dataIndex: 'companyType', width: 100 },
+    { title: '사업자번호', dataIndex: 'businessNumber', width: 130 },
+    { title: '대표자', dataIndex: 'representative', width: 100 },
+    { title: '연락처', dataIndex: 'phoneNumber', width: 130 },
     { title: '주소', dataIndex: 'address', ellipsis: true },
     {
       title: '관리',
