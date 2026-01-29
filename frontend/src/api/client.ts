@@ -59,7 +59,8 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => {
-    if (response.data && typeof response.data === 'object') {
+    const contentType = response.headers['content-type'] || '';
+    if (response.data && typeof response.data === 'object' && contentType.includes('application/json')) {
       response.data = convertKeys(response.data, snakeToCamel);
     }
     return response;
@@ -108,6 +109,9 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

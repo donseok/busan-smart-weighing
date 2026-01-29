@@ -193,10 +193,10 @@ const StatisticsPage: React.FC = () => {
 
     try {
       const params = new URLSearchParams();
-      params.append('dateFrom', dateRange[0].format('YYYY-MM-DD'));
-      params.append('dateTo', dateRange[1].format('YYYY-MM-DD'));
-      if (companyId) params.append('companyId', companyId.toString());
-      if (itemType) params.append('itemType', itemType);
+      params.append('date_from', dateRange[0].format('YYYY-MM-DD'));
+      params.append('date_to', dateRange[1].format('YYYY-MM-DD'));
+      if (companyId) params.append('company_id', companyId.toString());
+      if (itemType) params.append('item_type', itemType);
       params.append('type', activeTab === 'daily' ? 'daily' : activeTab === 'monthly' ? 'monthly' : 'all');
 
       const response = await apiClient.get(`/statistics/export?${params.toString()}`, {
