@@ -1,11 +1,12 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace WeighingCS.Controls;
 
 /// <summary>
-/// Rounded button with hover/press effects and three style variants.
+/// Rounded button with hover/press effects, subtle shadow, and three style variants.
 /// </summary>
 public class ModernButton : Control
 {
@@ -26,7 +27,7 @@ public class ModernButton : Control
             ControlStyles.StandardDoubleClick,
             true);
 
-        Size = new Size(120, 40);
+        Size = new Size(120, 38);
         Cursor = Cursors.Hand;
         Font = Theme.FontBody;
     }
@@ -43,28 +44,37 @@ public class ModernButton : Control
     {
         var g = e.Graphics;
         g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+        g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
         // Clear with parent background
         using (var clearBrush = new SolidBrush(Parent?.BackColor ?? Theme.BgBase))
             g.FillRectangle(clearBrush, ClientRectangle);
 
-        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+        var bounds = new Rectangle(1, 1, Width - 3, Height - 3);
         Color bgColor = GetBackgroundColor();
         Color fgColor = GetForegroundColor();
 
         if (!Enabled)
         {
-            bgColor = Theme.WithAlpha(bgColor, 128);
-            fgColor = Theme.WithAlpha(fgColor, 128);
+            bgColor = Theme.WithAlpha(bgColor, 100);
+            fgColor = Theme.WithAlpha(fgColor, 100);
         }
         else if (_pressed)
         {
-            bgColor = Theme.Darken(bgColor, 0.15f);
+            bgColor = Theme.Darken(bgColor, 0.2f);
         }
         else if (_hover)
         {
-            bgColor = Theme.Lighten(bgColor, 0.10f);
+            bgColor = Theme.Lighten(bgColor, 0.12f);
+        }
+
+        // Subtle shadow for primary/danger
+        if (Enabled && _variant != ButtonVariant.Secondary)
+        {
+            var shadowRect = new Rectangle(2, 3, Width - 4, Height - 4);
+            using var shadowPath = RoundedRectHelper.Create(shadowRect, Theme.RadiusMedium);
+            using var shadowBrush = new SolidBrush(Theme.WithAlpha(bgColor, 30));
+            g.FillPath(shadowBrush, shadowPath);
         }
 
         // Fill
@@ -74,11 +84,25 @@ public class ModernButton : Control
             g.FillPath(bgBrush, path);
         }
 
+        // Top highlight for primary/danger (glass effect)
+        if (_variant != ButtonVariant.Secondary && Enabled)
+        {
+            var highlightRect = new RectangleF(bounds.X, bounds.Y, bounds.Width, bounds.Height * 0.45f);
+            using var clipPath = RoundedRectHelper.Create(bounds, Theme.RadiusMedium);
+            g.SetClip(clipPath);
+            using var hlBrush = new LinearGradientBrush(highlightRect,
+                Theme.WithAlpha(Color.White, 20), Theme.WithAlpha(Color.White, 0),
+                LinearGradientMode.Vertical);
+            g.FillRectangle(hlBrush, highlightRect);
+            g.ResetClip();
+        }
+
         // Border for secondary variant
         if (_variant == ButtonVariant.Secondary)
         {
+            Color borderColor = _hover ? Theme.BorderLight : Theme.Border;
             using var path = RoundedRectHelper.Create(bounds, Theme.RadiusMedium);
-            using var pen = new Pen(Theme.Border, 1f);
+            using var pen = new Pen(borderColor, 1f);
             g.DrawPath(pen, path);
         }
 

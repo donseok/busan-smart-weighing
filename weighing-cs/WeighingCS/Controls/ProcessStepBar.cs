@@ -6,13 +6,13 @@ using System.Windows.Forms;
 namespace WeighingCS.Controls;
 
 /// <summary>
-/// Horizontal 4-step progress bar: 대기 → 계량 → 안정화 → 완료.
-/// Current step has glow effect, completed steps filled.
+/// Horizontal 4-step progress bar with circle indicators and connecting lines.
+/// Steps: 대기 → 계량 → 안정화 → 완료.
 /// </summary>
 public class ProcessStepBar : Control
 {
     private static readonly string[] Steps = { "대기", "계량", "안정화", "완료" };
-    private int _currentStep; // 0-based, -1 for none
+    private int _currentStep;
     private string _statusTag = "대기";
 
     public ProcessStepBar()
@@ -24,21 +24,15 @@ public class ProcessStepBar : Control
             ControlStyles.ResizeRedraw,
             true);
 
-        Size = new Size(600, 48);
+        Size = new Size(600, 64);
     }
 
-    /// <summary>
-    /// Current step index (0 = 대기, 1 = 계량, 2 = 안정화, 3 = 완료). -1 = none.
-    /// </summary>
     public int CurrentStep
     {
         get => _currentStep;
         set { _currentStep = Math.Clamp(value, -1, Steps.Length - 1); Invalidate(); }
     }
 
-    /// <summary>
-    /// Optional status tag text shown at the right side.
-    /// </summary>
     public string StatusTag
     {
         get => _statusTag;
@@ -58,65 +52,97 @@ public class ProcessStepBar : Control
             g.FillRectangle(clearBrush, ClientRectangle);
 
         // Background rounded rect
-        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+        var bounds = new Rectangle(1, 1, Width - 3, Height - 3);
         using (var path = RoundedRectHelper.Create(bounds, Theme.RadiusMedium))
         using (var bgBrush = new SolidBrush(Theme.BgSurface))
         {
             g.FillPath(bgBrush, path);
         }
+        using (var path = RoundedRectHelper.Create(bounds, Theme.RadiusMedium))
+        using (var pen = new Pen(Theme.WithAlpha(Theme.Border, 120), 1f))
+        {
+            g.DrawPath(pen, path);
+        }
 
-        // Calculate segment widths
-        int tagWidth = 80;
-        int stepsAreaWidth = Width - tagWidth - Theme.SpacingMd * 2;
-        int segmentWidth = stepsAreaWidth / Steps.Length;
-        int segHeight = 6;
-        int segY = Height / 2 - segHeight / 2 + 8;
-        int labelY = Height / 2 - 16;
+        int circleSize = 24;
+        int tagWidth = 90;
+        int stepsAreaWidth = Width - tagWidth - Theme.SpacingXl * 2;
+        int spacing = stepsAreaWidth / (Steps.Length - 1);
+        int startX = Theme.SpacingXl;
+        int centerY = Height / 2;
 
         for (int i = 0; i < Steps.Length; i++)
         {
-            int sx = Theme.SpacingMd + i * segmentWidth;
-
-            // Segment background
-            var segRect = new Rectangle(sx, segY, segmentWidth - 4, segHeight);
+            int cx = startX + i * spacing;
             bool isCompleted = i < _currentStep;
             bool isCurrent = i == _currentStep;
+            bool isFuture = i > _currentStep;
 
-            Color segColor = isCompleted ? Theme.Primary :
-                             isCurrent ? Theme.Primary :
-                             Theme.BgElevated;
-
-            // Glow for current step
-            if (isCurrent)
+            // Connecting line to next step
+            if (i < Steps.Length - 1)
             {
-                var glowRect = new Rectangle(sx - 2, segY - 2, segmentWidth, segHeight + 4);
-                using var glowPath = new GraphicsPath();
-                glowPath.AddRectangle(glowRect);
-                using var glowBrush = new SolidBrush(Theme.WithAlpha(Theme.Primary, 50));
-                g.FillRectangle(glowBrush, glowRect);
+                int nextX = startX + (i + 1) * spacing;
+                Color lineColor = isCompleted ? Theme.Primary : Theme.WithAlpha(Theme.Border, 100);
+                float lineWidth = isCompleted ? 2f : 1.5f;
+                using var linePen = new Pen(lineColor, lineWidth);
+                g.DrawLine(linePen, cx + circleSize / 2 + 2, centerY - 6, nextX - circleSize / 2 - 2, centerY - 6);
             }
 
-            // Segment fill
-            using (var segPath = RoundedRectHelper.Create(segRect, segHeight / 2))
-            using (var segBrush = new SolidBrush(isCompleted || isCurrent ? segColor : Theme.BgElevated))
+            // Circle
+            int circleX = cx - circleSize / 2;
+            int circleY = centerY - 6 - circleSize / 2;
+            var circleRect = new Rectangle(circleX, circleY, circleSize, circleSize);
+
+            if (isCompleted)
             {
-                g.FillPath(segBrush, segPath);
+                // Filled circle with checkmark
+                using (var fillBrush = new SolidBrush(Theme.Primary))
+                    g.FillEllipse(fillBrush, circleRect);
+
+                // Checkmark
+                using var checkPen = new Pen(Color.White, 2f) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round };
+                int ccx = circleX + circleSize / 2;
+                int ccy = circleY + circleSize / 2;
+                g.DrawLines(checkPen, new PointF[]
+                {
+                    new(ccx - 4, ccy),
+                    new(ccx - 1, ccy + 3),
+                    new(ccx + 5, ccy - 4),
+                });
+            }
+            else if (isCurrent)
+            {
+                // Glow
+                var glowRect = new Rectangle(circleX - 4, circleY - 4, circleSize + 8, circleSize + 8);
+                using (var glowBrush = new SolidBrush(Theme.WithAlpha(Theme.Primary, 30)))
+                    g.FillEllipse(glowBrush, glowRect);
+
+                // Outlined circle with dot
+                using (var outlinePen = new Pen(Theme.Primary, 2f))
+                    g.DrawEllipse(outlinePen, circleRect);
+
+                int dotSize = 8;
+                using (var dotBrush = new SolidBrush(Theme.Primary))
+                    g.FillEllipse(dotBrush,
+                        circleX + (circleSize - dotSize) / 2,
+                        circleY + (circleSize - dotSize) / 2,
+                        dotSize, dotSize);
+            }
+            else
+            {
+                // Empty circle
+                using var outlinePen = new Pen(Theme.WithAlpha(Theme.Border, 120), 1.5f);
+                g.DrawEllipse(outlinePen, circleRect);
             }
 
-            // Inactive segment border
-            if (!isCompleted && !isCurrent)
-            {
-                using var segPath = RoundedRectHelper.Create(segRect, segHeight / 2);
-                using var pen = new Pen(Theme.Border, 0.5f);
-                g.DrawPath(pen, segPath);
-            }
-
-            // Step label
+            // Step label below circle
             Color labelColor = isCompleted || isCurrent ? Theme.TextPrimary : Theme.TextMuted;
             using var labelBrush = new SolidBrush(labelColor);
-            var labelSize = g.MeasureString(Steps[i], Theme.FontSmall);
-            float lx = sx + (segmentWidth - 4 - labelSize.Width) / 2f;
-            g.DrawString(Steps[i], Theme.FontSmall, labelBrush, lx, labelY);
+            Font labelFont = isCurrent ? Theme.FontSmallBold : Theme.FontSmall;
+            var labelSize = g.MeasureString(Steps[i], labelFont);
+            float lx = cx - labelSize.Width / 2f;
+            float ly = circleY + circleSize + 5;
+            g.DrawString(Steps[i], labelFont, labelBrush, lx, ly);
         }
 
         // Status tag (right side)
@@ -124,9 +150,9 @@ public class ProcessStepBar : Control
         {
             using var tagFont = new Font("Segoe UI", 8F, FontStyle.Bold);
             var tagSize = g.MeasureString(_statusTag, tagFont);
-            float tw = tagSize.Width + 14;
-            float th = tagSize.Height + 4;
-            float tx = Width - tw - Theme.SpacingSm;
+            float tw = Math.Max(tagSize.Width + 16, 60);
+            float th = tagSize.Height + 6;
+            float tx = Width - tw - Theme.SpacingMd;
             float ty = (Height - th) / 2f;
 
             Color tagColor = _currentStep >= Steps.Length - 1 ? Theme.Success :
@@ -134,12 +160,18 @@ public class ProcessStepBar : Control
 
             var tagRect = new RectangleF(tx, ty, tw, th);
             using (var tagPath = RoundedRectHelper.Create(tagRect, (int)(th / 2)))
-            using (var tagBrush = new SolidBrush(Theme.WithAlpha(tagColor, 35)))
+            using (var tagBrush = new SolidBrush(Theme.WithAlpha(tagColor, 25)))
             {
                 g.FillPath(tagBrush, tagPath);
             }
+            using (var tagPath = RoundedRectHelper.Create(tagRect, (int)(th / 2)))
+            using (var tagPen = new Pen(Theme.WithAlpha(tagColor, 80), 1f))
+            {
+                g.DrawPath(tagPen, tagPath);
+            }
             using var tagTextBrush = new SolidBrush(tagColor);
-            g.DrawString(_statusTag, tagFont, tagTextBrush, tx + 7, ty + 2);
+            g.DrawString(_statusTag, tagFont, tagTextBrush,
+                tx + (tw - tagSize.Width) / 2f, ty + 3);
         }
     }
 }

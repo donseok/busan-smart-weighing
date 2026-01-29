@@ -131,8 +131,8 @@ public class ModernToggle : Control
         // Labels
         string leftText = "자동 (LPR)";
         string rightText = "수동";
-        using var leftFont = _isAutoMode ? Theme.FontBodyBold : Theme.FontBody;
-        using var rightFont = !_isAutoMode ? Theme.FontBodyBold : Theme.FontBody;
+        var leftFont = _isAutoMode ? Theme.FontBodyBold : Theme.FontBody;
+        var rightFont = !_isAutoMode ? Theme.FontBodyBold : Theme.FontBody;
 
         Color leftColor = _isAutoMode ? Theme.TextPrimary : Theme.TextMuted;
         Color rightColor = !_isAutoMode ? Theme.TextPrimary : Theme.TextMuted;

@@ -56,6 +56,9 @@ public partial class MainForm : Form
         AppendLog("부산 스마트 계량 시스템 시작 중...");
         AppendLog($"계량대 ID: {_settings.Scale.ScaleId} | COM: {_settings.Scale.ComPort} | 전송속도: {_settings.Scale.BaudRate}");
 
+        // Update status footer with scale info
+        statusFooter.ScaleInfo = $"계량대 #{_settings.Scale.ScaleId} · {_settings.Scale.ComPort} · {_settings.Scale.BaudRate}bps";
+
         InitializeSimulators();
         await InitializeCacheAsync();
         await ConnectServicesAsync();
@@ -134,25 +137,29 @@ public partial class MainForm : Form
         _indicator.WeightStabilized += OnWeightStabilized;
         _indicator.CommunicationError += OnIndicatorError;
         _indicator.ConnectionStateChanged += (_, connected) => InvokeUI(() =>
-            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Indicator, connected));
+            headerBar.SetDeviceStatus(HeaderBar.DeviceType.Indicator, connected));
 
         _display.ConnectionStateChanged += (_, connected) => InvokeUI(() =>
-            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Display, connected));
+            headerBar.SetDeviceStatus(HeaderBar.DeviceType.Display, connected));
         _display.ErrorOccurred += (_, msg) => InvokeUI(() => AppendLog($"[전광판] {msg}"));
 
         _barrier.ConnectionStateChanged += (_, connected) => InvokeUI(() =>
-            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Barrier, connected));
+            headerBar.SetDeviceStatus(HeaderBar.DeviceType.Barrier, connected));
         _barrier.BarrierStateChanged += (_, open) => InvokeUI(() => AppendLog($"[차단기] {(open ? "열림" : "닫힘")}"));
         _barrier.ErrorOccurred += (_, msg) => InvokeUI(() => AppendLog($"[차단기] {msg}"));
 
         _api.NetworkStatusChanged += (_, available) => InvokeUI(() =>
         {
-            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Network, available);
+            headerBar.SetDeviceStatus(HeaderBar.DeviceType.Network, available);
             AppendLog(available ? "[네트워크] 연결됨" : "[네트워크] 오프라인 - 캐시 활성화");
         });
         _api.ApiError += (_, msg) => InvokeUI(() => AppendLog($"[API 오류] {msg}"));
 
-        _cache.PendingSyncCountChanged += (_, count) => InvokeUI(() => AppendLog($"[캐시] 동기화 대기: {count}건"));
+        _cache.PendingSyncCountChanged += (_, count) => InvokeUI(() =>
+        {
+            AppendLog($"[캐시] 동기화 대기: {count}건");
+            statusFooter.SyncInfo = count > 0 ? $"동기화 대기: {count}건" : "";
+        });
         _cache.SyncError += (_, msg) => InvokeUI(() => AppendLog($"[캐시] {msg}"));
         _cache.RecordSynced += (_, record) => InvokeUI(() => AppendLog($"[캐시] 계량 동기화 완료 {record.WeighingId}"));
 
@@ -262,14 +269,14 @@ public partial class MainForm : Form
             if (_api is not null)
             {
                 bool loggedIn = await _api.LoginAsync();
-                connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Network, loggedIn);
+                headerBar.SetDeviceStatus(HeaderBar.DeviceType.Network, loggedIn);
                 AppendLog(loggedIn ? "API 인증 완료." : "API 인증 실패.");
             }
         }
         catch (Exception ex)
         {
             AppendLog($"API 로그인 오류: {ex.Message}");
-            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Network, false);
+            headerBar.SetDeviceStatus(HeaderBar.DeviceType.Network, false);
         }
 
         // Connect indicator
@@ -284,7 +291,7 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             AppendLog($"계량기 연결 실패: {ex.Message}");
-            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Indicator, false);
+            headerBar.SetDeviceStatus(HeaderBar.DeviceType.Indicator, false);
         }
 
         // Connect display board
@@ -300,7 +307,7 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             AppendLog($"전광판 연결 실패: {ex.Message}");
-            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Display, false);
+            headerBar.SetDeviceStatus(HeaderBar.DeviceType.Display, false);
         }
 
         // Connect barrier
@@ -315,7 +322,7 @@ public partial class MainForm : Form
         catch (Exception ex)
         {
             AppendLog($"차단기 연결 실패: {ex.Message}");
-            connectionBar.SetDeviceStatus(ConnectionStatusPanel.DeviceType.Barrier, false);
+            headerBar.SetDeviceStatus(HeaderBar.DeviceType.Barrier, false);
         }
     }
 
@@ -336,14 +343,14 @@ public partial class MainForm : Form
 
     private void OnFormResize(object? sender, EventArgs e)
     {
-        // Adjust splitter proportionally
-        if (splitMain.Width > 0)
+        // Adjust left column width proportionally
+        if (panelLeftCol != null && Width > 0)
         {
-            int targetDistance = (int)(splitMain.Width * 0.35);
-            targetDistance = Math.Max(300, Math.Min(500, targetDistance));
-            if (Math.Abs(splitMain.SplitterDistance - targetDistance) > 20)
+            int target = (int)(Width * 0.35);
+            target = Math.Max(360, Math.Min(520, target));
+            if (Math.Abs(panelLeftCol.Width - target) > 20)
             {
-                splitMain.SplitterDistance = targetDistance;
+                panelLeftCol.Width = target;
             }
         }
     }
@@ -356,12 +363,14 @@ public partial class MainForm : Form
         {
             cardManual.Enabled = false;
             _process?.SwitchMode(WeighingProcessService.WeighingMode.Auto);
+            statusFooter.ModeText = "자동 모드";
             AppendLog("자동 모드로 전환되었습니다.");
         }
         else
         {
             cardManual.Enabled = true;
             _process?.SwitchMode(WeighingProcessService.WeighingMode.Manual);
+            statusFooter.ModeText = "수동 모드";
             AppendLog("수동 모드로 전환되었습니다.");
         }
     }
@@ -508,7 +517,7 @@ public partial class MainForm : Form
 
         if (IsValidPlateNumber(plate))
         {
-            lblPlateValidation.Text = "✓ 유효한 형식";
+            lblPlateValidation.Text = "valid";
             lblPlateValidation.ForeColor = Theme.Success;
         }
         else
@@ -737,7 +746,7 @@ public partial class MainForm : Form
     {
         using var form = new Form();
         form.Text = title;
-        form.ClientSize = new Size(400, 180);
+        form.ClientSize = new Size(420, 190);
         form.StartPosition = FormStartPosition.CenterParent;
         form.FormBorderStyle = FormBorderStyle.FixedDialog;
         form.MaximizeBox = false;
@@ -748,30 +757,25 @@ public partial class MainForm : Form
         var label = new Label
         {
             Text = prompt,
-            Left = 20,
-            Top = 20,
+            Left = 24,
+            Top = 24,
             AutoSize = true,
             ForeColor = Theme.TextSecondary,
             Font = Theme.FontBody,
         };
 
-        var textBox = new TextBox
+        var textBox = new ModernTextBox
         {
-            Left = 20,
-            Top = 50,
-            Width = 355,
-            Height = 32,
-            Font = Theme.FontHeading,
-            BackColor = Theme.BgElevated,
-            ForeColor = Theme.TextPrimary,
-            BorderStyle = BorderStyle.FixedSingle,
+            Location = new Point(24, 52),
+            Size = new Size(370, Theme.InputHeight),
+            Font = Theme.FontMedium,
         };
 
         var btnOk = new ModernButton
         {
             Text = "확인",
-            Left = 190,
-            Top = 100,
+            Left = 200,
+            Top = 110,
             Width = 90,
             Height = 36,
             Variant = ModernButton.ButtonVariant.Primary,
@@ -782,9 +786,9 @@ public partial class MainForm : Form
         var btnCancel = new ModernButton
         {
             Text = "취소",
-            Left = 290,
-            Top = 100,
-            Width = 85,
+            Left = 300,
+            Top = 110,
+            Width = 90,
             Height = 36,
             Variant = ModernButton.ButtonVariant.Secondary,
             Font = Theme.FontBody,
@@ -792,7 +796,6 @@ public partial class MainForm : Form
         btnCancel.Click += (_, _) => { form.DialogResult = DialogResult.Cancel; form.Close(); };
 
         form.Controls.AddRange(new Control[] { label, textBox, btnOk, btnCancel });
-        form.AcceptButton = null; // ModernButton is not a System.Windows.Forms.Button
 
         return form.ShowDialog() == DialogResult.OK ? textBox.Text : null;
     }
@@ -804,10 +807,6 @@ public partial class MainForm : Form
     private static bool IsValidPlateNumber(string plate)
     {
         if (string.IsNullOrWhiteSpace(plate)) return false;
-        // Korean plate formats:
-        // Standard: 12가1234 (2digits + Korean + 4digits)
-        // Regional: 서울12가1234 (region + 2digits + Korean + 4digits)
-        // New: 123가1234 (3digits + Korean + 4digits)
         return System.Text.RegularExpressions.Regex.IsMatch(
             plate.Trim(),
             @"^([가-힣]{2})?\d{2,3}[가-힣]\d{4}$"
