@@ -10,7 +10,6 @@ import {
   Descriptions,
   message,
   Divider,
-  Space,
 } from 'antd';
 import {
   UserOutlined,
