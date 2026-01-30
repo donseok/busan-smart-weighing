@@ -34,6 +34,8 @@ public class ConnectionStatusPanel : Control
 
         Size = new Size(400, 72);
 
+        Theme.ThemeChanged += (_, _) => Invalidate();
+
         _devices = new DeviceInfo[]
         {
             new() { Icon = "\u2696", Label = "계량기", Connected = false, StatusText = "끊김" },  // ⚖

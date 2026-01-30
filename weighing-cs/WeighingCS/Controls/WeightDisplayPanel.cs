@@ -27,6 +27,7 @@ public class WeightDisplayPanel : Control
             true);
 
         Size = new Size(400, 220);
+        Theme.ThemeChanged += (_, _) => Invalidate();
     }
 
     public string WeightValue
@@ -109,7 +110,7 @@ public class WeightDisplayPanel : Control
         // Title "WEIGHT"
         using (var titleBrush = new SolidBrush(Theme.TextMuted))
         {
-            using var titleFont = new Font("Segoe UI", 9F, FontStyle.Bold);
+            using var titleFont = new Font("Segoe UI", 9F * Theme.FontScale, FontStyle.Bold);
             g.DrawString("WEIGHT", titleFont, titleBrush, Theme.SpacingXl, Theme.SpacingLg);
         }
 
@@ -149,7 +150,7 @@ public class WeightDisplayPanel : Control
         g.DrawString(_weightText, weightFont, textBrush, textX, textY);
 
         // Unit suffix
-        using var unitFont = new Font("Segoe UI", 16F, FontStyle.Bold);
+        using var unitFont = new Font("Segoe UI", 16F * Theme.FontScale, FontStyle.Bold);
         var unitSize = g.MeasureString(_unit, unitFont);
         using var unitBrush = new SolidBrush(Theme.TextMuted);
         g.DrawString(_unit, unitFont, unitBrush,
@@ -174,7 +175,7 @@ public class WeightDisplayPanel : Control
             _ => Theme.Warning,
         };
 
-        using var badgeFont = new Font("Segoe UI", 7.5F, FontStyle.Bold);
+        using var badgeFont = new Font("Segoe UI", 7.5F * Theme.FontScale, FontStyle.Bold);
         var badgeSize = g.MeasureString(badgeText, badgeFont);
         float bw = badgeSize.Width + 20;
         float bh = badgeSize.Height + 8;
@@ -200,11 +201,11 @@ public class WeightDisplayPanel : Control
     private void DrawBottomInfo(Graphics g, Rectangle bounds)
     {
         // Separator line
-        int lineY = bounds.Bottom - 36;
+        int lineY = bounds.Bottom - (int)(36 * Theme.LayoutScale);
         using (var linePen = new Pen(Theme.WithAlpha(Theme.Border, 50), 1f))
             g.DrawLine(linePen, bounds.X + Theme.SpacingXl, lineY, bounds.Right - Theme.SpacingLg, lineY);
 
-        // "실시간 계량 데이터" label
+        // label
         using var infoBrush = new SolidBrush(Theme.TextMuted);
         g.DrawString("실시간 계량 데이터", Theme.FontCaption, infoBrush, Theme.SpacingXl, lineY + 8);
     }
@@ -212,6 +213,6 @@ public class WeightDisplayPanel : Control
     private float CalculateFontSize()
     {
         float scale = Math.Max(0.5f, Math.Min(1.2f, Width / 400f));
-        return Math.Clamp(56f * scale, 32f, 72f);
+        return Math.Clamp(56f * scale, 32f, 72f) * Theme.FontScale;
     }
 }

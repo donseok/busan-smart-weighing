@@ -40,6 +40,14 @@ public class ModernTextBox : Control
         _inner.TextChanged += (s, e) => OnTextChanged(e);
 
         Controls.Add(_inner);
+
+        Theme.ThemeChanged += (_, _) =>
+        {
+            _inner.BackColor = Theme.BgElevated;
+            _inner.ForeColor = Theme.TextPrimary;
+            _inner.Font = Theme.FontBody;
+            Invalidate();
+        };
     }
 
     [AllowNull]

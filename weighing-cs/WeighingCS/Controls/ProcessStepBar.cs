@@ -24,7 +24,8 @@ public class ProcessStepBar : Control
             ControlStyles.ResizeRedraw,
             true);
 
-        Size = new Size(600, 64);
+        Size = new Size(600, (int)(64 * Theme.LayoutScale));
+        Theme.ThemeChanged += (_, _) => Invalidate();
     }
 
     public int CurrentStep
@@ -64,8 +65,8 @@ public class ProcessStepBar : Control
             g.DrawPath(pen, path);
         }
 
-        int circleSize = 24;
-        int tagWidth = 90;
+        int circleSize = (int)(24 * Theme.LayoutScale);
+        int tagWidth = (int)(90 * Theme.LayoutScale);
         int stepsAreaWidth = Width - tagWidth - Theme.SpacingXl * 2;
         int spacing = stepsAreaWidth / (Steps.Length - 1);
         int startX = Theme.SpacingXl;
@@ -100,14 +101,16 @@ public class ProcessStepBar : Control
                     g.FillEllipse(fillBrush, circleRect);
 
                 // Checkmark
-                using var checkPen = new Pen(Color.White, 2f) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round };
+                int checkScale = circleSize / 24;
+                using var checkPen = new Pen(Color.White, 2f * checkScale) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round };
                 int ccx = circleX + circleSize / 2;
                 int ccy = circleY + circleSize / 2;
+                int cs = Math.Max(1, circleSize / 6);
                 g.DrawLines(checkPen, new PointF[]
                 {
-                    new(ccx - 4, ccy),
-                    new(ccx - 1, ccy + 3),
-                    new(ccx + 5, ccy - 4),
+                    new(ccx - cs, ccy),
+                    new(ccx - cs / 4f, ccy + cs * 0.75f),
+                    new(ccx + cs * 1.25f, ccy - cs),
                 });
             }
             else if (isCurrent)
@@ -121,7 +124,7 @@ public class ProcessStepBar : Control
                 using (var outlinePen = new Pen(Theme.Primary, 2f))
                     g.DrawEllipse(outlinePen, circleRect);
 
-                int dotSize = 8;
+                int dotSize = (int)(8 * Theme.LayoutScale);
                 using (var dotBrush = new SolidBrush(Theme.Primary))
                     g.FillEllipse(dotBrush,
                         circleX + (circleSize - dotSize) / 2,
@@ -148,7 +151,7 @@ public class ProcessStepBar : Control
         // Status tag (right side)
         if (!string.IsNullOrEmpty(_statusTag))
         {
-            using var tagFont = new Font("Segoe UI", 8F, FontStyle.Bold);
+            using var tagFont = new Font("Segoe UI", 8F * Theme.FontScale, FontStyle.Bold);
             var tagSize = g.MeasureString(_statusTag, tagFont);
             float tw = Math.Max(tagSize.Width + 16, 60);
             float th = tagSize.Height + 6;

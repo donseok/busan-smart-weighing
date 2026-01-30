@@ -10,6 +10,9 @@ static class Program
     {
         ApplicationConfiguration.Initialize();
 
+        // Load saved theme preference (dark/light mode)
+        WeighingCS.Controls.Theme.LoadPreference();
+
         // Show splash screen during initialization
         var splash = new SplashForm();
         splash.Show();

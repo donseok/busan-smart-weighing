@@ -34,7 +34,7 @@ public class ModernComboBox : Control
             ForeColor = Theme.TextPrimary,
             Font = Theme.FontBody,
             DrawMode = DrawMode.OwnerDrawFixed,
-            ItemHeight = 24,
+            ItemHeight = (int)(24 * Theme.LayoutScale),
         };
 
         _inner.GotFocus += (_, _) => { _focused = true; Invalidate(); };
@@ -42,6 +42,15 @@ public class ModernComboBox : Control
         _inner.DrawItem += OnDrawItem;
 
         Controls.Add(_inner);
+
+        Theme.ThemeChanged += (_, _) =>
+        {
+            _inner.BackColor = Theme.BgElevated;
+            _inner.ForeColor = Theme.TextPrimary;
+            _inner.Font = Theme.FontBody;
+            _inner.ItemHeight = (int)(24 * Theme.LayoutScale);
+            Invalidate();
+        };
     }
 
     /// <summary>Items collection (delegated to inner ComboBox).</summary>

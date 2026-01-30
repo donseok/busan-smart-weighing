@@ -22,6 +22,8 @@ public class LedIndicator : Control
             true);
 
         Size = new Size(16, 16);
+
+        Theme.ThemeChanged += (_, _) => Invalidate();
     }
 
     public bool IsOn

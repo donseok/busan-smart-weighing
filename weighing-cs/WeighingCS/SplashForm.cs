@@ -17,7 +17,15 @@ public class SplashForm : Form
     {
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.CenterScreen;
-        ClientSize = new Size(520, 320);
+
+        // Scale splash size but limit to 80% of screen
+        int baseW = (int)(520 * Theme.LayoutScale);
+        int baseH = (int)(320 * Theme.LayoutScale);
+        var screen = Screen.PrimaryScreen?.WorkingArea ?? new Rectangle(0, 0, 1920, 1080);
+        int maxW = (int)(screen.Width * 0.8);
+        int maxH = (int)(screen.Height * 0.8);
+        ClientSize = new Size(Math.Min(baseW, maxW), Math.Min(baseH, maxH));
+
         BackColor = Theme.BgDarkest;
         ShowInTaskbar = false;
         TopMost = true;
@@ -29,6 +37,8 @@ public class SplashForm : Form
             ControlStyles.OptimizedDoubleBuffer,
             true);
 
+        float s = Theme.LayoutScale;
+
         // Progress bar
         progressBar = new ModernProgressBar
         {
@@ -36,8 +46,8 @@ public class SplashForm : Form
             Maximum = 100,
             Value = 0,
             BarColor = Theme.Primary,
-            Location = new Point(80, 220),
-            Size = new Size(360, 4),
+            Location = new Point((int)(80 * s), (int)(220 * s)),
+            Size = new Size((int)(360 * s), (int)(4 * s)),
         };
 
         // Status text
@@ -48,8 +58,8 @@ public class SplashForm : Form
             ForeColor = Theme.Primary,
             AutoSize = false,
             TextAlign = ContentAlignment.MiddleCenter,
-            Size = new Size(520, 25),
-            Location = new Point(0, 238),
+            Size = new Size(ClientSize.Width, (int)(25 * s)),
+            Location = new Point(0, (int)(238 * s)),
             BackColor = Color.Transparent,
         };
 
@@ -61,8 +71,8 @@ public class SplashForm : Form
             ForeColor = Theme.TextMuted,
             AutoSize = false,
             TextAlign = ContentAlignment.MiddleCenter,
-            Size = new Size(520, 18),
-            Location = new Point(0, 290),
+            Size = new Size(ClientSize.Width, (int)(18 * s)),
+            Location = new Point(0, (int)(290 * s)),
             BackColor = Color.Transparent,
         };
 
@@ -76,6 +86,8 @@ public class SplashForm : Form
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
+        float s = Theme.LayoutScale;
+
         // Background gradient
         using (var bgBrush = new LinearGradientBrush(
             ClientRectangle, Theme.BgDarkest, Theme.BgBase, LinearGradientMode.ForwardDiagonal))
@@ -84,8 +96,8 @@ public class SplashForm : Form
         }
 
         // Subtle radial glow in center
-        int glowSize = 300;
-        var glowRect = new Rectangle((Width - glowSize) / 2, 20, glowSize, glowSize);
+        int glowSize = (int)(300 * s);
+        var glowRect = new Rectangle((Width - glowSize) / 2, (int)(20 * s), glowSize, glowSize);
         using (var glowPath = new GraphicsPath())
         {
             glowPath.AddEllipse(glowRect);
@@ -102,9 +114,9 @@ public class SplashForm : Form
             g.DrawRectangle(borderPen, 0, 0, Width - 1, Height - 1);
 
         // Logo circle
-        int logoSize = 52;
+        int logoSize = (int)(52 * s);
         int logoX = (Width - logoSize) / 2;
-        int logoY = 40;
+        int logoY = (int)(40 * s);
         var logoRect = new Rectangle(logoX, logoY, logoSize, logoSize);
 
         using (var logoPath = new GraphicsPath())
@@ -116,7 +128,7 @@ public class SplashForm : Form
         }
 
         // Logo text
-        using (var logoFont = new Font("Segoe UI", 16F, FontStyle.Bold))
+        using (var logoFont = new Font("Segoe UI", 16F * Theme.FontScale, FontStyle.Bold))
         {
             var logoTextSize = g.MeasureString("DK", logoFont);
             float ltx = logoX + (logoSize - logoTextSize.Width) / 2f;
@@ -126,26 +138,26 @@ public class SplashForm : Form
         }
 
         // Title
-        using (var titleFont = new Font("Segoe UI", 20F, FontStyle.Bold))
+        using (var titleFont = new Font("Segoe UI", 20F * Theme.FontScale, FontStyle.Bold))
         using (var titleBrush = new SolidBrush(Theme.TextPrimary))
         {
-            var titleSize = g.MeasureString("부산 스마트 계량 시스템", titleFont);
-            g.DrawString("부산 스마트 계량 시스템", titleFont,
-                titleBrush, (Width - titleSize.Width) / 2f, 110);
+            var titleSize = g.MeasureString("동국씨엠 스마트 계량 시스템", titleFont);
+            g.DrawString("동국씨엠 스마트 계량 시스템", titleFont,
+                titleBrush, (Width - titleSize.Width) / 2f, (int)(110 * s));
         }
 
         // Subtitle
-        using (var subFont = new Font("Segoe UI", 9.5F))
+        using (var subFont = new Font("Segoe UI", 9.5F * Theme.FontScale))
         using (var subBrush = new SolidBrush(Theme.TextMuted))
         {
-            string sub = "BUSAN SMART WEIGHING SYSTEM";
+            string sub = "DONGKUK CM SMART WEIGHING SYSTEM";
             var subSize = g.MeasureString(sub, subFont);
-            g.DrawString(sub, subFont, subBrush, (Width - subSize.Width) / 2f, 150);
+            g.DrawString(sub, subFont, subBrush, (Width - subSize.Width) / 2f, (int)(150 * s));
         }
 
         // Decorative line
-        int lineY = 180;
-        int lineWidth = 60;
+        int lineY = (int)(180 * s);
+        int lineWidth = (int)(60 * s);
         using (var lineBrush = new LinearGradientBrush(
             new Point(Width / 2 - lineWidth, lineY), new Point(Width / 2 + lineWidth, lineY),
             Theme.WithAlpha(Theme.Primary, 0), Theme.Primary))

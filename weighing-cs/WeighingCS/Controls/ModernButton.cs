@@ -27,9 +27,11 @@ public class ModernButton : Control
             ControlStyles.StandardDoubleClick,
             true);
 
-        Size = new Size(120, 38);
+        Size = new Size((int)(120 * Theme.LayoutScale), (int)(38 * Theme.LayoutScale));
         Cursor = Cursors.Hand;
         Font = Theme.FontBody;
+
+        Theme.ThemeChanged += (_, _) => { Font = Theme.FontBody; Invalidate(); };
     }
 
     public ButtonVariant Variant

@@ -35,6 +35,7 @@ import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
 import { darkColors, lightColors } from '../theme/themeConfig';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import type { Notice } from '../types';
 import { NOTICE_CATEGORY_OPTIONS, NOTICE_CATEGORY_COLORS } from '../constants/labels';
 
@@ -54,11 +55,14 @@ const NoticePage: React.FC = () => {
 
   const { themeMode } = useTheme();
   const colors = themeMode === 'dark' ? darkColors : lightColors;
+  const { hasRole } = useAuth();
+  const isAdmin = hasRole('ADMIN');
 
   const fetchNotices = async (page = 1, size = 10) => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/notices/admin', {
+      const endpoint = isAdmin ? '/notices/admin' : '/notices';
+      const res = await apiClient.get(endpoint, {
         params: { page: page - 1, size },
       });
       setNotices(res.data.data.content);
@@ -183,7 +187,7 @@ const NoticePage: React.FC = () => {
   };
 
   const columns: ColumnsType<Notice> = [
-    {
+    ...(isAdmin ? [{
       title: '상태',
       dataIndex: 'isPublished',
       key: 'isPublished',
@@ -196,7 +200,7 @@ const NoticePage: React.FC = () => {
           </Tag>
         </Space>
       ),
-    },
+    } as const] : []),
     {
       title: '카테고리',
       dataIndex: 'categoryDesc',
@@ -238,9 +242,9 @@ const NoticePage: React.FC = () => {
       render: (date: string) => date ? new Date(date).toLocaleString('ko-KR') : '-',
     },
     {
-      title: '관리',
+      title: isAdmin ? '관리' : '보기',
       key: 'actions',
-      width: 180,
+      width: isAdmin ? 180 : 60,
       render: (_, record: Notice) => (
         <Space size="small">
           <Button
@@ -249,27 +253,31 @@ const NoticePage: React.FC = () => {
             icon={<EyeOutlined />}
             onClick={() => handleViewDetail(record.noticeId)}
           />
-          <Button
-            type="text"
-            size="small"
-            icon={<PushpinOutlined />}
-            onClick={() => handleTogglePin(record.noticeId)}
-            style={{ color: record.isPinned ? colors.warning : colors.textSecondary }}
-          />
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          />
-          <Popconfirm
-            title="정말 삭제하시겠습니까?"
-            onConfirm={() => handleDelete(record.noticeId)}
-            okText="삭제"
-            cancelText="취소"
-          >
-            <Button type="text" size="small" icon={<DeleteOutlined />} danger />
-          </Popconfirm>
+          {isAdmin && (
+            <>
+              <Button
+                type="text"
+                size="small"
+                icon={<PushpinOutlined />}
+                onClick={() => handleTogglePin(record.noticeId)}
+                style={{ color: record.isPinned ? colors.warning : colors.textSecondary }}
+              />
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => handleEdit(record)}
+              />
+              <Popconfirm
+                title="정말 삭제하시겠습니까?"
+                onConfirm={() => handleDelete(record.noticeId)}
+                okText="삭제"
+                cancelText="취소"
+              >
+                <Button type="text" size="small" icon={<DeleteOutlined />} danger />
+              </Popconfirm>
+            </>
+          )}
         </Space>
       ),
     },
@@ -290,9 +298,11 @@ const NoticePage: React.FC = () => {
             style={{ width: 250 }}
             allowClear
           />
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-            공지 등록
-          </Button>
+          {isAdmin && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+              공지 등록
+            </Button>
+          )}
         </Space>
       </div>
 
@@ -370,17 +380,19 @@ const NoticePage: React.FC = () => {
           <Button key="close" onClick={() => setDetailModalVisible(false)}>
             닫기
           </Button>,
-          <Button
-            key="publish"
-            onClick={() => {
-              if (selectedNotice) {
-                handleTogglePublish(selectedNotice.noticeId);
-                setDetailModalVisible(false);
-              }
-            }}
-          >
-            {selectedNotice?.isPublished ? '비공개로 전환' : '공개로 전환'}
-          </Button>,
+          ...(isAdmin ? [
+            <Button
+              key="publish"
+              onClick={() => {
+                if (selectedNotice) {
+                  handleTogglePublish(selectedNotice.noticeId);
+                  setDetailModalVisible(false);
+                }
+              }}
+            >
+              {selectedNotice?.isPublished ? '비공개로 전환' : '공개로 전환'}
+            </Button>,
+          ] : []),
         ]}
         width={700}
       >

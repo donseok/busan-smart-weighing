@@ -22,7 +22,9 @@ public class ModernProgressBar : Control
             ControlStyles.ResizeRedraw,
             true);
 
-        Size = new Size(360, 6);
+        Size = new Size((int)(360 * Theme.LayoutScale), (int)(6 * Theme.LayoutScale));
+
+        Theme.ThemeChanged += (_, _) => Invalidate();
     }
 
     public int Value

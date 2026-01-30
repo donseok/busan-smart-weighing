@@ -27,11 +27,13 @@ public class ModernToggle : Control
             ControlStyles.StandardClick,
             true);
 
-        Size = new Size(260, 40);
+        Size = new Size((int)(260 * Theme.LayoutScale), (int)(40 * Theme.LayoutScale));
         Cursor = Cursors.Hand;
 
         _animTimer = new System.Windows.Forms.Timer { Interval = 16 }; // ~60fps
         _animTimer.Tick += OnAnimTick;
+
+        Theme.ThemeChanged += (_, _) => Invalidate();
     }
 
     /// <summary>

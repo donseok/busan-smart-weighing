@@ -25,9 +25,11 @@ public class ModernCheckBox : Control
             ControlStyles.StandardClick,
             true);
 
-        Size = new Size(200, 28);
+        Size = new Size(200, (int)(28 * Theme.LayoutScale));
         Cursor = Cursors.Hand;
         Font = Theme.FontBody;
+
+        Theme.ThemeChanged += (_, _) => { Font = Theme.FontBody; Invalidate(); };
     }
 
     public bool Checked
@@ -64,7 +66,7 @@ public class ModernCheckBox : Control
         using (var clearBrush = new SolidBrush(Parent?.BackColor ?? Theme.BgBase))
             g.FillRectangle(clearBrush, ClientRectangle);
 
-        int boxSize = 18;
+        int boxSize = (int)(18 * Theme.LayoutScale);
         int boxY = (Height - boxSize) / 2;
         var boxRect = new Rectangle(0, boxY, boxSize, boxSize);
 
@@ -78,14 +80,16 @@ public class ModernCheckBox : Control
             }
 
             // Checkmark
-            using var pen = new Pen(Color.White, 2f) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round };
+            int penW = Math.Max(2, boxSize / 9);
+            using var pen = new Pen(Color.White, penW) { StartCap = LineCap.Round, EndCap = LineCap.Round, LineJoin = LineJoin.Round };
             int cx = boxRect.X + boxSize / 2;
             int cy = boxRect.Y + boxSize / 2;
+            int cs = boxSize / 5;
             g.DrawLines(pen, new PointF[]
             {
-                new(cx - 4, cy),
-                new(cx - 1, cy + 3),
-                new(cx + 5, cy - 4),
+                new(cx - cs, cy),
+                new(cx - cs / 4f, cy + cs * 0.75f),
+                new(cx + cs * 1.25f, cy - cs),
             });
         }
         else

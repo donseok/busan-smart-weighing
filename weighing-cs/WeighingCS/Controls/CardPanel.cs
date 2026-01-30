@@ -12,8 +12,8 @@ public class CardPanel : Panel
 {
     private string _title = string.Empty;
     private Color _accentColor = Color.Empty;
-    private const int AccentWidth = 3;
-    private const int TitleHeight = 36;
+    private static int AccentWidth => (int)(3 * Theme.LayoutScale);
+    private static int TitleHeight => (int)(36 * Theme.LayoutScale);
 
     public CardPanel()
     {
@@ -27,6 +27,8 @@ public class CardPanel : Panel
         BackColor = Theme.BgSurface;
         ForeColor = Theme.TextSecondary;
         Padding = new Padding(Theme.SpacingLg, TitleHeight + Theme.SpacingSm, Theme.SpacingLg, Theme.SpacingLg);
+
+        Theme.ThemeChanged += (_, _) => { BackColor = Theme.BgSurface; ForeColor = Theme.TextSecondary; Invalidate(); };
     }
 
     public string Title

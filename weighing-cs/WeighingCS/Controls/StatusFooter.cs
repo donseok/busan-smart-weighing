@@ -32,6 +32,8 @@ public class StatusFooter : Control
         _timer.Tick += (_, _) => { _timeText = DateTime.Now.ToString("HH:mm:ss"); Invalidate(); };
         _timer.Start();
         _timeText = DateTime.Now.ToString("HH:mm:ss");
+
+        Theme.ThemeChanged += (_, _) => { Size = new Size(Width, Theme.FooterHeight); Invalidate(); };
     }
 
     public string ScaleInfo { get => _scaleInfo; set { _scaleInfo = value; Invalidate(); } }
@@ -66,7 +68,7 @@ public class StatusFooter : Control
 
         // Mode indicator with colored dot
         Color modeDotColor = _modeText.Contains("자동") ? Theme.Primary : Theme.Purple;
-        int dotSize = 6;
+        int dotSize = (int)(6 * Theme.LayoutScale);
         int dotY = y + (Theme.FontSmall.Height - dotSize) / 2;
         using (var dotBrush = new SolidBrush(modeDotColor))
             g.FillEllipse(dotBrush, x, dotY, dotSize, dotSize);

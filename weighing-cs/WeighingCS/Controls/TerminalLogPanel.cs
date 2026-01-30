@@ -13,7 +13,7 @@ public class TerminalLogPanel : Control
 {
     public enum LogLevel { Info, Success, Warning, Error }
 
-    private const int HeaderHeight = 32;
+    private static int TermHeaderHeight => (int)(32 * Theme.LayoutScale);
     private readonly RichTextBox _rtb;
 
     public TerminalLogPanel()
@@ -37,6 +37,14 @@ public class TerminalLogPanel : Control
 
         Controls.Add(_rtb);
         Size = new Size(400, 200);
+
+        Theme.ThemeChanged += (_, _) =>
+        {
+            _rtb.BackColor = Theme.BgElevated;
+            _rtb.ForeColor = Theme.Success;
+            _rtb.Font = Theme.FontMono;
+            Invalidate();
+        };
     }
 
     /// <summary>
@@ -48,9 +56,9 @@ public class TerminalLogPanel : Control
     {
         base.OnLayout(levent);
         _rtb.SetBounds(
-            Theme.SpacingSm, HeaderHeight + Theme.SpacingXs,
+            Theme.SpacingSm, TermHeaderHeight + Theme.SpacingXs,
             Width - Theme.SpacingSm * 2,
-            Height - HeaderHeight - Theme.SpacingSm - Theme.SpacingXs);
+            Height - TermHeaderHeight - Theme.SpacingSm - Theme.SpacingXs);
     }
 
     protected override void OnPaintBackground(PaintEventArgs e) { }
@@ -78,7 +86,7 @@ public class TerminalLogPanel : Control
         }
 
         // Header bar background
-        var headerRect = new Rectangle(0, 0, Width - 1, HeaderHeight);
+        var headerRect = new Rectangle(0, 0, Width - 1, TermHeaderHeight);
         using (var clipPath = RoundedRectHelper.Create(bounds, Theme.RadiusLarge))
         {
             g.SetClip(clipPath);
@@ -90,24 +98,24 @@ public class TerminalLogPanel : Control
         // Header separator line
         using (var linePen = new Pen(Theme.Border, 1f))
         {
-            g.DrawLine(linePen, 0, HeaderHeight, Width, HeaderHeight);
+            g.DrawLine(linePen, 0, TermHeaderHeight, Width, TermHeaderHeight);
         }
 
         // Traffic-light dots
-        int dotSize = 10;
-        int dotY = (HeaderHeight - dotSize) / 2;
+        int dotSize = (int)(10 * Theme.LayoutScale);
+        int dotY = (TermHeaderHeight - dotSize) / 2;
         int dotX = Theme.SpacingMd;
         Color[] dotColors = { Color.FromArgb(255, 95, 87), Color.FromArgb(255, 189, 46), Color.FromArgb(39, 201, 63) };
         foreach (var dc in dotColors)
         {
             using var dotBrush = new SolidBrush(dc);
             g.FillEllipse(dotBrush, dotX, dotY, dotSize, dotSize);
-            dotX += dotSize + 6;
+            dotX += dotSize + (int)(6 * Theme.LayoutScale);
         }
 
         // Title
         using var titleBrush = new SolidBrush(Theme.TextSecondary);
-        g.DrawString("상태 로그", Theme.FontSmallBold, titleBrush, dotX + 8, (HeaderHeight - Theme.FontSmallBold.Height) / 2f);
+        g.DrawString("상태 로그", Theme.FontSmallBold, titleBrush, dotX + 8, (TermHeaderHeight - Theme.FontSmallBold.Height) / 2f);
     }
 
     /// <summary>

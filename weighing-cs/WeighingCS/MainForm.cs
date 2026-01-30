@@ -53,7 +53,7 @@ public partial class MainForm : Form
         LoadSettings();
         InitializeServices();
 
-        AppendLog("부산 스마트 계량 시스템 시작 중...");
+        AppendLog("동국씨엠 스마트 계량 시스템 시작 중...");
         AppendLog($"계량대 ID: {_settings.Scale.ScaleId} | COM: {_settings.Scale.ComPort} | 전송속도: {_settings.Scale.BaudRate}");
 
         // Update status footer with scale info
@@ -339,15 +339,25 @@ public partial class MainForm : Form
         txtSearchPlate.TextChanged += OnSearchPlateTextChanged;
         lvHistory.ColumnClick += OnHistoryColumnClick;
         this.Resize += OnFormResize;
+
+        Theme.ThemeChanged += (_, _) =>
+        {
+            BackColor = Theme.BgBase;
+            ForeColor = Theme.TextPrimary;
+            panelContent.BackColor = Theme.BgBase;
+            panelLeftCol.BackColor = Theme.BgBase;
+            panelRightCol.BackColor = Theme.BgBase;
+            panelDivider.BackColor = Theme.WithAlpha(Theme.Border, 100);
+        };
     }
 
     private void OnFormResize(object? sender, EventArgs e)
     {
-        // Adjust left column width proportionally
+        // Adjust left column width proportionally (50%, clamped 500-800)
         if (panelLeftCol != null && Width > 0)
         {
-            int target = (int)(Width * 0.35);
-            target = Math.Max(360, Math.Min(520, target));
+            int target = (int)(Width * 0.50);
+            target = Math.Max(500, Math.Min(800, target));
             if (Math.Abs(panelLeftCol.Width - target) > 20)
             {
                 panelLeftCol.Width = target;
@@ -744,9 +754,11 @@ public partial class MainForm : Form
 
     private static string? ShowInputDialog(string title, string prompt)
     {
+        float s = Theme.LayoutScale;
+
         using var form = new Form();
         form.Text = title;
-        form.ClientSize = new Size(420, 190);
+        form.ClientSize = new Size((int)(420 * s), (int)(190 * s));
         form.StartPosition = FormStartPosition.CenterParent;
         form.FormBorderStyle = FormBorderStyle.FixedDialog;
         form.MaximizeBox = false;
@@ -757,8 +769,8 @@ public partial class MainForm : Form
         var label = new Label
         {
             Text = prompt,
-            Left = 24,
-            Top = 24,
+            Left = (int)(24 * s),
+            Top = (int)(24 * s),
             AutoSize = true,
             ForeColor = Theme.TextSecondary,
             Font = Theme.FontBody,
@@ -766,18 +778,18 @@ public partial class MainForm : Form
 
         var textBox = new ModernTextBox
         {
-            Location = new Point(24, 52),
-            Size = new Size(370, Theme.InputHeight),
+            Location = new Point((int)(24 * s), (int)(52 * s)),
+            Size = new Size((int)(370 * s), Theme.InputHeight),
             Font = Theme.FontMedium,
         };
 
         var btnOk = new ModernButton
         {
             Text = "확인",
-            Left = 200,
-            Top = 110,
-            Width = 90,
-            Height = 36,
+            Left = (int)(200 * s),
+            Top = (int)(110 * s),
+            Width = (int)(90 * s),
+            Height = (int)(36 * s),
             Variant = ModernButton.ButtonVariant.Primary,
             Font = Theme.FontBodyBold,
         };
@@ -786,10 +798,10 @@ public partial class MainForm : Form
         var btnCancel = new ModernButton
         {
             Text = "취소",
-            Left = 300,
-            Top = 110,
-            Width = 90,
-            Height = 36,
+            Left = (int)(300 * s),
+            Top = (int)(110 * s),
+            Width = (int)(90 * s),
+            Height = (int)(36 * s),
             Variant = ModernButton.ButtonVariant.Secondary,
             Font = Theme.FontBody,
         };
