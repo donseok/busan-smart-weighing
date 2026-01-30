@@ -24,7 +24,7 @@ interface ConnectionStatusBarProps {
  */
 const STATUS_COLORS: Record<ConnectionStatus, string> = {
   ONLINE: '#10B981',
-  OFFLINE: '#64748B',
+  OFFLINE: '#94A3B8',
   ERROR: '#F43F5E',
 };
 

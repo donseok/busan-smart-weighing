@@ -498,6 +498,14 @@ public partial class MainForm : Form
         }
 
         ClearVehicleInfo();
+
+        // Clear multi-weight display
+        weightDisplay.FirstWeight = 0;
+        weightDisplay.SecondWeight = 0;
+        weightDisplay.NetWeight = 0;
+        weightDisplay.TheoreticalWeight = 0;
+        weightDisplay.NotificationText = "";
+
         AppendLog("프로세스가 초기화되었습니다.");
     }
 
@@ -543,11 +551,22 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            weightDisplay.WeightValue = e.Weight.ToString("F1");
+            weightDisplay.CurrentWeight = e.Weight;
 
             if (!e.IsStable)
             {
                 weightDisplay.Stability = WeightDisplayPanel.StabilityState.Unstable;
+            }
+
+            // During active weighing, mirror current weight as 2nd weight and auto-calc net
+            if (_process?.CurrentState is WeighingProcessService.ProcessState.Weighing or
+                WeighingProcessService.ProcessState.Stabilizing)
+            {
+                weightDisplay.SecondWeight = e.Weight;
+                if (weightDisplay.FirstWeight > 0)
+                {
+                    weightDisplay.NetWeight = Math.Abs(e.Weight - weightDisplay.FirstWeight);
+                }
             }
         });
     }
@@ -556,7 +575,7 @@ public partial class MainForm : Form
     {
         InvokeUI(() =>
         {
-            weightDisplay.WeightValue = e.Weight.ToString("F1");
+            weightDisplay.CurrentWeight = e.Weight;
             weightDisplay.Stability = WeightDisplayPanel.StabilityState.Stable;
 
             // Audio alert: system beep for weight stabilization
@@ -601,11 +620,27 @@ public partial class MainForm : Form
             processStepBar.StatusTag = e.NewState.ToString();
             AppendLog($"프로세스 상태: {e.OldState} -> {e.NewState}");
 
-            // Update vehicle info when dispatch is set.
+            // Update vehicle info and weight display when dispatch is set.
             if (_process?.ActiveDispatch is not null)
             {
-                UpdateVehicleInfo(_process.ActiveDispatch);
+                var dispatch = _process.ActiveDispatch;
+                UpdateVehicleInfo(dispatch);
+
+                // Load dispatch weight data into the multi-weight display
+                weightDisplay.FirstWeight = dispatch.TareWeight ?? 0;
+                weightDisplay.TheoreticalWeight = dispatch.ExpectedWeight ?? 0;
             }
+
+            // Update notification text with process state
+            weightDisplay.NotificationText = e.NewState switch
+            {
+                WeighingProcessService.ProcessState.Idle => "",
+                WeighingProcessService.ProcessState.Weighing => "계량 진행 중...",
+                WeighingProcessService.ProcessState.Stabilizing => "중량 안정화 중...",
+                WeighingProcessService.ProcessState.Completed => "계량 완료",
+                WeighingProcessService.ProcessState.Error => "오류 발생",
+                _ => $"처리 중: {e.NewState}",
+            };
         });
     }
 
@@ -615,6 +650,12 @@ public partial class MainForm : Form
         {
             AppendLog($"계량 완료: {record.GrossWeight:F1} kg | 모드: {record.WeighingMode} | ID: {record.WeighingId}");
             AddHistoryEntry(record);
+
+            // Update multi-weight display with final values
+            weightDisplay.SecondWeight = record.GrossWeight;
+            weightDisplay.FirstWeight = record.TareWeight;
+            weightDisplay.NetWeight = record.NetWeight;
+            weightDisplay.NotificationText = $"계량 완료 — {record.GrossWeight:#,##0} Kg";
         });
     }
 

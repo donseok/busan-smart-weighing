@@ -307,7 +307,7 @@ const StatisticsPage: React.FC = () => {
         <Row gutter={[16, 12]} align="middle">
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>
                 기간
               </Typography.Text>
               <RangePicker
@@ -320,7 +320,7 @@ const StatisticsPage: React.FC = () => {
           </Col>
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>
                 업체
               </Typography.Text>
               <Select
@@ -338,7 +338,7 @@ const StatisticsPage: React.FC = () => {
           </Col>
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 60, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 60, display: 'inline-block' }}>
                 품목유형
               </Typography.Text>
               <Select

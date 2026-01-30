@@ -15,6 +15,7 @@ import apiClient from '../api/client';
 import type { Dispatch } from '../types';
 import dayjs, { type Dayjs } from 'dayjs';
 import SortableTable from '../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../components/TablePageLayout';
 import { maxLengthRule, futureOrPresentDateValidator } from '../utils/validators';
 import {
   ITEM_TYPE_LABELS,
@@ -192,7 +193,8 @@ const DispatchPage: React.FC = () => {
   );
 
   return (
-    <>
+    <TablePageLayout>
+      <FixedArea>
       <Typography.Title level={4}>배차 관리</Typography.Title>
 
       {/* Search Condition Card */}
@@ -204,7 +206,7 @@ const DispatchPage: React.FC = () => {
         <Row gutter={[16, 12]} align="middle">
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>
                 기간
               </Typography.Text>
               <RangePicker
@@ -218,7 +220,7 @@ const DispatchPage: React.FC = () => {
           </Col>
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 60, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 60, display: 'inline-block' }}>
                 품목유형
               </Typography.Text>
               <Select
@@ -233,7 +235,7 @@ const DispatchPage: React.FC = () => {
           </Col>
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 60, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 60, display: 'inline-block' }}>
                 배차상태
               </Typography.Text>
               <Select
@@ -282,7 +284,8 @@ const DispatchPage: React.FC = () => {
           배차 등록
         </Button>
       </div>
-
+      </FixedArea>
+      <ScrollArea>
       <SortableTable
         columns={columns}
         dataSource={data}
@@ -297,6 +300,7 @@ const DispatchPage: React.FC = () => {
             : '검색 조건을 설정한 후 조회 버튼을 클릭하세요.',
         }}
       />
+      </ScrollArea>
 
       {searched && totalElements > 0 && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
@@ -337,7 +341,7 @@ const DispatchPage: React.FC = () => {
           {formFields}
         </Form>
       </Modal>
-    </>
+    </TablePageLayout>
   );
 };
 

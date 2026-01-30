@@ -24,6 +24,7 @@ import {
   Col,
 } from 'antd';
 import SortableTable from '../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../components/TablePageLayout';
 import { SearchOutlined, ClearOutlined, ShareAltOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
@@ -182,7 +183,8 @@ const SlipPage: React.FC = () => {
   ];
 
   return (
-    <>
+    <TablePageLayout>
+      <FixedArea>
       <Typography.Title level={4}>전자계량표 관리</Typography.Title>
 
       <Card
@@ -193,7 +195,7 @@ const SlipPage: React.FC = () => {
         <Row gutter={[16, 12]} align="middle">
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>
                 기간
               </Typography.Text>
               <RangePicker
@@ -217,7 +219,8 @@ const SlipPage: React.FC = () => {
           </Col>
         </Row>
       </Card>
-
+      </FixedArea>
+      <ScrollArea>
       <SortableTable
         columns={columns}
         dataSource={data}
@@ -231,6 +234,7 @@ const SlipPage: React.FC = () => {
           style: { cursor: 'pointer' },
         })}
       />
+      </ScrollArea>
 
       {/* Detail Modal */}
       <Modal
@@ -315,7 +319,7 @@ const SlipPage: React.FC = () => {
           ]}
         />
       </Modal>
-    </>
+    </TablePageLayout>
   );
 };
 

@@ -23,6 +23,7 @@ import {
   Col,
 } from 'antd';
 import SortableTable from '../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../components/TablePageLayout';
 import { SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
@@ -182,7 +183,8 @@ const WeighingPage: React.FC = () => {
   };
 
   return (
-    <>
+    <TablePageLayout>
+      <FixedArea>
       <Typography.Title level={4}>계량 현황</Typography.Title>
 
       <Card
@@ -193,7 +195,7 @@ const WeighingPage: React.FC = () => {
         <Row gutter={[16, 12]} align="middle">
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>
                 기간
               </Typography.Text>
               <RangePicker
@@ -207,7 +209,7 @@ const WeighingPage: React.FC = () => {
           </Col>
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 50, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>
                 상태
               </Typography.Text>
               <Select
@@ -225,7 +227,7 @@ const WeighingPage: React.FC = () => {
           </Col>
           <Col>
             <Space size={8}>
-              <Typography.Text type="secondary" style={{ minWidth: 60, display: 'inline-block' }}>
+              <Typography.Text strong style={{ minWidth: 60, display: 'inline-block' }}>
                 계량방식
               </Typography.Text>
               <Select
@@ -250,7 +252,8 @@ const WeighingPage: React.FC = () => {
           </Col>
         </Row>
       </Card>
-
+      </FixedArea>
+      <ScrollArea>
       <SortableTable
         columns={columns}
         dataSource={data}
@@ -263,6 +266,7 @@ const WeighingPage: React.FC = () => {
           style: { cursor: 'pointer' },
         })}
       />
+      </ScrollArea>
 
       <Modal
         title="계량 상세정보"
@@ -329,7 +333,7 @@ const WeighingPage: React.FC = () => {
           </Descriptions>
         )}
       </Modal>
-    </>
+    </TablePageLayout>
   );
 };
 

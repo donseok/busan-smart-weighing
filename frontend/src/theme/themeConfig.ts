@@ -26,7 +26,7 @@ const darkColors = {
   warning: '#F59E0B',      // Amber - 주의, 재계량
   error: '#F43F5E',        // Rose - 에러, 통신 두절
   textPrimary: '#F8FAFC',  // 기본 텍스트
-  textSecondary: '#94A3B8', // 보조 텍스트
+  textSecondary: '#CBD5E1', // 보조 텍스트 (Slate 300 - 가독성 향상)
   border: '#334155',       // 테두리 색상
 } as const;
 

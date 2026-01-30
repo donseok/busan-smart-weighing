@@ -24,6 +24,7 @@ import {
   Card,
 } from 'antd';
 import SortableTable from '../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../components/TablePageLayout';
 import {
   PlusOutlined,
   EditOutlined,
@@ -284,7 +285,8 @@ const NoticePage: React.FC = () => {
   ];
 
   return (
-    <div>
+    <TablePageLayout>
+      <FixedArea>
       <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Title level={4} style={{ margin: 0, color: colors.textPrimary }}>
           공지사항 관리
@@ -305,7 +307,8 @@ const NoticePage: React.FC = () => {
           )}
         </Space>
       </div>
-
+      </FixedArea>
+      <ScrollArea>
       <SortableTable
         columns={columns}
         dataSource={notices}
@@ -319,6 +322,7 @@ const NoticePage: React.FC = () => {
           onChange: (page, pageSize) => fetchNotices(page, pageSize),
         }}
       />
+      </ScrollArea>
 
       {/* 등록/수정 모달 */}
       <Modal
@@ -419,7 +423,7 @@ const NoticePage: React.FC = () => {
           </div>
         )}
       </Modal>
-    </div>
+    </TablePageLayout>
   );
 };
 

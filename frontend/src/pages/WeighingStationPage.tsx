@@ -39,6 +39,7 @@ const WeighingStationPage: React.FC = () => {
     selectedDispatchId,
     simulatorEnabled,
     searchLoading,
+    weighingDisplay,
     changeMode,
     handleSearch,
     handleConfirmWeight,
@@ -97,7 +98,7 @@ const WeighingStationPage: React.FC = () => {
           <Col xs={24} lg={10}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {/* 중량 표시 */}
-              <WeightDisplay weight={weight} />
+              <WeightDisplay weight={weight} weighingInfo={weighingDisplay} />
 
               {/* 차량/배차 정보 */}
               <VehicleInfoPanel vehicle={vehicle} />

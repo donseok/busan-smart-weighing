@@ -264,6 +264,27 @@ export interface SimulatorCommand {
   params?: Record<string, unknown>;
 }
 
+// ─── 다중 중량 표시 데이터 ───
+
+/**
+ * 다중 중량 표시 데이터 타입
+ *
+ * 계량소 중량 디스플레이에 표시되는 1차/2차/실/이론 중량 및 알림 메시지입니다.
+ *
+ * @property firstWeight - 1차중량 (공차중량, kg)
+ * @property secondWeight - 2차중량 (총중량, kg)
+ * @property netWeight - 실중량 (순중량 = |2차 - 1차|, kg)
+ * @property theoreticalWeight - 이론중량 (배차 예상 중량, kg)
+ * @property notification - 알림 메시지 (프로세스 상태)
+ */
+export interface WeighingDisplayInfo {
+  firstWeight: number;
+  secondWeight: number;
+  netWeight: number;
+  theoreticalWeight: number;
+  notification: string;
+}
+
 // ─── 계량소 전체 상태 ───
 
 /**
@@ -319,6 +340,15 @@ export const INITIAL_DEVICES: DeviceConnectionState = {
   display: 'OFFLINE',
   barrier: 'OFFLINE',
   network: 'OFFLINE',
+};
+
+/** 초기 다중 중량 표시 데이터 (모든 값 0) */
+export const INITIAL_WEIGHING_DISPLAY: WeighingDisplayInfo = {
+  firstWeight: 0,
+  secondWeight: 0,
+  netWeight: 0,
+  theoreticalWeight: 0,
+  notification: '',
 };
 
 /** 프로세스 상태별 한글 라벨 매핑 */

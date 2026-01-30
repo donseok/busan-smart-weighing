@@ -29,7 +29,7 @@ interface ProcessStateBarProps {
  * - ERROR: 오류 (빨간색, 닫기 아이콘)
  */
 const STATE_CONFIG: Record<ProcessState, { color: string; icon: React.ReactNode }> = {
-  IDLE: { color: '#64748B', icon: <ClockCircleOutlined /> },
+  IDLE: { color: '#94A3B8', icon: <ClockCircleOutlined /> },
   WEIGHING: { color: '#06B6D4', icon: <LoadingOutlined spin /> },
   STABILIZING: { color: '#F59E0B', icon: <SyncOutlined spin /> },
   COMPLETE: { color: '#10B981', icon: <CheckCircleOutlined /> },

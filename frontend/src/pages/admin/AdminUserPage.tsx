@@ -24,6 +24,7 @@ import {
   Switch,
 } from 'antd';
 import SortableTable from '../../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../../components/TablePageLayout';
 import {
   PlusOutlined,
   EditOutlined,
@@ -300,7 +301,8 @@ const AdminUserPage: React.FC = () => {
   ];
 
   return (
-    <div>
+    <TablePageLayout>
+      <FixedArea>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>사용자 관리</Title>
         <Button
@@ -311,7 +313,8 @@ const AdminUserPage: React.FC = () => {
           사용자 추가
         </Button>
       </div>
-
+      </FixedArea>
+      <ScrollArea>
       <SortableTable
         columns={columns}
         dataSource={users}
@@ -326,6 +329,7 @@ const AdminUserPage: React.FC = () => {
         onChange={(p) => fetchUsers(p.current, p.pageSize)}
         size="small"
       />
+      </ScrollArea>
 
       {/* 사용자 생성 모달 */}
       <Modal
@@ -433,7 +437,7 @@ const AdminUserPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </TablePageLayout>
   );
 };
 

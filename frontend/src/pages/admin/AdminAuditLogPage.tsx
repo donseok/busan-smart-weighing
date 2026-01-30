@@ -20,6 +20,7 @@ import {
   Descriptions,
 } from 'antd';
 import SortableTable from '../../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../../components/TablePageLayout';
 import { SearchOutlined, ReloadOutlined, EyeOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -215,7 +216,8 @@ const AdminAuditLogPage: React.FC = () => {
   ];
 
   return (
-    <div>
+    <TablePageLayout>
+      <FixedArea>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>감사 로그</Title>
       </div>
@@ -250,7 +252,8 @@ const AdminAuditLogPage: React.FC = () => {
           </Button>
         </Space>
       </div>
-
+      </FixedArea>
+      <ScrollArea>
       <SortableTable
         columns={columns}
         dataSource={logs}
@@ -265,6 +268,7 @@ const AdminAuditLogPage: React.FC = () => {
         onChange={(p) => fetchLogs(p.current, p.pageSize)}
         size="small"
       />
+      </ScrollArea>
 
       {/* 상세 모달 */}
       <Modal
@@ -295,7 +299,7 @@ const AdminAuditLogPage: React.FC = () => {
           </Descriptions>
         )}
       </Modal>
-    </div>
+    </TablePageLayout>
   );
 };
 

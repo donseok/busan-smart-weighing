@@ -31,6 +31,7 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import SortableTable from '../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../components/TablePageLayout';
 import apiClient from '../api/client';
 import type { WeighingRecord } from '../types';
 import dayjs, { type Dayjs } from 'dayjs';
@@ -237,7 +238,8 @@ const InquiryPage: React.FC = () => {
   ];
 
   return (
-    <>
+    <TablePageLayout>
+      <FixedArea>
       <Typography.Title level={4}>계량 조회</Typography.Title>
 
       {/* Search Condition Card */}
@@ -250,7 +252,7 @@ const InquiryPage: React.FC = () => {
           <Col>
             <Space size={8}>
               <Typography.Text
-                type="secondary"
+                strong
                 style={{ minWidth: 50, display: 'inline-block' }}
               >
                 기간
@@ -269,7 +271,7 @@ const InquiryPage: React.FC = () => {
           <Col>
             <Space size={8}>
               <Typography.Text
-                type="secondary"
+                strong
                 style={{ minWidth: 60, display: 'inline-block' }}
               >
                 차량번호
@@ -292,7 +294,7 @@ const InquiryPage: React.FC = () => {
           <Col>
             <Space size={8}>
               <Typography.Text
-                type="secondary"
+                strong
                 style={{ minWidth: 60, display: 'inline-block' }}
               >
                 계량방식
@@ -312,7 +314,7 @@ const InquiryPage: React.FC = () => {
           <Col>
             <Space size={8}>
               <Typography.Text
-                type="secondary"
+                strong
                 style={{ minWidth: 30, display: 'inline-block' }}
               >
                 상태
@@ -364,7 +366,8 @@ const InquiryPage: React.FC = () => {
           </Space>
         </div>
       )}
-
+      </FixedArea>
+      <ScrollArea>
       <SortableTable
         columns={columns}
         dataSource={data}
@@ -383,6 +386,7 @@ const InquiryPage: React.FC = () => {
             : '검색 조건을 설정한 후 조회 버튼을 클릭하세요.',
         }}
       />
+      </ScrollArea>
 
       {searched && totalElements > 0 && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
@@ -462,7 +466,7 @@ const InquiryPage: React.FC = () => {
           </Descriptions>
         )}
       </Modal>
-    </>
+    </TablePageLayout>
   );
 };
 

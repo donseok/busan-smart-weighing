@@ -246,7 +246,7 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ height: '100vh', overflow: 'hidden' }}>
       {/* 왼쪽 사이드바: 접이식 네비게이션 메뉴 */}
       <Sider
         collapsible
@@ -331,7 +331,7 @@ const MainLayout: React.FC = () => {
         </div>
       </Sider>
 
-      <Layout style={{ background: colors.bgBase }}>
+      <Layout style={{ background: colors.bgBase, overflow: 'hidden' }}>
         {/* 상단 헤더: 즐겨찾기, 테마 전환, 사용자 메뉴 */}
         <Header
           ref={headerRef}
@@ -518,14 +518,18 @@ const MainLayout: React.FC = () => {
         </div>
 
         {/* 콘텐츠 영역: 모든 탭 컴포넌트를 동시 렌더링하고 display로 전환하여 언마운트 방지 */}
-        <Content style={{ margin: spacing.lg, overflow: 'auto' }}>
+        <Content style={{ margin: spacing.lg, flex: 1, overflow: 'hidden' }}>
           <div
             style={{
               padding: spacing.xl,
-              minHeight: 360,
+              height: '100%',
               background: colors.bgSurface,
               borderRadius: 12,
               border: `1px solid ${colors.border}`,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
             }}
           >
             {/* 활성 탭만 display:block, 나머지는 display:none으로 숨김 (전환 시 fadeIn 애니메이션) */}
@@ -534,6 +538,9 @@ const MainLayout: React.FC = () => {
                 key={tab.key}
                 style={{
                   display: tab.key === activeKey ? 'block' : 'none',
+                  flex: 1,
+                  minHeight: 0,
+                  overflow: 'auto',
                   animation: tab.key === activeKey ? 'fadeIn 0.2s ease-in' : undefined,
                 }}
               >

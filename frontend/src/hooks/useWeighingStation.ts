@@ -35,11 +35,13 @@ import type {
   ScaleStatusMessage,
   WeighingUpdateMessage,
   DeviceStatusMessage,
+  WeighingDisplayInfo,
 } from '../types/weighingStation';
 import {
   EMPTY_VEHICLE,
   INITIAL_WEIGHT,
   INITIAL_DEVICES,
+  INITIAL_WEIGHING_DISPLAY,
 } from '../types/weighingStation';
 
 /** 로그 항목 ID 자동 증가 카운터 */
@@ -58,6 +60,7 @@ export function useWeighingStation() {
   const [selectedDispatchId, setSelectedDispatchId] = useState<number | null>(null); // 선택된 배차 ID
   const [simulatorEnabled, setSimulatorEnabled] = useState(false);      // 시뮬레이터 활성화 여부
   const [searchLoading, setSearchLoading] = useState(false);            // 검색 로딩 상태
+  const [weighingDisplay, setWeighingDisplay] = useState<WeighingDisplayInfo>(INITIAL_WEIGHING_DISPLAY); // 다중 중량 표시
 
   // 로그 상태의 최신값을 참조하기 위한 ref (콜백 내에서 클로저 문제 방지)
   const logsRef = useRef(logs);
@@ -99,6 +102,16 @@ export function useWeighingStation() {
     });
     // 중량 데이터 수신 시 계량대 장치를 온라인으로 표시
     setDevices((prev) => ({ ...prev, scale: 'ONLINE' }));
+
+    // 계량 중일 때 현재 중량을 2차중량으로 반영하고 실중량 자동 계산
+    setWeighingDisplay((prev) => {
+      if (prev.firstWeight > 0 || prev.secondWeight > 0) {
+        const second = msg.currentWeight;
+        const net = prev.firstWeight > 0 ? Math.abs(second - prev.firstWeight) : 0;
+        return { ...prev, secondWeight: second, netWeight: net };
+      }
+      return prev;
+    });
   }, []);
 
   /**
@@ -119,6 +132,15 @@ export function useWeighingStation() {
         driverName: msg.driverName || '-',
       });
     }
+
+    // 다중 중량 표시 업데이트
+    setWeighingDisplay((prev) => ({
+      ...prev,
+      firstWeight: msg.tareWeight ?? prev.firstWeight,
+      secondWeight: msg.grossWeight ?? prev.secondWeight,
+      netWeight: msg.netWeight ?? prev.netWeight,
+      notification: msg.message ?? prev.notification,
+    }));
 
     // 메시지가 있으면 상태 로그에 기록
     if (msg.message) {
@@ -235,6 +257,14 @@ export function useWeighingStation() {
       });
       addLog(`수동 계량 시작: ${dispatch.plateNumber} (배차#${dispatch.dispatchId})`, 'success');
       message.success('계량이 시작되었습니다');
+
+      // 배차 정보의 이론중량을 다중 중량 표시에 반영
+      // Note: DispatchSearchResult does not have expectedWeight/tareWeight fields,
+      // so these will be populated via WebSocket WeighingUpdateMessage once the backend processes it.
+      setWeighingDisplay((prev) => ({
+        ...prev,
+        notification: `수동 계량: ${dispatch.plateNumber}`,
+      }));
     } catch {
       message.error('계량 시작 실패');
       addLog('수동 계량 시작 실패', 'error');
@@ -250,6 +280,7 @@ export function useWeighingStation() {
       setVehicle(EMPTY_VEHICLE);
       setSearchResults([]);
       setSelectedDispatchId(null);
+      setWeighingDisplay(INITIAL_WEIGHING_DISPLAY);
       addLog('프로세스 초기화', 'info');
     } catch {
       message.error('초기화 실패');
@@ -326,6 +357,7 @@ export function useWeighingStation() {
     selectedDispatchId,
     simulatorEnabled,
     searchLoading,
+    weighingDisplay,
 
     // 액션
     changeMode,

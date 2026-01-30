@@ -64,14 +64,14 @@ partial class MainForm
         // -- Weight display ---------------------------------------------------
         this.weightDisplay = new WeightDisplayPanel();
         this.weightDisplay.Dock = DockStyle.Top;
-        this.weightDisplay.Height = (int)(220 * s);
+        this.weightDisplay.Height = (int)(400 * s);
 
         // -- Vehicle / dispatch info card ------------------------------------
         this.cardVehicle = new CardPanel();
         this.cardVehicle.Title = "차량 / 배차 정보";
         this.cardVehicle.AccentColor = Theme.Primary;
         this.cardVehicle.Dock = DockStyle.Top;
-        this.cardVehicle.Height = (int)(250 * s);
+        this.cardVehicle.Height = (int)(220 * s);
 
         this.tableVehicle = new TableLayoutPanel();
         this.tableVehicle.Dock = DockStyle.Fill;

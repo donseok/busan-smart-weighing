@@ -10,6 +10,7 @@
 import { useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { Button, Space, Typography, Modal, Form, Popconfirm, message, Input } from 'antd';
 import SortableTable from './SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from './TablePageLayout';
 import EmptyState from './EmptyState';
 import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -202,7 +203,8 @@ export default function MasterCrudPage<T extends object>({
   ]);
 
   return (
-    <>
+    <TablePageLayout>
+      <FixedArea>
       <Typography.Title level={4}>{title}</Typography.Title>
       <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} align="center">
         <Space>
@@ -226,6 +228,8 @@ export default function MasterCrudPage<T extends object>({
           <Button icon={<ReloadOutlined />} onClick={resetSearch}>초기화</Button>
         </Space>
       </Space>
+      </FixedArea>
+      <ScrollArea>
       <SortableTable
         columns={[...columns, actionColumn] as ColumnsType<T>}
         dataSource={displayData}
@@ -244,6 +248,7 @@ export default function MasterCrudPage<T extends object>({
           ),
         }}
       />
+      </ScrollArea>
 
       <Modal
         title={`${entityName} 등록`}
@@ -272,6 +277,6 @@ export default function MasterCrudPage<T extends object>({
           {editFormFields || formFields}
         </Form>
       </Modal>
-    </>
+    </TablePageLayout>
   );
 }

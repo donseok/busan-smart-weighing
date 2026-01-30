@@ -11,6 +11,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Space, Typography, Tag, Modal, Input, Form, message, Popconfirm, Card, Row, Col } from 'antd';
 import SortableTable from '../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../components/TablePageLayout';
 import { CheckOutlined, CloseOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../api/client';
@@ -92,7 +93,8 @@ const GatePassPage: React.FC = () => {
   ];
 
   return (
-    <>
+    <TablePageLayout>
+      <FixedArea>
       <Typography.Title level={4}>출문 관리</Typography.Title>
       <Card
         size="small"
@@ -105,7 +107,10 @@ const GatePassPage: React.FC = () => {
           </Col>
         </Row>
       </Card>
+      </FixedArea>
+      <ScrollArea>
       <SortableTable columns={columns} dataSource={data} rowKey="gatePassId" loading={loading} size="middle" tableKey="gatePass" />
+      </ScrollArea>
 
       <Modal title="출문 반려" open={rejectModalOpen} onOk={() => rejectForm.submit()} onCancel={() => { setRejectModalOpen(false); rejectForm.resetFields(); }} okText="반려" cancelText="취소">
         <Form form={rejectForm} onFinish={handleReject}>
@@ -114,7 +119,7 @@ const GatePassPage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </>
+    </TablePageLayout>
   );
 };
 

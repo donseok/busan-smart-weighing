@@ -113,7 +113,7 @@ const WeighingHistoryTable: React.FC<WeighingHistoryTableProps> = ({ history }) 
       style={{
         background: token.colorBgContainer,
         border: `1px solid ${token.colorBorder}`,
-        borderLeft: `3px solid #64748B`,
+        borderLeft: `3px solid #94A3B8`,
         borderRadius: 12,
         padding: '16px 0',
         overflow: 'hidden',
@@ -123,7 +123,7 @@ const WeighingHistoryTable: React.FC<WeighingHistoryTableProps> = ({ history }) 
       <div
         style={{
           fontSize: 13,
-          color: '#64748B',
+          color: '#94A3B8',
           fontWeight: 600,
           marginBottom: 8,
           padding: '0 20px',

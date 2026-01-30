@@ -47,7 +47,7 @@ export const DISPATCH_STATUS_COLORS: Record<string, string> = {
 
 // ─── 계량대 상태 색상 ───
 export const SCALE_STATUS_COLORS: Record<string, string> = {
-  IDLE: '#94A3B8',    // textSecondary
+  IDLE: '#CBD5E1',    // textSecondary (밝게 조정)
   WEIGHING: '#F59E0B', // warning
   COMPLETED: '#10B981', // success
   ERROR: '#F43F5E',    // error

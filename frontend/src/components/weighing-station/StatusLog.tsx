@@ -20,7 +20,7 @@ interface StatusLogProps {
  * - error: 빨간색 (오류)
  */
 const LEVEL_COLORS: Record<StatusLogEntry['level'], string> = {
-  info: '#94A3B8',
+  info: '#CBD5E1',
   success: '#39FF14',
   warning: '#F59E0B',
   error: '#F43F5E',
@@ -83,7 +83,7 @@ const StatusLog: React.FC<StatusLogProps> = ({ logs }) => {
         {/* 로그 엔트리 총 개수 표시 배지 */}
         <span style={{
           fontSize: 10,
-          color: '#484F58',
+          color: '#8B949E',
           marginLeft: 'auto',
           fontFamily: 'monospace',
           background: '#1C2333',
@@ -108,7 +108,7 @@ const StatusLog: React.FC<StatusLogProps> = ({ logs }) => {
       >
         {logs.length === 0 ? (
           /* 로그가 없을 때 빈 상태 메시지 */
-          <div style={{ color: '#484F58', padding: '16px 0', textAlign: 'center' }}>
+          <div style={{ color: '#8B949E', padding: '16px 0', textAlign: 'center' }}>
             로그가 없습니다
           </div>
         ) : (
@@ -116,7 +116,7 @@ const StatusLog: React.FC<StatusLogProps> = ({ logs }) => {
           logs.map((entry) => (
             <div key={entry.id} style={{ display: 'flex', gap: 8, whiteSpace: 'nowrap' }}>
               {/* 타임스탬프 */}
-              <span style={{ color: '#484F58', flexShrink: 0 }}>
+              <span style={{ color: '#8B949E', flexShrink: 0 }}>
                 [{entry.timestamp}]
               </span>
               {/* 로그 메시지 (레벨별 색상 적용) */}
