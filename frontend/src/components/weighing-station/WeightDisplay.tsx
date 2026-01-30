@@ -105,11 +105,12 @@ const WeightDisplay: React.FC<WeightDisplayProps> = ({ weight }) => {
         aria-label={`현재 중량 ${weight.currentWeight.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${weight.unit}, 상태: ${STABILITY_LABELS[weight.stability]}`}
         style={{
           fontFamily: "'JetBrains Mono', 'Consolas', 'Courier New', monospace",
-          fontSize: 72,
+          fontSize: weight.currentWeight === 0 ? 96 : 72,
           fontWeight: 700,
           lineHeight: 1,
-          /* 상태별 텍스트 색상: 오류=빨강, 연결 끊김=회색, 그 외=기본 테마 색상 */
-          color: weight.stability === 'ERROR' ? '#F43F5E'
+          /* 상태별 텍스트 색상: 0.0=빨강, 오류=빨강, 연결 끊김=회색, 그 외=기본 테마 색상 */
+          color: weight.currentWeight === 0 ? '#F43F5E'
+            : weight.stability === 'ERROR' ? '#F43F5E'
             : weight.stability === 'DISCONNECTED' ? '#64748B'
             : token.colorPrimary,
           /* 안정 상태일 때만 글로우 효과 적용 */
