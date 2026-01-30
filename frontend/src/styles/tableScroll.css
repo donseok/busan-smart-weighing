@@ -1,12 +1,17 @@
 /**
- * 테이블 고정 헤더 + 바디 스크롤 CSS 오버라이드
- *
- * .st-fill-height 클래스가 적용된 컨테이너 내부의
- * Ant Design Table이 부모 높이를 채우고,
- * 테이블 헤더는 고정, 바디만 스크롤되도록 합니다.
- *
- * 사용 조건: SortableTable에 scroll={{ y: 1 }} 전달 시 자동 적용
+ * 전역 슬림 스크롤바 + 테이블 고정 헤더/바디 스크롤 CSS
  */
+
+/* ── 전역 스크롤바 숨김 (스크롤 기능은 유지) ── */
+* {
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── 테이블 고정 헤더 + 바디 스크롤 ── */
 
 /* Ant Design Table 래퍼 — 부모 높이 전파 */
 .st-fill-height .ant-table-wrapper {

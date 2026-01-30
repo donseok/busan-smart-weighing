@@ -537,10 +537,12 @@ const MainLayout: React.FC = () => {
               <div
                 key={tab.key}
                 style={{
-                  display: tab.key === activeKey ? 'block' : 'none',
+                  display: tab.key === activeKey ? 'flex' : 'none',
+                  flexDirection: 'column' as const,
                   flex: 1,
                   minHeight: 0,
-                  overflow: 'auto',
+                  overflowY: 'auto' as const,
+                  overflowX: 'hidden' as const,
                   animation: tab.key === activeKey ? 'fadeIn 0.2s ease-in' : undefined,
                 }}
               >

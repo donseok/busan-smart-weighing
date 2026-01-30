@@ -19,7 +19,6 @@ import {
   Space,
   Button,
   Statistic,
-  Table,
   Badge,
   Select,
   message,
@@ -35,6 +34,8 @@ import {
   StopOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import SortableTable from '../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../components/TablePageLayout';
 import apiClient from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
 import dayjs from 'dayjs';
@@ -206,130 +207,79 @@ const MonitoringPage: React.FC = () => {
   };
 
   return (
-    <>
-      <Typography.Title level={4}>장비 관제</Typography.Title>
+    <TablePageLayout>
+      <FixedArea>
+        <Typography.Title level={4}>장비 관제</Typography.Title>
 
-      {/* Summary Cards */}
-      {summary && (
-        <Row gutter={16} style={{ marginBottom: 24 }}>
-          <Col span={6}>
-            <Card style={{ borderTop: '3px solid #06B6D4', background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, transparent 60%)' }}>
-              <Statistic
-                title="전체 장비"
-                value={summary.totalDevices}
-                valueStyle={{ color: '#06B6D4' }}
-                suffix="대"
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ borderTop: '3px solid #10B981', background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, transparent 60%)' }}>
-              <Statistic
-                title={
-                  <Space>
-                    {getStatusBadge('ONLINE')}
-                    온라인
-                  </Space>
-                }
-                value={summary.onlineCount}
-                valueStyle={{ color: '#10B981' }}
-                suffix="대"
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ borderTop: '3px solid #F59E0B', background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, transparent 60%)' }}>
-              <Statistic
-                title={
-                  <Space>
-                    {getStatusBadge('OFFLINE')}
-                    오프라인
-                  </Space>
-                }
-                value={summary.offlineCount}
-                valueStyle={{ color: '#F59E0B' }}
-                suffix="대"
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ borderTop: '3px solid #F43F5E', background: 'linear-gradient(135deg, rgba(244,63,94,0.08) 0%, transparent 60%)' }}>
-              <Statistic
-                title={
-                  <Space>
-                    {getStatusBadge('ERROR')}
-                    오류
-                  </Space>
-                }
-                value={summary.errorCount}
-                valueStyle={{ color: '#F43F5E' }}
-                suffix="대"
-              />
-            </Card>
-          </Col>
-        </Row>
-      )}
-
-      {/* Device Type Cards */}
-      {summary && Object.keys(summary.countByTypeAndStatus).length > 0 && (
-        <Row gutter={16} style={{ marginBottom: 24 }}>
-          {Object.entries(summary.countByTypeAndStatus).map(([type, statusCounts]) => (
-            <Col span={6} key={type}>
-              <Card
-                size="small"
-                title={<span style={{ color: '#06B6D4' }}>{type}</span>}
-                style={{ borderLeft: '3px solid #06B6D4' }}
-              >
-                <Space direction="vertical" size={4}>
-                  {Object.entries(statusCounts).map(([status, count]) => (
-                    <div key={status}>
-                      <Badge
-                        status={
-                          status === '온라인' ? 'success' :
-                          status === '오류' ? 'error' : 'default'
-                        }
-                      />
-                      <span style={{
-                        marginLeft: 8,
-                        color: status === '온라인' ? '#10B981' :
-                               status === '오류' ? '#F43F5E' : '#F59E0B',
-                      }}>
-                        {status}: {count}대
-                      </span>
-                    </div>
-                  ))}
-                </Space>
+        {/* Summary Cards */}
+        {summary && (
+          <Row gutter={16} style={{ marginBottom: 24 }}>
+            <Col span={6}>
+              <Card style={{ borderTop: '3px solid #06B6D4', background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, transparent 60%)' }}>
+                <Statistic title="전체 장비" value={summary.totalDevices} valueStyle={{ color: '#06B6D4' }} suffix="대" />
               </Card>
             </Col>
-          ))}
-        </Row>
-      )}
+            <Col span={6}>
+              <Card style={{ borderTop: '3px solid #10B981', background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, transparent 60%)' }}>
+                <Statistic title={<Space>{getStatusBadge('ONLINE')}온라인</Space>} value={summary.onlineCount} valueStyle={{ color: '#10B981' }} suffix="대" />
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card style={{ borderTop: '3px solid #F59E0B', background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, transparent 60%)' }}>
+                <Statistic title={<Space>{getStatusBadge('OFFLINE')}오프라인</Space>} value={summary.offlineCount} valueStyle={{ color: '#F59E0B' }} suffix="대" />
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card style={{ borderTop: '3px solid #F43F5E', background: 'linear-gradient(135deg, rgba(244,63,94,0.08) 0%, transparent 60%)' }}>
+                <Statistic title={<Space>{getStatusBadge('ERROR')}오류</Space>} value={summary.errorCount} valueStyle={{ color: '#F43F5E' }} suffix="대" />
+              </Card>
+            </Col>
+          </Row>
+        )}
 
-      {/* Filters */}
-      <Space style={{ marginBottom: 16 }}>
-        <Select
-          placeholder="장비 유형"
-          style={{ width: 150 }}
-          value={typeFilter}
-          onChange={setTypeFilter}
-          options={deviceTypeOptions}
+        {/* Device Type Cards */}
+        {summary && Object.keys(summary.countByTypeAndStatus).length > 0 && (
+          <Row gutter={16} style={{ marginBottom: 24 }}>
+            {Object.entries(summary.countByTypeAndStatus).map(([type, statusCounts]) => (
+              <Col span={6} key={type}>
+                <Card size="small" title={<span style={{ color: '#06B6D4' }}>{type}</span>} style={{ borderLeft: '3px solid #06B6D4' }}>
+                  <Space direction="vertical" size={4}>
+                    {Object.entries(statusCounts).map(([status, count]) => (
+                      <div key={status}>
+                        <Badge status={status === '온라인' ? 'success' : status === '오류' ? 'error' : 'default'} />
+                        <span style={{ marginLeft: 8, color: status === '온라인' ? '#10B981' : status === '오류' ? '#F43F5E' : '#F59E0B' }}>
+                          {status}: {count}대
+                        </span>
+                      </div>
+                    ))}
+                  </Space>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
+
+        {/* Filters */}
+        <Space style={{ marginBottom: 16 }}>
+          <Select placeholder="장비 유형" style={{ width: 150 }} value={typeFilter} onChange={setTypeFilter} options={deviceTypeOptions} />
+          <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading}>새로고침</Button>
+        </Space>
+      </FixedArea>
+
+      {/* Device Table - column header fixed, data scrolls */}
+      <ScrollArea>
+        <SortableTable
+          columns={columns}
+          dataSource={filteredDevices}
+          rowKey="deviceId"
+          loading={loading}
+          size="middle"
+          tableKey="monitoring"
+          pagination={false}
+          scroll={{ y: 1 }}
         />
-        <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading}>
-          새로고침
-        </Button>
-      </Space>
-
-      {/* Device Table */}
-      <Table
-        columns={columns}
-        dataSource={filteredDevices}
-        rowKey="deviceId"
-        loading={loading}
-        size="middle"
-        pagination={false}
-        scroll={{ x: 1000 }}
-      />
-    </>
+      </ScrollArea>
+    </TablePageLayout>
   );
 };
 

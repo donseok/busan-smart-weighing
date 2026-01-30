@@ -11,6 +11,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Space, Typography, Modal, Form, Input, InputNumber, Popconfirm, message, Select, Tag } from 'antd';
 import SortableTable from '../../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../../components/TablePageLayout';
 import { PlusOutlined, ReloadOutlined, SearchOutlined, EditOutlined, DeleteOutlined, FilterOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '../../api/client';
@@ -166,34 +167,38 @@ const MasterCodePage: React.FC = () => {
   ];
 
   return (
-    <>
-      <Typography.Title level={4}>코드 관리</Typography.Title>
-      <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} align="center">
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>코드 등록</Button>
-        <Space>
-          <Select
-            style={{ width: 180 }}
-            placeholder="코드그룹 필터"
-            allowClear
-            value={selectedGroup}
-            onChange={setSelectedGroup}
-            options={codeGroups.map(g => ({ label: g, value: g }))}
-            suffixIcon={<FilterOutlined />}
-          />
-          <Input
-            placeholder="코드그룹/코드명 검색"
-            allowClear
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-            onPressEnter={handleSearch}
-            style={{ width: 250 }}
-            prefix={<SearchOutlined />}
-          />
-          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>조회</Button>
-          <Button icon={<ReloadOutlined />} onClick={handleReset}>초기화</Button>
+    <TablePageLayout>
+      <FixedArea>
+        <Typography.Title level={4}>코드 관리</Typography.Title>
+        <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }} align="center">
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>코드 등록</Button>
+          <Space>
+            <Select
+              style={{ width: 180 }}
+              placeholder="코드그룹 필터"
+              allowClear
+              value={selectedGroup}
+              onChange={setSelectedGroup}
+              options={codeGroups.map(g => ({ label: g, value: g }))}
+              suffixIcon={<FilterOutlined />}
+            />
+            <Input
+              placeholder="코드그룹/코드명 검색"
+              allowClear
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onPressEnter={handleSearch}
+              style={{ width: 250 }}
+              prefix={<SearchOutlined />}
+            />
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>조회</Button>
+            <Button icon={<ReloadOutlined />} onClick={handleReset}>초기화</Button>
+          </Space>
         </Space>
-      </Space>
-      <SortableTable columns={columns} dataSource={data} rowKey="codeId" loading={loading} size="middle" tableKey="masterCode" />
+      </FixedArea>
+      <ScrollArea>
+        <SortableTable columns={columns} dataSource={data} rowKey="codeId" loading={loading} size="middle" tableKey="masterCode" pagination={false} scroll={{ y: 1 }} />
+      </ScrollArea>
 
       <Modal
         title="코드 등록"
@@ -262,7 +267,7 @@ const MasterCodePage: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </>
+    </TablePageLayout>
   );
 };
 

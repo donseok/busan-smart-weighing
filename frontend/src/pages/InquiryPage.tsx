@@ -17,8 +17,6 @@ import {
   DatePicker,
   Input,
   Card,
-  Row,
-  Col,
   Modal,
   Descriptions,
   Tag,
@@ -248,105 +246,57 @@ const InquiryPage: React.FC = () => {
         style={{ marginBottom: 16 }}
         styles={{ body: { padding: '16px 24px' } }}
       >
-        <Row gutter={[16, 12]} align="middle">
-          <Col>
-            <Space size={8}>
-              <Typography.Text
-                strong
-                style={{ minWidth: 50, display: 'inline-block' }}
-              >
-                기간
-              </Typography.Text>
-              <RangePicker
-                value={filters.dateRange}
-                onChange={(dates) =>
-                  setFilters((prev) => ({ ...prev, dateRange: dates }))
-                }
-                placeholder={['시작일', '종료일']}
-                allowClear
-                style={{ width: 260 }}
-              />
-            </Space>
-          </Col>
-          <Col>
-            <Space size={8}>
-              <Typography.Text
-                strong
-                style={{ minWidth: 60, display: 'inline-block' }}
-              >
-                차량번호
-              </Typography.Text>
-              <Input
-                value={filters.lprPlateNumber}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    lprPlateNumber: e.target.value,
-                  }))
-                }
-                onKeyDown={handleKeyDown}
-                placeholder="차량번호 입력"
-                allowClear
-                style={{ width: 160 }}
-              />
-            </Space>
-          </Col>
-          <Col>
-            <Space size={8}>
-              <Typography.Text
-                strong
-                style={{ minWidth: 60, display: 'inline-block' }}
-              >
-                계량방식
-              </Typography.Text>
-              <Select
-                value={filters.weighingMode}
-                onChange={(value) =>
-                  setFilters((prev) => ({ ...prev, weighingMode: value }))
-                }
-                placeholder="전체"
-                allowClear
-                style={{ width: 150 }}
-                options={modeOptions}
-              />
-            </Space>
-          </Col>
-          <Col>
-            <Space size={8}>
-              <Typography.Text
-                strong
-                style={{ minWidth: 30, display: 'inline-block' }}
-              >
-                상태
-              </Typography.Text>
-              <Select
-                value={filters.status}
-                onChange={(value) =>
-                  setFilters((prev) => ({ ...prev, status: value }))
-                }
-                placeholder="전체"
-                allowClear
-                style={{ width: 130 }}
-                options={statusOptions}
-              />
-            </Space>
-          </Col>
-          <Col flex="auto" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <Space size={4}>
+            <Typography.Text strong>기간</Typography.Text>
+            <RangePicker
+              value={filters.dateRange}
+              onChange={(dates) => setFilters((prev) => ({ ...prev, dateRange: dates }))}
+              placeholder={['시작일', '종료일']}
+              allowClear
+              style={{ width: 240 }}
+            />
+          </Space>
+          <Space size={4}>
+            <Typography.Text strong>차량번호</Typography.Text>
+            <Input
+              value={filters.lprPlateNumber}
+              onChange={(e) => setFilters((prev) => ({ ...prev, lprPlateNumber: e.target.value }))}
+              onKeyDown={handleKeyDown}
+              placeholder="차량번호"
+              allowClear
+              style={{ width: 130 }}
+            />
+          </Space>
+          <Space size={4}>
+            <Typography.Text strong>계량방식</Typography.Text>
+            <Select
+              value={filters.weighingMode}
+              onChange={(value) => setFilters((prev) => ({ ...prev, weighingMode: value }))}
+              placeholder="전체"
+              allowClear
+              style={{ width: 130 }}
+              options={modeOptions}
+            />
+          </Space>
+          <Space size={4}>
+            <Typography.Text strong>상태</Typography.Text>
+            <Select
+              value={filters.status}
+              onChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
+              placeholder="전체"
+              allowClear
+              style={{ width: 110 }}
+              options={statusOptions}
+            />
+          </Space>
+          <div style={{ marginLeft: 'auto' }}>
             <Space>
-              <Button icon={<ClearOutlined />} onClick={handleReset}>
-                초기화
-              </Button>
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                onClick={handleSearch}
-                loading={loading}
-              >
-                조회
-              </Button>
+              <Button icon={<ClearOutlined />} onClick={handleReset}>초기화</Button>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch} loading={loading}>조회</Button>
             </Space>
-          </Col>
-        </Row>
+          </div>
+        </div>
       </Card>
 
       {/* Results */}

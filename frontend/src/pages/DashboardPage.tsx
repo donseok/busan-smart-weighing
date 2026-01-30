@@ -8,7 +8,7 @@
  * @module pages/DashboardPage
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Card, Spin, Typography, Tabs, Space, Modal, Skeleton, Row, Col } from 'antd';
+import { Alert, Card, Spin, Typography, Tabs, Tag, Space, Modal, Skeleton, Row, Col } from 'antd';
 import { NotificationOutlined } from '@ant-design/icons';
 import apiClient from '../api/client';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -201,25 +201,86 @@ const DashboardPage: React.FC = () => {
   ];
 
   return (
-    <>
-      <Typography.Title level={4} style={{ marginBottom: 20 }}>대시보드</Typography.Title>
-      {loading ? (
-        <div>
-          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-            {[1, 2, 3, 4].map(i => (
-              <Col span={6} key={i}>
-                <Card><Skeleton active paragraph={{ rows: 1 }} /></Card>
-              </Col>
-            ))}
-          </Row>
-          <Row gutter={[16, 16]}>
-            <Col span={12}><Card><Skeleton active paragraph={{ rows: 6 }} /></Card></Col>
-            <Col span={12}><Card><Skeleton active paragraph={{ rows: 6 }} /></Card></Col>
-          </Row>
-        </div>
-      ) : (
-        <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} style={{ marginBottom: 24 }} />
-      )}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* 고정 영역: 제목 + 탭 헤더 + 공지사항 */}
+      <div style={{ flexShrink: 0 }}>
+        <Typography.Title level={4} style={{ marginBottom: 20 }}>대시보드</Typography.Title>
+        {!loading && (
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            items={tabItems.map(item => ({ key: item.key, label: item.label }))}
+            style={{ marginBottom: 0 }}
+          />
+        )}
+        {!loading && activeTab === 'overview' && pinnedNotices.length > 0 && (
+          <div style={{ marginTop: 12, marginBottom: 4 }}>
+            <Alert
+              type="info"
+              showIcon
+              icon={<NotificationOutlined />}
+              message={
+                <Space style={{ cursor: 'pointer' }}>
+                  <Tag color="red">공지</Tag>
+                  {pinnedNotices[0].title}
+                </Space>
+              }
+              style={{ borderRadius: 8, cursor: 'pointer' }}
+              onClick={() => handleNoticeClick(pinnedNotices[0].noticeId)}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* 스크롤 영역: 탭 콘텐츠 */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0, paddingTop: 16 }}>
+        {loading ? (
+          <div>
+            <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+              {[1, 2, 3, 4].map(i => (
+                <Col span={6} key={i}>
+                  <Card><Skeleton active paragraph={{ rows: 1 }} /></Card>
+                </Col>
+              ))}
+            </Row>
+            <Row gutter={[16, 16]}>
+              <Col span={12}><Card><Skeleton active paragraph={{ rows: 6 }} /></Card></Col>
+              <Col span={12}><Card><Skeleton active paragraph={{ rows: 6 }} /></Card></Col>
+            </Row>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'overview' && (
+              <OverviewTab
+                statistics={statistics}
+                pinnedNotices={[]}
+                onNoticeClick={handleNoticeClick}
+                lineChartOption={lineChartOption}
+                pieChartOption={pieChartOption}
+                barChartOption={barChartOption}
+                companyTopChartOption={companyTopChartOption}
+                colors={colors}
+              />
+            )}
+            {activeTab === 'realtime' && (
+              <RealtimeTab
+                summary={summary}
+                inProgressWeighings={inProgressWeighings}
+                colors={colors}
+              />
+            )}
+            {activeTab === 'analysis' && (
+              <AnalysisTab
+                companyStats={companyStats}
+                companyBarChartOption={companyBarChartOption}
+                lineChartOption={lineChartOption}
+                colors={colors}
+              />
+            )}
+          </>
+        )}
+      </div>
+
       <Modal
         title={<Space><NotificationOutlined />{selectedNotice?.title}</Space>}
         open={noticeModalVisible}
@@ -246,7 +307,7 @@ const DashboardPage: React.FC = () => {
           )}
         </Spin>
       </Modal>
-    </>
+    </div>
   );
 };
 

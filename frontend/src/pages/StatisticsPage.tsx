@@ -17,7 +17,6 @@ import {
   Button,
   Space,
   Tabs,
-  Table,
   Card,
   Row,
   Col,
@@ -31,6 +30,8 @@ import {
   LineChartOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import SortableTable from '../components/SortableTable';
+import { TablePageLayout, FixedArea, ScrollArea } from '../components/TablePageLayout';
 import apiClient from '../api/client';
 import dayjs, { type Dayjs } from 'dayjs';
 import { colors } from '../theme/themeConfig';
@@ -240,76 +241,74 @@ const StatisticsPage: React.FC = () => {
   };
 
   return (
-    <>
-      <Typography.Title level={4}>통계 및 보고서</Typography.Title>
+    <TablePageLayout>
+      <FixedArea>
+        <Typography.Title level={4}>통계 및 보고서</Typography.Title>
 
-      {/* Summary Cards */}
-      {summary && (
-        <Row gutter={16} style={{ marginBottom: 24 }}>
-          <Col span={6}>
-            <Card style={{ borderTop: `3px solid ${colors.primary}` }}>
-              <Statistic
-                title="총 계량 건수"
-                value={summary.totalCount}
-                prefix={<BarChartOutlined />}
-                suffix="건"
-                valueStyle={{ color: colors.primary }}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ borderTop: `3px solid ${colors.success}` }}>
-              <Statistic
-                title="총 중량 (톤)"
-                value={summary.totalWeightTon}
-                prefix={<LineChartOutlined />}
-                precision={2}
-                suffix="톤"
-                valueStyle={{ color: colors.success }}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ borderTop: `3px solid ${colors.warning}` }}>
-              <Statistic
-                title="품목별 최다"
-                value={
-                  Object.entries(summary.countByItemType).length > 0
-                    ? Object.entries(summary.countByItemType).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
-                    : '-'
-                }
-                valueStyle={{ color: colors.warning }}
-              />
-            </Card>
-          </Col>
-          <Col span={6}>
-            <Card style={{ borderTop: `3px solid ${colors.error}` }}>
-              <Statistic
-                title="업체별 최다"
-                value={
-                  Object.entries(summary.countByCompany).length > 0
-                    ? Object.entries(summary.countByCompany).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
-                    : '-'
-                }
-                valueStyle={{ color: colors.error }}
-              />
-            </Card>
-          </Col>
-        </Row>
-      )}
+        {/* Summary Cards */}
+        {summary && (
+          <Row gutter={16} style={{ marginBottom: 24 }}>
+            <Col span={6}>
+              <Card style={{ borderTop: `3px solid ${colors.primary}` }}>
+                <Statistic
+                  title="총 계량 건수"
+                  value={summary.totalCount}
+                  prefix={<BarChartOutlined />}
+                  suffix="건"
+                  valueStyle={{ color: colors.primary }}
+                />
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card style={{ borderTop: `3px solid ${colors.success}` }}>
+                <Statistic
+                  title="총 중량 (톤)"
+                  value={summary.totalWeightTon}
+                  prefix={<LineChartOutlined />}
+                  precision={2}
+                  suffix="톤"
+                  valueStyle={{ color: colors.success }}
+                />
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card style={{ borderTop: `3px solid ${colors.warning}` }}>
+                <Statistic
+                  title="품목별 최다"
+                  value={
+                    Object.entries(summary.countByItemType).length > 0
+                      ? Object.entries(summary.countByItemType).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
+                      : '-'
+                  }
+                  valueStyle={{ color: colors.warning }}
+                />
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card style={{ borderTop: `3px solid ${colors.error}` }}>
+                <Statistic
+                  title="업체별 최다"
+                  value={
+                    Object.entries(summary.countByCompany).length > 0
+                      ? Object.entries(summary.countByCompany).sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
+                      : '-'
+                  }
+                  valueStyle={{ color: colors.error }}
+                />
+              </Card>
+            </Col>
+          </Row>
+        )}
 
-      {/* Filters */}
-      <Card
-        size="small"
-        style={{ marginBottom: 16 }}
-        styles={{ body: { padding: '16px 24px' } }}
-      >
-        <Row gutter={[16, 12]} align="middle">
-          <Col>
+        {/* Filters */}
+        <Card
+          size="small"
+          style={{ marginBottom: 16 }}
+          styles={{ body: { padding: '16px 24px' } }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <Space size={8}>
-              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>
-                기간
-              </Typography.Text>
+              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>기간</Typography.Text>
               <RangePicker
                 value={dateRange}
                 onChange={handleDateRangeChange}
@@ -317,12 +316,8 @@ const StatisticsPage: React.FC = () => {
                 style={{ width: 280 }}
               />
             </Space>
-          </Col>
-          <Col>
             <Space size={8}>
-              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>
-                업체
-              </Typography.Text>
+              <Typography.Text strong style={{ minWidth: 50, display: 'inline-block' }}>업체</Typography.Text>
               <Select
                 placeholder="전체"
                 allowClear
@@ -335,12 +330,8 @@ const StatisticsPage: React.FC = () => {
                 }))}
               />
             </Space>
-          </Col>
-          <Col>
             <Space size={8}>
-              <Typography.Text strong style={{ minWidth: 60, display: 'inline-block' }}>
-                품목유형
-              </Typography.Text>
+              <Typography.Text strong style={{ minWidth: 60, display: 'inline-block' }}>품목유형</Typography.Text>
               <Select
                 placeholder="전체"
                 allowClear
@@ -350,66 +341,58 @@ const StatisticsPage: React.FC = () => {
                 options={itemTypeOptions}
               />
             </Space>
-          </Col>
-          <Col flex="auto" style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Space>
-              <Button icon={<SearchOutlined />} onClick={fetchStatistics} loading={loading}>
-                조회
-              </Button>
-              <Button
-                type="primary"
-                icon={<DownloadOutlined />}
-                onClick={handleExport}
-              >
-                Excel 다운로드
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-      </Card>
+            <div style={{ marginLeft: 'auto' }}>
+              <Space>
+                <Button icon={<SearchOutlined />} onClick={fetchStatistics} loading={loading}>조회</Button>
+                <Button type="primary" icon={<DownloadOutlined />} onClick={handleExport}>Excel 다운로드</Button>
+              </Space>
+            </div>
+          </div>
+        </Card>
 
-      {/* Data Tables */}
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={[
-          {
-            key: 'daily',
-            label: '일별 통계',
-            children: (
-              <Table
-                columns={dailyColumns}
-                dataSource={dailyData}
-                rowKey={(record) =>
-                  `${record.date}-${record.companyId}-${record.itemType}`
-                }
-                loading={loading}
-                size="middle"
-                pagination={{ pageSize: 20, showSizeChanger: true }}
-                scroll={{ x: 800 }}
-              />
-            ),
-          },
-          {
-            key: 'monthly',
-            label: '월별 통계',
-            children: (
-              <Table
-                columns={monthlyColumns}
-                dataSource={monthlyData}
-                rowKey={(record) =>
-                  `${record.year}-${record.month}-${record.companyId}-${record.itemType}`
-                }
-                loading={loading}
-                size="middle"
-                pagination={{ pageSize: 20, showSizeChanger: true }}
-                scroll={{ x: 800 }}
-              />
-            ),
-          },
-        ]}
-      />
-    </>
+        {/* Tab headers only */}
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            { key: 'daily', label: '일별 통계' },
+            { key: 'monthly', label: '월별 통계' },
+          ]}
+          style={{ marginBottom: 0 }}
+        />
+      </FixedArea>
+
+      {/* Data Tables - scrollable with fixed column headers */}
+      <ScrollArea>
+        {activeTab === 'daily' ? (
+          <SortableTable
+            columns={dailyColumns}
+            dataSource={dailyData}
+            rowKey={(record: DailyStatistics) =>
+              `${record.date}-${record.companyId}-${record.itemType}`
+            }
+            loading={loading}
+            size="middle"
+            tableKey="statistics-daily"
+            pagination={false}
+            scroll={{ y: 1 }}
+          />
+        ) : (
+          <SortableTable
+            columns={monthlyColumns}
+            dataSource={monthlyData}
+            rowKey={(record: MonthlyStatistics) =>
+              `${record.year}-${record.month}-${record.companyId}-${record.itemType}`
+            }
+            loading={loading}
+            size="middle"
+            tableKey="statistics-monthly"
+            pagination={false}
+            scroll={{ y: 1 }}
+          />
+        )}
+      </ScrollArea>
+    </TablePageLayout>
   );
 };
 

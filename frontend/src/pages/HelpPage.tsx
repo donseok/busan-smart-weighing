@@ -83,182 +83,192 @@ const HelpPage: React.FC = () => {
     return acc;
   }, {} as Record<string, Faq[]>);
 
-  return (
-    <>
-      <Typography.Title level={4}>이용 안내</Typography.Title>
+  const [activeTab, setActiveTab] = useState('faq');
 
-      <Tabs
-        defaultActiveKey="faq"
-        items={[
-          {
-            key: 'faq',
-            label: (
-              <span>
-                <QuestionCircleOutlined />
-                자주 묻는 질문 (FAQ)
-              </span>
-            ),
-            children: (
-              <>
-                <Space style={{ marginBottom: 16 }}>
-                  <Select
-                    placeholder="카테고리 선택"
-                    style={{ width: 160 }}
-                    value={categoryFilter}
-                    onChange={setCategoryFilter}
-                    options={categoryOptions.map((opt) => ({
-                      value: opt.value,
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* 고정 영역: 제목 + 탭 헤더 + 카테고리 필터 */}
+      <div style={{ flexShrink: 0 }}>
+        <Typography.Title level={4}>이용 안내</Typography.Title>
+
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'faq',
+              label: (
+                <span>
+                  <QuestionCircleOutlined />
+                  자주 묻는 질문 (FAQ)
+                </span>
+              ),
+            },
+            {
+              key: 'guide',
+              label: (
+                <span>
+                  <BookOutlined />
+                  시스템 이용 안내
+                </span>
+              ),
+            },
+          ]}
+          style={{ marginBottom: 0 }}
+        />
+
+        {activeTab === 'faq' && (
+          <Space style={{ marginTop: 16, marginBottom: 16 }}>
+            <Select
+              placeholder="카테고리 선택"
+              style={{ width: 160 }}
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+              options={categoryOptions.map((opt) => ({
+                value: opt.value,
+                label: (
+                  <Space>
+                    {opt.icon}
+                    {opt.label}
+                  </Space>
+                ),
+              }))}
+            />
+          </Space>
+        )}
+      </div>
+
+      {/* 스크롤 영역: 탭 콘텐츠 */}
+      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+        {activeTab === 'faq' ? (
+          <Spin spinning={loading}>
+            {faqs.length === 0 ? (
+              <Empty description="등록된 FAQ가 없습니다." />
+            ) : categoryFilter ? (
+              <Collapse
+                accordion
+                items={faqs.map((faq) => ({
+                  key: faq.faqId,
+                  label: (
+                    <span>
+                      <QuestionCircleOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+                      {faq.question}
+                    </span>
+                  ),
+                  children: (
+                    <div style={{ whiteSpace: 'pre-wrap' }}>{faq.answer}</div>
+                  ),
+                }))}
+              />
+            ) : (
+              Object.entries(groupedFaqs).map(([category, categoryFaqs]) => (
+                <Card
+                  key={category}
+                  title={category}
+                  size="small"
+                  style={{ marginBottom: 16 }}
+                >
+                  <Collapse
+                    accordion
+                    bordered={false}
+                    items={categoryFaqs.map((faq) => ({
+                      key: faq.faqId,
                       label: (
-                        <Space>
-                          {opt.icon}
-                          {opt.label}
-                        </Space>
+                        <span>
+                          <QuestionCircleOutlined style={{ marginRight: 8, color: '#1890ff' }} />
+                          {faq.question}
+                        </span>
+                      ),
+                      children: (
+                        <div style={{ whiteSpace: 'pre-wrap' }}>{faq.answer}</div>
                       ),
                     }))}
                   />
-                </Space>
+                </Card>
+              ))
+            )}
+          </Spin>
+        ) : (
+          <Card>
+            <Typography.Title level={5}>동국씨엠 스마트 계량 시스템</Typography.Title>
+            <Typography.Paragraph>
+              본 시스템은 동국씨엠 부산공장의 차량 계량 업무를 효율적으로 관리하기 위한
+              통합 플랫폼입니다.
+            </Typography.Paragraph>
 
-                <Spin spinning={loading}>
-                  {faqs.length === 0 ? (
-                    <Empty description="등록된 FAQ가 없습니다." />
-                  ) : categoryFilter ? (
-                    <Collapse
-                      accordion
-                      items={faqs.map((faq) => ({
-                        key: faq.faqId,
-                        label: (
-                          <span>
-                            <QuestionCircleOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-                            {faq.question}
-                          </span>
-                        ),
-                        children: (
-                          <div style={{ whiteSpace: 'pre-wrap' }}>{faq.answer}</div>
-                        ),
-                      }))}
-                    />
-                  ) : (
-                    Object.entries(groupedFaqs).map(([category, categoryFaqs]) => (
-                      <Card
-                        key={category}
-                        title={category}
-                        size="small"
-                        style={{ marginBottom: 16 }}
-                      >
-                        <Collapse
-                          accordion
-                          bordered={false}
-                          items={categoryFaqs.map((faq) => ({
-                            key: faq.faqId,
-                            label: (
-                              <span>
-                                <QuestionCircleOutlined style={{ marginRight: 8, color: '#1890ff' }} />
-                                {faq.question}
-                              </span>
-                            ),
-                            children: (
-                              <div style={{ whiteSpace: 'pre-wrap' }}>{faq.answer}</div>
-                            ),
-                          }))}
-                        />
-                      </Card>
-                    ))
-                  )}
-                </Spin>
-              </>
-            ),
-          },
-          {
-            key: 'guide',
-            label: (
-              <span>
-                <BookOutlined />
-                시스템 이용 안내
-              </span>
-            ),
-            children: (
-              <Card>
-                <Typography.Title level={5}>동국씨엠 스마트 계량 시스템</Typography.Title>
-                <Typography.Paragraph>
-                  본 시스템은 동국씨엠 부산공장의 차량 계량 업무를 효율적으로 관리하기 위한
-                  통합 플랫폼입니다.
-                </Typography.Paragraph>
+            <Divider />
 
-                <Divider />
+            <Typography.Title level={5}>주요 기능</Typography.Title>
 
-                <Typography.Title level={5}>주요 기능</Typography.Title>
+            <Typography.Title level={5} style={{ marginTop: 24 }}>
+              1. 배차 관리
+            </Typography.Title>
+            <Typography.Paragraph>
+              <ul>
+                <li>차량 배차 등록, 수정, 삭제</li>
+                <li>배차 상태 관리 (등록 → 진행중 → 완료)</li>
+                <li>배차 이력 조회 및 검색</li>
+              </ul>
+            </Typography.Paragraph>
 
-                <Typography.Title level={5} style={{ marginTop: 24 }}>
-                  1. 배차 관리
-                </Typography.Title>
-                <Typography.Paragraph>
-                  <ul>
-                    <li>차량 배차 등록, 수정, 삭제</li>
-                    <li>배차 상태 관리 (등록 → 진행중 → 완료)</li>
-                    <li>배차 이력 조회 및 검색</li>
-                  </ul>
-                </Typography.Paragraph>
+            <Typography.Title level={5} style={{ marginTop: 24 }}>
+              2. 계량 현황
+            </Typography.Title>
+            <Typography.Paragraph>
+              <ul>
+                <li>실시간 계량 현황 모니터링</li>
+                <li>LPR 자동 차량번호 인식</li>
+                <li>모바일 OTP 인증 계량</li>
+                <li>계량 이력 조회</li>
+              </ul>
+            </Typography.Paragraph>
 
-                <Typography.Title level={5} style={{ marginTop: 24 }}>
-                  2. 계량 현황
-                </Typography.Title>
-                <Typography.Paragraph>
-                  <ul>
-                    <li>실시간 계량 현황 모니터링</li>
-                    <li>LPR 자동 차량번호 인식</li>
-                    <li>모바일 OTP 인증 계량</li>
-                    <li>계량 이력 조회</li>
-                  </ul>
-                </Typography.Paragraph>
+            <Typography.Title level={5} style={{ marginTop: 24 }}>
+              3. 출문 관리
+            </Typography.Title>
+            <Typography.Paragraph>
+              <ul>
+                <li>계량 완료 차량 출문 승인/거부</li>
+                <li>출문 이력 관리</li>
+              </ul>
+            </Typography.Paragraph>
 
-                <Typography.Title level={5} style={{ marginTop: 24 }}>
-                  3. 출문 관리
-                </Typography.Title>
-                <Typography.Paragraph>
-                  <ul>
-                    <li>계량 완료 차량 출문 승인/거부</li>
-                    <li>출문 이력 관리</li>
-                  </ul>
-                </Typography.Paragraph>
+            <Typography.Title level={5} style={{ marginTop: 24 }}>
+              4. 전자 계량표
+            </Typography.Title>
+            <Typography.Paragraph>
+              <ul>
+                <li>계량 완료 시 자동 발행</li>
+                <li>PDF 다운로드 및 이메일 공유</li>
+                <li>QR 코드를 통한 진위 확인</li>
+              </ul>
+            </Typography.Paragraph>
 
-                <Typography.Title level={5} style={{ marginTop: 24 }}>
-                  4. 전자 계량표
-                </Typography.Title>
-                <Typography.Paragraph>
-                  <ul>
-                    <li>계량 완료 시 자동 발행</li>
-                    <li>PDF 다운로드 및 이메일 공유</li>
-                    <li>QR 코드를 통한 진위 확인</li>
-                  </ul>
-                </Typography.Paragraph>
+            <Typography.Title level={5} style={{ marginTop: 24 }}>
+              5. 통계 및 보고서
+            </Typography.Title>
+            <Typography.Paragraph>
+              <ul>
+                <li>일별/월별 계량 통계</li>
+                <li>업체별, 품목별 분석</li>
+                <li>Excel 다운로드</li>
+              </ul>
+            </Typography.Paragraph>
 
-                <Typography.Title level={5} style={{ marginTop: 24 }}>
-                  5. 통계 및 보고서
-                </Typography.Title>
-                <Typography.Paragraph>
-                  <ul>
-                    <li>일별/월별 계량 통계</li>
-                    <li>업체별, 품목별 분석</li>
-                    <li>Excel 다운로드</li>
-                  </ul>
-                </Typography.Paragraph>
+            <Divider />
 
-                <Divider />
-
-                <Typography.Title level={5}>문의처</Typography.Title>
-                <Typography.Paragraph>
-                  <ul>
-                    <li>전화: 051-123-4567</li>
-                    <li>이메일: support@dongkuk.com</li>
-                    <li>운영시간: 평일 08:00 ~ 18:00</li>
-                  </ul>
-                </Typography.Paragraph>
-              </Card>
-            ),
-          },
-        ]}
-      />
-    </>
+            <Typography.Title level={5}>문의처</Typography.Title>
+            <Typography.Paragraph>
+              <ul>
+                <li>전화: 051-123-4567</li>
+                <li>이메일: support@dongkuk.com</li>
+                <li>운영시간: 평일 08:00 ~ 18:00</li>
+              </ul>
+            </Typography.Paragraph>
+          </Card>
+        )}
+      </div>
+    </div>
   );
 };
 

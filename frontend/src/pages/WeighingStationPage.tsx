@@ -60,29 +60,19 @@ const WeighingStationPage: React.FC = () => {
   }, [loadHistory]);
 
   return (
-    <div style={{ margin: -24 }}>
-      {/* 헤더 */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+      {/* 헤더 (고정) */}
       <div
         style={{
-          padding: '16px 24px',
-          borderBottom: `1px solid ${token.colorBorder}`,
+          flexShrink: 0,
+          paddingBottom: 12,
+          marginBottom: 12,
+          borderBottom: `2px solid ${token.colorPrimary}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: `linear-gradient(135deg, ${token.colorPrimary}08, ${token.colorPrimary}15, transparent)`,
-          position: 'relative',
-          overflow: 'hidden',
         }}
       >
-        {/* 악센트 라인 */}
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          background: `linear-gradient(90deg, ${token.colorPrimary}, ${token.colorSuccess}, transparent)`,
-        }} />
         <Typography.Title level={4} style={{ margin: 0 }}>
           계량소 관제
         </Typography.Title>
@@ -91,8 +81,8 @@ const WeighingStationPage: React.FC = () => {
         </Typography.Text>
       </div>
 
-      {/* 메인 그리드 */}
-      <div style={{ padding: 16 }}>
+      {/* 메인 그리드 (스크롤) */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}>
         <Row gutter={16}>
           {/* ─── 좌측 패널 (표시 영역) ─── */}
           <Col xs={24} lg={10}>
