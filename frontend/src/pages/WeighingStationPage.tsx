@@ -76,9 +76,6 @@ const WeighingStationPage: React.FC = () => {
         <Typography.Title level={4} style={{ margin: 0 }}>
           계량소 관제
         </Typography.Title>
-        <Typography.Text style={{ color: token.colorTextSecondary, fontSize: 13 }}>
-          Weighing Station Control
-        </Typography.Text>
       </div>
 
       {/* 메인 그리드 (스크롤) */}
