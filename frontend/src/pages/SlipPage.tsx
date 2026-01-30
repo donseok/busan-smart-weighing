@@ -227,7 +227,7 @@ const SlipPage: React.FC = () => {
         rowKey="slipId"
         loading={loading}
         size="middle"
-        scroll={{ x: 1000 }}
+        scroll={{ x: 1000, y: 1 }}
         tableKey="slip"
         onRow={(record) => ({
           onClick: () => openDetail(record),

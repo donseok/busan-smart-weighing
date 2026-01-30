@@ -237,6 +237,7 @@ export default function MasterCrudPage<T extends object>({
         loading={loading}
         size="middle"
         tableKey={tableKey}
+        scroll={{ y: 1 }}
         locale={{
           emptyText: (
             <EmptyState

@@ -109,7 +109,7 @@ const GatePassPage: React.FC = () => {
       </Card>
       </FixedArea>
       <ScrollArea>
-      <SortableTable columns={columns} dataSource={data} rowKey="gatePassId" loading={loading} size="middle" tableKey="gatePass" />
+      <SortableTable columns={columns} dataSource={data} rowKey="gatePassId" loading={loading} size="middle" tableKey="gatePass" scroll={{ y: 1 }} />
       </ScrollArea>
 
       <Modal title="출문 반려" open={rejectModalOpen} onOk={() => rejectForm.submit()} onCancel={() => { setRejectModalOpen(false); rejectForm.resetFields(); }} okText="반려" cancelText="취소">

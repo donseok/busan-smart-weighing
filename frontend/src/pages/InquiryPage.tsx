@@ -376,6 +376,7 @@ const InquiryPage: React.FC = () => {
         size="middle"
         tableKey="inquiry"
         pagination={false}
+        scroll={{ y: 1 }}
         onRow={(record) => ({
           onClick: () => openDetail(record),
           style: { cursor: 'pointer' },

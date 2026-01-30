@@ -260,6 +260,7 @@ const AdminAuditLogPage: React.FC = () => {
         rowKey="auditLogId"
         loading={loading}
         tableKey="adminAuditLog"
+        scroll={{ y: 1 }}
         pagination={{
           ...pagination,
           showSizeChanger: true,

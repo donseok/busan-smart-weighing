@@ -386,18 +386,26 @@ function SortableTable<T extends object>({
 
   /* 컬럼 드래그가 비활성화된 경우 DndContext 없이 일반 테이블만 렌더링 */
   if (!enableColumnDrag) {
-    return (
-      <Table<T>
-        {...tableProps}
-        columns={finalColumns}
-      />
-    );
+    const table = <Table<T> {...tableProps} columns={finalColumns} />;
+    if (tableProps.scroll?.y) {
+      return (
+        <div className="st-fill-height" style={{ height: '100%', overflow: 'hidden' }}>
+          {table}
+        </div>
+      );
+    }
+    return table;
   }
 
+  const fillHeight = !!tableProps.scroll?.y;
+
   return (
-    <div>
+    <div
+      className={fillHeight ? 'st-fill-height' : undefined}
+      style={fillHeight ? { height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' } : undefined}
+    >
       {/* 컬럼 순서 초기화 버튼 */}
-      <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
         <Tooltip title="컬럼 순서 초기화">
           <Button
             size="small"
@@ -409,22 +417,24 @@ function SortableTable<T extends object>({
         </Tooltip>
       </div>
       {/* dnd-kit 드래그앤드롭 컨텍스트로 감싸진 테이블 */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={draggableColumnIds}
-          strategy={horizontalListSortingStrategy}
+      <div style={fillHeight ? { flex: 1, minHeight: 0 } : undefined}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <Table<T>
-            {...tableProps}
-            columns={finalColumns}
-            components={components}
-          />
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={draggableColumnIds}
+            strategy={horizontalListSortingStrategy}
+          >
+            <Table<T>
+              {...tableProps}
+              columns={finalColumns}
+              components={components}
+            />
+          </SortableContext>
+        </DndContext>
+      </div>
     </div>
   );
 }

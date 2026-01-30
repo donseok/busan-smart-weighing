@@ -1,0 +1,50 @@
+/**
+ * 테이블 고정 헤더 + 바디 스크롤 CSS 오버라이드
+ *
+ * .st-fill-height 클래스가 적용된 컨테이너 내부의
+ * Ant Design Table이 부모 높이를 채우고,
+ * 테이블 헤더는 고정, 바디만 스크롤되도록 합니다.
+ *
+ * 사용 조건: SortableTable에 scroll={{ y: 1 }} 전달 시 자동 적용
+ */
+
+/* Ant Design Table 래퍼 — 부모 높이 전파 */
+.st-fill-height .ant-table-wrapper {
+  height: 100%;
+}
+
+.st-fill-height .ant-spin-nested-loading {
+  height: 100%;
+}
+
+/* flex column으로 변경: 테이블 + 페이지네이션 분리 */
+.st-fill-height .ant-spin-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 테이블: 남은 공간 채우기 (페이지네이션이 있으면 그 공간 제외) */
+.st-fill-height .ant-table {
+  flex: 1;
+  min-height: 0;
+}
+
+/* 테이블 컨테이너를 flex column으로 — 헤더/바디 분리 */
+.st-fill-height .ant-table-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 테이블 헤더 고정 */
+.st-fill-height .ant-table-header {
+  flex-shrink: 0;
+}
+
+/* 테이블 바디: 남은 공간 채우기 + 스크롤 */
+.st-fill-height .ant-table-body {
+  flex: 1;
+  max-height: none !important;
+  overflow-y: auto !important;
+}

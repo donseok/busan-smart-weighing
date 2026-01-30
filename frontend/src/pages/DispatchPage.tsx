@@ -294,6 +294,7 @@ const DispatchPage: React.FC = () => {
         size="middle"
         tableKey="dispatch"
         pagination={false}
+        scroll={{ y: 1 }}
         locale={{
           emptyText: searched
             ? '조회 결과가 없습니다.'

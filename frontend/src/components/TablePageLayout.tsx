@@ -25,7 +25,7 @@ export const FixedArea: FC<{ children: ReactNode }> = ({ children }) => (
   <div style={{ flexShrink: 0 }}>{children}</div>
 );
 
-/** 스크롤 영역 (테이블/그리드 — 내용이 많으면 스크롤) */
+/** 스크롤 영역 (테이블/그리드 — 테이블 자체가 스크롤을 처리) */
 export const ScrollArea: FC<{ children: ReactNode }> = ({ children }) => (
-  <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>{children}</div>
+  <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>{children}</div>
 );

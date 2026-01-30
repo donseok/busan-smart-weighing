@@ -18,6 +18,7 @@ import { TabProvider } from './context/TabContext';
 import { AuthProvider } from './context/AuthContext';
 import { darkTheme, lightTheme } from './theme/themeConfig';
 import App from './App';
+import './styles/tableScroll.css';
 
 // 테마를 동적으로 적용하는 래퍼 컴포넌트
 const ThemedApp: React.FC = () => {

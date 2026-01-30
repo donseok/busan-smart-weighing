@@ -261,6 +261,7 @@ const WeighingPage: React.FC = () => {
         loading={loading}
         size="middle"
         tableKey="weighing"
+        scroll={{ y: 1 }}
         onRow={(record) => ({
           onClick: () => openDetail(record),
           style: { cursor: 'pointer' },

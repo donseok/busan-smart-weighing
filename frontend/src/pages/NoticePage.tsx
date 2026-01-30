@@ -315,6 +315,7 @@ const NoticePage: React.FC = () => {
         rowKey="noticeId"
         loading={loading}
         tableKey="notice"
+        scroll={{ y: 1 }}
         pagination={{
           ...pagination,
           showSizeChanger: true,

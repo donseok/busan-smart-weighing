@@ -321,6 +321,7 @@ const AdminUserPage: React.FC = () => {
         rowKey="userId"
         loading={loading}
         tableKey="adminUser"
+        scroll={{ y: 1 }}
         pagination={{
           ...pagination,
           showSizeChanger: true,
