@@ -16,6 +16,8 @@ public class WeightDisplayPanel : Control
     private string _weightText = "0.0";
     private string _unit = "kg";
     private StabilityState _stability = StabilityState.Unstable;
+    private Font? _cachedWeightFont;
+    private float _cachedWeightFontSize;
 
     public WeightDisplayPanel()
     {
@@ -52,7 +54,7 @@ public class WeightDisplayPanel : Control
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-        var bounds = new Rectangle(1, 1, Width - 3, Height - 3);
+        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
 
         // Outer shadow
         var shadowRect = new Rectangle(2, 3, Width - 4, Height - 4);
@@ -110,8 +112,7 @@ public class WeightDisplayPanel : Control
         // Title "WEIGHT"
         using (var titleBrush = new SolidBrush(Theme.TextMuted))
         {
-            using var titleFont = new Font("Segoe UI", 9F * Theme.FontScale, FontStyle.Bold);
-            g.DrawString("WEIGHT", titleFont, titleBrush, Theme.SpacingXl, Theme.SpacingLg);
+            g.DrawString("WEIGHT", Theme.FontWeightTitle, titleBrush, Theme.SpacingXl, Theme.SpacingLg);
         }
 
         // Stability badge (top-right)
@@ -119,7 +120,12 @@ public class WeightDisplayPanel : Control
 
         // Main weight text
         float fontSize = CalculateFontSize();
-        using var weightFont = new Font("Consolas", fontSize, FontStyle.Bold);
+        if (_cachedWeightFont == null || Math.Abs(_cachedWeightFontSize - fontSize) > 0.5f)
+        {
+            _cachedWeightFont = new Font("Consolas", fontSize, FontStyle.Bold);
+            _cachedWeightFontSize = fontSize;
+        }
+        var weightFont = _cachedWeightFont;
         var weightSize = g.MeasureString(_weightText, weightFont);
 
         float textX = (Width - weightSize.Width) / 2f - 10;
@@ -150,10 +156,9 @@ public class WeightDisplayPanel : Control
         g.DrawString(_weightText, weightFont, textBrush, textX, textY);
 
         // Unit suffix
-        using var unitFont = new Font("Segoe UI", 16F * Theme.FontScale, FontStyle.Bold);
-        var unitSize = g.MeasureString(_unit, unitFont);
+        var unitSize = g.MeasureString(_unit, Theme.FontUnitLabel);
         using var unitBrush = new SolidBrush(Theme.TextMuted);
-        g.DrawString(_unit, unitFont, unitBrush,
+        g.DrawString(_unit, Theme.FontUnitLabel, unitBrush,
             textX + weightSize.Width + 6, textY + weightSize.Height - unitSize.Height - 4);
 
         // Bottom info bar
@@ -175,8 +180,7 @@ public class WeightDisplayPanel : Control
             _ => Theme.Warning,
         };
 
-        using var badgeFont = new Font("Segoe UI", 7.5F * Theme.FontScale, FontStyle.Bold);
-        var badgeSize = g.MeasureString(badgeText, badgeFont);
+        var badgeSize = g.MeasureString(badgeText, Theme.FontBadge);
         float bw = badgeSize.Width + 20;
         float bh = badgeSize.Height + 8;
         float bx = bounds.Right - bw - Theme.SpacingLg;
@@ -195,7 +199,7 @@ public class WeightDisplayPanel : Control
         }
 
         using var badgeTextBrush = new SolidBrush(badgeBg);
-        g.DrawString(badgeText, badgeFont, badgeTextBrush, bx + 10, by + 4);
+        g.DrawString(badgeText, Theme.FontBadge, badgeTextBrush, bx + 10, by + 4);
     }
 
     private void DrawBottomInfo(Graphics g, Rectangle bounds)

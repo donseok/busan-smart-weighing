@@ -99,7 +99,7 @@ public class ModernComboBox : Control
     {
         base.OnLayout(levent);
         if (_inner == null) return;
-        int pad = 3;
+        int pad = Theme.SpacingXs + 1;
         _inner.SetBounds(pad, pad, Width - pad * 2, Height - pad * 2);
     }
 
@@ -110,12 +110,12 @@ public class ModernComboBox : Control
         var g = e.Graphics;
         g.SmoothingMode = SmoothingMode.AntiAlias;
 
-        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+        var bounds = new Rectangle(1, 1, Width - 2, Height - 2);
 
         // Focus glow
         if (_focused)
         {
-            var glowRect = new Rectangle(-1, -1, Width + 1, Height + 1);
+            var glowRect = new Rectangle(0, 0, Width - 1, Height - 1);
             using var glowPath = RoundedRectHelper.Create(glowRect, Theme.RadiusSmall + 1);
             using var glowBrush = new SolidBrush(Theme.WithAlpha(Theme.Primary, 25));
             g.FillPath(glowBrush, glowPath);

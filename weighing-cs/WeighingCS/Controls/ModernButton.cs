@@ -52,7 +52,7 @@ public class ModernButton : Control
         using (var clearBrush = new SolidBrush(Parent?.BackColor ?? Theme.BgBase))
             g.FillRectangle(clearBrush, ClientRectangle);
 
-        var bounds = new Rectangle(1, 1, Width - 3, Height - 3);
+        var bounds = new Rectangle(1, 1, Width - 2, Height - 2);
         Color bgColor = GetBackgroundColor();
         Color fgColor = GetForegroundColor();
 
@@ -73,7 +73,7 @@ public class ModernButton : Control
         // Subtle shadow for primary/danger
         if (Enabled && _variant != ButtonVariant.Secondary)
         {
-            var shadowRect = new Rectangle(2, 3, Width - 4, Height - 4);
+            var shadowRect = new Rectangle(2, 3, Width - 3, Height - 3);
             using var shadowPath = RoundedRectHelper.Create(shadowRect, Theme.RadiusMedium);
             using var shadowBrush = new SolidBrush(Theme.WithAlpha(bgColor, 30));
             g.FillPath(shadowBrush, shadowPath);
@@ -108,12 +108,16 @@ public class ModernButton : Control
             g.DrawPath(pen, path);
         }
 
-        // Text
-        var textSize = g.MeasureString(Text, Font);
-        float tx = (Width - textSize.Width) / 2f;
-        float ty = (Height - textSize.Height) / 2f;
+        // Text with ellipsis trimming
+        using var sf = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center,
+            Trimming = StringTrimming.EllipsisCharacter,
+            FormatFlags = StringFormatFlags.NoWrap,
+        };
         using var textBrush = new SolidBrush(fgColor);
-        g.DrawString(Text, Font, textBrush, tx, ty);
+        g.DrawString(Text, Font, textBrush, bounds, sf);
     }
 
     private Color GetBackgroundColor() => _variant switch

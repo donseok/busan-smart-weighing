@@ -55,6 +55,11 @@ public class TerminalLogPanel : Control
     protected override void OnLayout(LayoutEventArgs levent)
     {
         base.OnLayout(levent);
+        if (Width < 2 || Height < 2) return;
+        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+        using var regionPath = RoundedRectHelper.Create(bounds, Theme.RadiusLarge);
+        Region = new Region(regionPath);
+
         _rtb.SetBounds(
             Theme.SpacingSm, TermHeaderHeight + Theme.SpacingXs,
             Width - Theme.SpacingSm * 2,

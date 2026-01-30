@@ -112,6 +112,13 @@ public static class Theme
     private static Font? _fontMono;
     private static Font? _fontMonoSmall;
     private static Font? _fontMonoLarge;
+    private static Font? _fontWeightTitle;
+    private static Font? _fontBadge;
+    private static Font? _fontUnitLabel;
+    private static Font? _fontClockLarge;
+    private static Font? _fontLogoText;
+    private static Font? _fontEmojiIcon;
+    private static Font? _fontStatusTag;
 
     public static Font FontCaption => _fontCaption ??= new Font("Segoe UI", 7.5F * FontScale);
     public static Font FontSmall => _fontSmall ??= new Font("Segoe UI", 8F * FontScale);
@@ -125,6 +132,13 @@ public static class Theme
     public static Font FontMono => _fontMono ??= new Font("Consolas", 10F * FontScale);
     public static Font FontMonoSmall => _fontMonoSmall ??= new Font("Consolas", 8.5F * FontScale);
     public static Font FontMonoLarge => _fontMonoLarge ??= new Font("Consolas", 48F * FontScale, FontStyle.Bold);
+    public static Font FontWeightTitle => _fontWeightTitle ??= new Font("Segoe UI", 9F * FontScale, FontStyle.Bold);
+    public static Font FontBadge => _fontBadge ??= new Font("Segoe UI", 7.5F * FontScale, FontStyle.Bold);
+    public static Font FontUnitLabel => _fontUnitLabel ??= new Font("Segoe UI", 16F * FontScale, FontStyle.Bold);
+    public static Font FontClockLarge => _fontClockLarge ??= new Font("Consolas", 13F * FontScale, FontStyle.Bold);
+    public static Font FontLogoText => _fontLogoText ??= new Font("Segoe UI", 11F * FontScale, FontStyle.Bold);
+    public static Font FontEmojiIcon => _fontEmojiIcon ??= new Font("Segoe UI Emoji", 12F * FontScale);
+    public static Font FontStatusTag => _fontStatusTag ??= new Font("Segoe UI", 8F * FontScale, FontStyle.Bold);
 
     // ── Font cache invalidation ───────────────────────────────────────
 
@@ -145,6 +159,13 @@ public static class Theme
         _fontMono = null;
         _fontMonoSmall = null;
         _fontMonoLarge = null;
+        _fontWeightTitle = null;
+        _fontBadge = null;
+        _fontUnitLabel = null;
+        _fontClockLarge = null;
+        _fontLogoText = null;
+        _fontEmojiIcon = null;
+        _fontStatusTag = null;
     }
 
     // ── Theme toggle ──────────────────────────────────────────────────

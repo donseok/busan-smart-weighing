@@ -53,7 +53,7 @@ public class ProcessStepBar : Control
             g.FillRectangle(clearBrush, ClientRectangle);
 
         // Background rounded rect
-        var bounds = new Rectangle(1, 1, Width - 3, Height - 3);
+        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
         using (var path = RoundedRectHelper.Create(bounds, Theme.RadiusMedium))
         using (var bgBrush = new SolidBrush(Theme.BgSurface))
         {
@@ -86,7 +86,8 @@ public class ProcessStepBar : Control
                 Color lineColor = isCompleted ? Theme.Primary : Theme.WithAlpha(Theme.Border, 100);
                 float lineWidth = isCompleted ? 2f : 1.5f;
                 using var linePen = new Pen(lineColor, lineWidth);
-                g.DrawLine(linePen, cx + circleSize / 2 + 2, centerY - 6, nextX - circleSize / 2 - 2, centerY - 6);
+                int lineGap = (int)(2 * Theme.LayoutScale);
+                g.DrawLine(linePen, cx + circleSize / 2 + lineGap, centerY - 6, nextX - circleSize / 2 - lineGap, centerY - 6);
             }
 
             // Circle
@@ -144,15 +145,14 @@ public class ProcessStepBar : Control
             Font labelFont = isCurrent ? Theme.FontSmallBold : Theme.FontSmall;
             var labelSize = g.MeasureString(Steps[i], labelFont);
             float lx = cx - labelSize.Width / 2f;
-            float ly = circleY + circleSize + 5;
+            float ly = circleY + circleSize + Theme.SpacingXs;
             g.DrawString(Steps[i], labelFont, labelBrush, lx, ly);
         }
 
         // Status tag (right side)
         if (!string.IsNullOrEmpty(_statusTag))
         {
-            using var tagFont = new Font("Segoe UI", 8F * Theme.FontScale, FontStyle.Bold);
-            var tagSize = g.MeasureString(_statusTag, tagFont);
+            var tagSize = g.MeasureString(_statusTag, Theme.FontStatusTag);
             float tw = Math.Max(tagSize.Width + 16, 60);
             float th = tagSize.Height + 6;
             float tx = Width - tw - Theme.SpacingMd;
@@ -173,7 +173,7 @@ public class ProcessStepBar : Control
                 g.DrawPath(tagPen, tagPath);
             }
             using var tagTextBrush = new SolidBrush(tagColor);
-            g.DrawString(_statusTag, tagFont, tagTextBrush,
+            g.DrawString(_statusTag, Theme.FontStatusTag, tagTextBrush,
                 tx + (tw - tagSize.Width) / 2f, ty + 3);
         }
     }

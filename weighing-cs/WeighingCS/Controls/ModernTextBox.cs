@@ -77,7 +77,7 @@ public class ModernTextBox : Control
     {
         base.OnLayout(levent);
         if (_inner == null) return;
-        int pad = Theme.SpacingSm + 2;
+        int pad = Theme.SpacingMd;
         int innerHeight = _inner.PreferredHeight;
         int innerY = (Height - innerHeight) / 2;
         _inner.SetBounds(pad, innerY, Width - pad * 2, innerHeight);
@@ -91,12 +91,12 @@ public class ModernTextBox : Control
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+        var bounds = new Rectangle(1, 1, Width - 2, Height - 2);
 
         // Focus glow
         if (_focused)
         {
-            var glowRect = new Rectangle(-1, -1, Width + 1, Height + 1);
+            var glowRect = new Rectangle(0, 0, Width - 1, Height - 1);
             using var glowPath = RoundedRectHelper.Create(glowRect, Theme.RadiusSmall + 1);
             using var glowBrush = new SolidBrush(Theme.WithAlpha(Theme.Primary, 25));
             g.FillPath(glowBrush, glowPath);
@@ -121,7 +121,7 @@ public class ModernTextBox : Control
         // Placeholder text when empty and not focused
         if (string.IsNullOrEmpty(_inner.Text) && !_focused && !string.IsNullOrEmpty(_placeholder))
         {
-            int pad = Theme.SpacingSm + 2;
+            int pad = Theme.SpacingMd;
             using var placeholderBrush = new SolidBrush(Theme.TextMuted);
             g.DrawString(_placeholder, Font, placeholderBrush, pad, (Height - Font.Height) / 2f);
         }

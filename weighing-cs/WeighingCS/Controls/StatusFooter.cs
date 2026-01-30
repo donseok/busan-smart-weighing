@@ -106,8 +106,9 @@ public class StatusFooter : Control
 
     private void DrawSeparator(Graphics g, ref int x, int y)
     {
+        int sepPad = Theme.SpacingXs;
         using var pen = new Pen(Theme.Border, 1f);
-        g.DrawLine(pen, x, y - 1, x, y + Theme.FontSmall.Height + 1);
+        g.DrawLine(pen, x, y - sepPad, x, y + Theme.FontSmall.Height + sepPad);
         x += Theme.SpacingMd;
     }
 

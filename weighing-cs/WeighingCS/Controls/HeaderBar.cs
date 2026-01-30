@@ -103,13 +103,12 @@ public class HeaderBar : Control
         }
 
         // Logo text "DK"
-        using (var logoFont = new Font("Segoe UI", 11F * Theme.FontScale, FontStyle.Bold))
         {
-            var logoTextSize = g.MeasureString("DK", logoFont);
+            var logoTextSize = g.MeasureString("DK", Theme.FontLogoText);
             float ltx = x + (logoSize - logoTextSize.Width) / 2f;
             float lty = logoY + (logoSize - logoTextSize.Height) / 2f;
             using var logoTextBrush = new SolidBrush(Color.White);
-            g.DrawString("DK", logoFont, logoTextBrush, ltx, lty);
+            g.DrawString("DK", Theme.FontLogoText, logoTextBrush, ltx, lty);
         }
 
         x += logoSize + Theme.SpacingMd;
@@ -126,12 +125,11 @@ public class HeaderBar : Control
         float rightX = Width - Theme.SpacingLg;
 
         // Clock
-        using (var clockFont = new Font("Consolas", 13F * Theme.FontScale, FontStyle.Bold))
         {
-            var clockSize = g.MeasureString(_clockText, clockFont);
+            var clockSize = g.MeasureString(_clockText, Theme.FontClockLarge);
             rightX -= clockSize.Width;
             using var clockBrush = new SolidBrush(Theme.TextPrimary);
-            g.DrawString(_clockText, clockFont, clockBrush, rightX, centerY - clockSize.Height / 2f);
+            g.DrawString(_clockText, Theme.FontClockLarge, clockBrush, rightX, centerY - clockSize.Height / 2f);
         }
 
         // Theme toggle icon (left of clock)
@@ -147,14 +145,13 @@ public class HeaderBar : Control
             g.FillEllipse(toggleBgBrush, _themeToggleRect);
 
         // Draw sun or moon icon
-        using (var iconFont = new Font("Segoe UI Emoji", 12F * Theme.FontScale))
         {
             string icon = Theme.IsDarkMode ? "\uD83C\uDF19" : "\u2600"; // moon for dark, sun for light
-            var iconSize = g.MeasureString(icon, iconFont);
+            var iconSize = g.MeasureString(icon, Theme.FontEmojiIcon);
             float ix = toggleX + (toggleSize - iconSize.Width) / 2f;
             float iy = toggleY + (toggleSize - iconSize.Height) / 2f;
             using var iconBrush = new SolidBrush(Theme.IsDarkMode ? Theme.Blue : Theme.Warning);
-            g.DrawString(icon, iconFont, iconBrush, ix, iy);
+            g.DrawString(icon, Theme.FontEmojiIcon, iconBrush, ix, iy);
         }
 
         rightX = toggleX - Theme.SpacingMd;

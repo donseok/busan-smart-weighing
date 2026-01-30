@@ -148,8 +148,18 @@ public class ModernToggle : Control
 
         using var leftBrush = new SolidBrush(leftColor);
         using var rightBrush = new SolidBrush(rightColor);
+
+        // Clip each label to its half to prevent text overflow
+        var leftClip = new RectangleF(0, 0, trackMargin + halfWidth, Height);
+        var rightClip = new RectangleF(trackMargin + halfWidth, 0, trackMargin + halfWidth + trackMargin, Height);
+
+        g.SetClip(leftClip);
         g.DrawString(leftText, leftFont, leftBrush, leftX, textY);
+        g.ResetClip();
+
+        g.SetClip(rightClip);
         g.DrawString(rightText, rightFont, rightBrush, rightX, textY);
+        g.ResetClip();
     }
 
     protected override void Dispose(bool disposing)

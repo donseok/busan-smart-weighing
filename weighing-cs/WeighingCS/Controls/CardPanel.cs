@@ -57,6 +57,15 @@ public class CardPanel : Panel
         }
     }
 
+    protected override void OnLayout(LayoutEventArgs levent)
+    {
+        base.OnLayout(levent);
+        if (Width < 2 || Height < 2) return;
+        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+        using var regionPath = RoundedRectHelper.Create(bounds, Theme.RadiusLarge);
+        Region = new Region(regionPath);
+    }
+
     protected override void OnPaintBackground(PaintEventArgs e) { }
 
     protected override void OnPaint(PaintEventArgs e)
@@ -67,12 +76,12 @@ public class CardPanel : Panel
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-        var bounds = new Rectangle(1, 1, Width - 3, Height - 3);
+        var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
 
-        // Subtle shadow (outer glow)
-        var shadowRect = new Rectangle(2, 3, Width - 4, Height - 4);
+        // Subtle shadow (outer glow) with softer alpha
+        var shadowRect = new Rectangle(2, 3, Width - 3, Height - 3);
         using (var shadowPath = RoundedRectHelper.Create(shadowRect, Theme.RadiusLarge))
-        using (var shadowBrush = new SolidBrush(Theme.WithAlpha(Color.Black, 25)))
+        using (var shadowBrush = new SolidBrush(Theme.WithAlpha(Color.Black, 18)))
         {
             g.FillPath(shadowBrush, shadowPath);
         }
@@ -96,14 +105,7 @@ public class CardPanel : Panel
             g.ResetClip();
         }
 
-        // Border
-        using (var path = RoundedRectHelper.Create(bounds, Theme.RadiusLarge))
-        using (var borderPen = new Pen(Theme.WithAlpha(Theme.Border, 160), 1f))
-        {
-            g.DrawPath(borderPen, path);
-        }
-
-        // Left accent bar
+        // Left accent bar (drawn before border so border overlaps cleanly)
         if (!_accentColor.IsEmpty)
         {
             using var clip = RoundedRectHelper.Create(bounds, Theme.RadiusLarge);
@@ -111,6 +113,13 @@ public class CardPanel : Panel
             using var accentBrush = new SolidBrush(_accentColor);
             g.FillRectangle(accentBrush, bounds.X, bounds.Y, AccentWidth + 1, bounds.Height);
             g.ResetClip();
+        }
+
+        // Border
+        using (var path = RoundedRectHelper.Create(bounds, Theme.RadiusLarge))
+        using (var borderPen = new Pen(Theme.WithAlpha(Theme.Border, 160), 1f))
+        {
+            g.DrawPath(borderPen, path);
         }
 
         // Title text
