@@ -131,6 +131,7 @@ const WeightDisplay: React.FC<WeightDisplayProps> = ({ weight }) => {
           color: token.colorTextSecondary,
           fontWeight: 500,
           marginTop: 4,
+          alignSelf: 'flex-end',
         }}
       >
         {weight.unit}
