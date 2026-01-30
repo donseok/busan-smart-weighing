@@ -1408,10 +1408,14 @@ BgElevated #0F172A  → 입력 필드
 BgSurface  #1E293B  → 카드
 BgHover    #283548  → 호버 상태
 
+// 스케일 팩터
+FontScale  = 1.5f   // 폰트 크기 배율
+LayoutScale = 1.25f // 레이아웃/간격 배율
+
 // 폰트 (정적 캐시, Dispose 금지!)
-Theme.FontBody      → 9.5pt Segoe UI
-Theme.FontBodyBold  → 9.5pt Segoe UI Bold
-Theme.FontMono      → 10pt Consolas
+Theme.FontBody      → 9.5pt × FontScale = 14.25pt Segoe UI
+Theme.FontBodyBold  → 9.5pt × FontScale = 14.25pt Segoe UI Bold
+Theme.FontMono      → 10pt × FontScale = 15pt Consolas
 
 // 색상 유틸리티
 Theme.WithAlpha(color, alpha)  → 알파 투명도
@@ -1420,12 +1424,14 @@ Theme.Darken(color, factor)    → 어둡게
 ```
 
 > **주의**: `Theme.FontXxx` 속성은 정적 캐시된 공유 인스턴스이다. `using var font = Theme.FontBody`처럼 사용하면 Dispose 후 **전역적으로 폰트가 무효화**되어 모든 컨트롤에서 "Parameter is not valid" 예외가 발생한다. 반드시 `var font = Theme.FontBody`로 참조만 한다.
+>
+> **테마 전환 안전성**: `InvalidateFontCache()`는 이전 폰트 인스턴스를 `Dispose()`하지 않고 참조만 `null`로 설정한다. 컨트롤의 `ThemeChanged` 핸들러가 새 폰트를 재할당하기 전에 `OnPaint`가 호출될 수 있어, Dispose 시 경합 조건으로 크래시가 발생하기 때문이다. 이전 폰트는 GC가 수거한다.
 
 #### 6.4.2 커스텀 컨트롤 구성
 
 | 컨트롤 | 설명 | 구현 방식 |
 |--------|------|-----------|
-| `HeaderBar` | 상단 헤더 (로고, 제목, 연결 LED, 시계) | Control 상속, Timer |
+| `HeaderBar` | 상단 헤더 (로고, 제목, 연결 LED, 테마 토글, 시계) | Control 상속, Timer |
 | `StatusFooter` | 하단 상태바 (계량대, 모드, 동기화, 시간) | Control 상속, Timer |
 | `WeightDisplayPanel` | 대형 중량 표시 (글로우, 안정성 뱃지) | Control 상속 |
 | `CardPanel` | 카드 컨테이너 (유리 효과, 그림자, 액센트) | Panel 상속 |
@@ -1434,7 +1440,7 @@ Theme.Darken(color, factor)    → 어둡게
 | `ModernTextBox` | 텍스트 입력 (글로우 테두리, 플레이스홀더) | Control 상속 + TextBox 위임 |
 | `ModernComboBox` | 드롭다운 (커스텀 아이템 렌더링) | Control 상속 + ComboBox 위임 |
 | `ModernCheckBox` | 체크박스 (커스텀 렌더링, 체크마크) | Control 상속 |
-| `ModernListView` | 리스트뷰 (교대 행, 상태 색상화) | ListView 상속 (OwnerDraw) |
+| `ModernListView` | 리스트뷰 (교대 행, 상태 색상화, 마지막 컬럼 자동 채움) | ListView 상속 (OwnerDraw) |
 | `ProcessStepBar` | 4단계 프로세스 표시 (원형 인디케이터) | Control 상속 |
 | `TerminalLogPanel` | 터미널 스타일 로그 출력 | Control 상속 |
 | `ModernProgressBar` | 진행바 (스플래시 화면용) | Control 상속 |

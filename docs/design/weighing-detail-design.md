@@ -1261,10 +1261,12 @@ Tailwind CSS Slate 팔레트 기반의 다크 테마 디자인 토큰을 중앙 
 | 색상 | `Success` | `#10B981` | 성공 (에메랄드) |
 | 색상 | `Warning` | `#F59E0B` | 경고 (앰버) |
 | 색상 | `Error` | `#F43E5E` | 오류 (로즈) |
-| 폰트 | `FontBody` | Segoe UI 9.5pt | 본문 |
-| 폰트 | `FontMono` | Consolas 10pt | 모노스페이스 |
-| 간격 | `SpacingSm/Md/Lg/Xl` | 8/12/16/24px | 여백 |
-| 반경 | `RadiusSmall/Medium/Large/Xl` | 6/8/12/16px | 라운드 코너 |
+| 스케일 | `FontScale` | `1.5f` | 폰트 크기 배율 |
+| 스케일 | `LayoutScale` | `1.25f` | 레이아웃/간격 배율 |
+| 폰트 | `FontBody` | Segoe UI 9.5pt × FontScale | 본문 |
+| 폰트 | `FontMono` | Consolas 10pt × FontScale | 모노스페이스 |
+| 간격 | `SpacingSm/Md/Lg/Xl` | 8/12/16/24 × LayoutScale | 여백 |
+| 반경 | `RadiusSmall/Medium/Large/Xl` | 6/8/12/16 × LayoutScale | 라운드 코너 |
 
 **공통 유틸리티**: `WithAlpha(color, alpha)`, `Lighten(color, factor)`, `Darken(color, factor)`, `Blend(c1, c2, amount)`
 
@@ -1281,8 +1283,8 @@ Tailwind CSS Slate 팔레트 기반의 다크 테마 디자인 토큰을 중앙 
 │  │WeightDisplay │ │ │  │ ProcessStepBar (64px)    │  │
 │  │(220px, 글로우)│ │ │  │ CardManual (185px)       │  │
 │  ├──────────────┤ │ │  │ CardActions (88px)       │  │
-│  │CardVehicle   │ │ │  │ CardSimulator (90px)     │  │
-│  │(190px, 5행)  │ │ │  │ TerminalLog (Fill)       │  │
+│  │CardVehicle   │ │ │  │ CardSimulator (130×s)    │  │
+│  │(250×s, 5행)  │ │ │  │ TerminalLog (Fill)       │  │
 │  ├──────────────┤ │ │  └──────────────────────────┘  │
 │  │CardHistory   │ │ │                                │
 │  │(Fill, 리스트) │ │ │                                │
@@ -1305,6 +1307,7 @@ Tailwind CSS Slate 팔레트 기반의 다크 테마 디자인 토큰을 중앙 
 |------|------|------|
 | 로고 | 좌측 | 34px 원형, Primary→PrimaryDark 그라디언트 + "DK" 흰색 텍스트 |
 | 제목 | 좌측 | "부산 스마트 계량 시스템" (FontHeading) + 영문 부제 (FontCaption) |
+| 테마 토글 | 우측 | 다크=🌙(Blue), 라이트=☀(Warning), 클릭 시 다크↔라이트 전환, theme.dat 저장 |
 | 연결 상태 | 우측 | 4개 LED 도트 (계량기/전광판/차단기/네트워크), 연결 시 Success 글로우 |
 | 시계 | 우측 끝 | "HH:mm" Consolas 13pt Bold, 1초 Timer 갱신 |
 | 하단 보더 | 전체 | Primary→투명 그라디언트 라인 |
@@ -1365,6 +1368,7 @@ Tailwind CSS Slate 팔레트 기반의 다크 테마 디자인 토큰을 중앙 
 - 행: BgElevated / BgSurface 교대 배경
 - 선택 행: Primary(30) 배경 + 좌측 3px Primary 액센트
 - 상태 컬럼 자동 색상화: 완료=Success, 진행=Warning, 오류=Error
+- 마지막 컬럼 자동 채움: `FillLastColumn()` — Resize/HandleCreated 시 마지막 컬럼이 남은 가로 공간을 자동으로 채워 빈 영역 방지
 
 #### 9.6.4 프론트엔드 vs 데스크톱 컴포넌트 매핑
 

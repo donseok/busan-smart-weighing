@@ -1680,7 +1680,7 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | 드래그 정렬 | 테이블 행 드래그 재정렬 | `SortableTable.tsx` (@dnd-kit) |
 | 빈 상태 UI | 데이터 없을 때 안내 화면 | `EmptyState.tsx` |
 | 즐겨찾기 | 배차/업체 즐겨찾기 | `FavoriteButton.tsx`, `FavoritesList.tsx` |
-| 다크/라이트 테마 | 테마 전환 지원 | `ThemeContext.tsx`, `themeConfig.ts` |
+| 다크/라이트 테마 | 테마 전환 지원 | 웹: `ThemeContext.tsx`, `themeConfig.ts` / CS: `Theme.cs` (HeaderBar 토글, theme.dat 저장) |
 | 다중 탭 네비게이션 | 최대 10탭, 고정탭 지원 | `TabContext.tsx`, `pageRegistry.ts` |
 | 오프라인 캐시 (모바일) | SharedPreferences 기반 | `offline_cache_service.dart` |
 | 하드웨어 시뮬레이터 | 개발용 장비 시뮬레이션 | `Simulators/*.cs` |

@@ -6,7 +6,7 @@ using System.Windows.Forms;
 namespace WeighingCS.Controls;
 
 /// <summary>
-/// Application header bar with logo, title, connection status indicators, and clock.
+/// Application header bar with logo, title, connection status indicators, theme toggle, and clock.
 /// </summary>
 public class HeaderBar : Control
 {
@@ -21,6 +21,8 @@ public class HeaderBar : Control
     private DeviceStatus[] _devices;
     private readonly System.Windows.Forms.Timer _clockTimer;
     private string _clockText = "";
+    private bool _themeHover;
+    private RectangleF _themeToggleRect;
 
     public HeaderBar()
     {
@@ -46,6 +48,8 @@ public class HeaderBar : Control
         _clockTimer.Tick += (_, _) => { _clockText = DateTime.Now.ToString("HH:mm"); Invalidate(); };
         _clockTimer.Start();
         _clockText = DateTime.Now.ToString("HH:mm");
+
+        Theme.ThemeChanged += (_, _) => { Size = new Size(Width, Theme.HeaderHeight); Invalidate(); };
     }
 
     public void SetDeviceStatus(DeviceType device, bool connected)
@@ -85,7 +89,7 @@ public class HeaderBar : Control
         int centerY = Height / 2;
 
         // Logo circle
-        int logoSize = 34;
+        int logoSize = (int)(34 * Theme.LayoutScale);
         int logoY = centerY - logoSize / 2;
         var logoRect = new Rectangle(x, logoY, logoSize, logoSize);
 
@@ -99,7 +103,7 @@ public class HeaderBar : Control
         }
 
         // Logo text "DK"
-        using (var logoFont = new Font("Segoe UI", 11F, FontStyle.Bold))
+        using (var logoFont = new Font("Segoe UI", 11F * Theme.FontScale, FontStyle.Bold))
         {
             var logoTextSize = g.MeasureString("DK", logoFont);
             float ltx = x + (logoSize - logoTextSize.Width) / 2f;
@@ -112,17 +116,17 @@ public class HeaderBar : Control
 
         // Title
         using (var titleBrush = new SolidBrush(Theme.TextPrimary))
-            g.DrawString("부산 스마트 계량 시스템", Theme.FontHeading, titleBrush, x, centerY - 18);
+            g.DrawString("동국씨엠 스마트 계량 시스템", Theme.FontHeading, titleBrush, x, centerY - 18 * Theme.LayoutScale);
 
         // Subtitle
         using (var subBrush = new SolidBrush(Theme.TextMuted))
-            g.DrawString("BUSAN SMART WEIGHING", Theme.FontCaption, subBrush, x, centerY + 4);
+            g.DrawString("DONGKUK CM SMART WEIGHING", Theme.FontCaption, subBrush, x, centerY + 4 * Theme.LayoutScale);
 
-        // ── Right: Connection indicators + Clock ────────────────────
+        // ── Right: Theme toggle + Connection indicators + Clock ────
         float rightX = Width - Theme.SpacingLg;
 
         // Clock
-        using (var clockFont = new Font("Consolas", 13F, FontStyle.Bold))
+        using (var clockFont = new Font("Consolas", 13F * Theme.FontScale, FontStyle.Bold))
         {
             var clockSize = g.MeasureString(_clockText, clockFont);
             rightX -= clockSize.Width;
@@ -130,14 +134,40 @@ public class HeaderBar : Control
             g.DrawString(_clockText, clockFont, clockBrush, rightX, centerY - clockSize.Height / 2f);
         }
 
+        // Theme toggle icon (left of clock)
+        rightX -= Theme.SpacingLg;
+        float toggleSize = 28 * Theme.LayoutScale;
+        float toggleX = rightX - toggleSize;
+        float toggleY = centerY - toggleSize / 2f;
+        _themeToggleRect = new RectangleF(toggleX, toggleY, toggleSize, toggleSize);
+
+        // Draw toggle circle background
+        Color toggleBg = _themeHover ? Theme.WithAlpha(Theme.Primary, 40) : Theme.WithAlpha(Theme.TextMuted, 20);
+        using (var toggleBgBrush = new SolidBrush(toggleBg))
+            g.FillEllipse(toggleBgBrush, _themeToggleRect);
+
+        // Draw sun or moon icon
+        using (var iconFont = new Font("Segoe UI Emoji", 12F * Theme.FontScale))
+        {
+            string icon = Theme.IsDarkMode ? "\uD83C\uDF19" : "\u2600"; // moon for dark, sun for light
+            var iconSize = g.MeasureString(icon, iconFont);
+            float ix = toggleX + (toggleSize - iconSize.Width) / 2f;
+            float iy = toggleY + (toggleSize - iconSize.Height) / 2f;
+            using var iconBrush = new SolidBrush(Theme.IsDarkMode ? Theme.Blue : Theme.Warning);
+            g.DrawString(icon, iconFont, iconBrush, ix, iy);
+        }
+
+        rightX = toggleX - Theme.SpacingMd;
+
         // Separator
-        rightX -= Theme.SpacingXl;
+        rightX -= Theme.SpacingMd;
         using (var sepPen = new Pen(Theme.Border, 1f))
-            g.DrawLine(sepPen, rightX, 14, rightX, Height - 14);
+            g.DrawLine(sepPen, rightX, 14 * Theme.LayoutScale, rightX, Height - 14 * Theme.LayoutScale);
 
         rightX -= Theme.SpacingLg;
 
         // Connection indicators (right to left)
+        int dotSize = (int)(7 * Theme.LayoutScale);
         for (int i = _devices.Length - 1; i >= 0; i--)
         {
             ref readonly var dev = ref _devices[i];
@@ -150,21 +180,52 @@ public class HeaderBar : Control
                 g.DrawString(dev.Label, Theme.FontCaption, labelBrush, rightX, centerY - labelSize.Height / 2f);
 
             // Dot
-            int dotSize = 7;
             rightX -= dotSize + 5;
-            int dotY = centerY - dotSize / 2;
+            int dotY2 = centerY - dotSize / 2;
 
             // Glow when connected
             if (dev.Connected)
             {
                 using var glowBrush = new SolidBrush(Theme.WithAlpha(dotColor, 40));
-                g.FillEllipse(glowBrush, rightX - 3, dotY - 3, dotSize + 6, dotSize + 6);
+                g.FillEllipse(glowBrush, rightX - 3, dotY2 - 3, dotSize + 6, dotSize + 6);
             }
 
             using (var dotBrush = new SolidBrush(dotColor))
-                g.FillEllipse(dotBrush, rightX, dotY, dotSize, dotSize);
+                g.FillEllipse(dotBrush, rightX, dotY2, dotSize, dotSize);
 
             rightX -= Theme.SpacingMd;
+        }
+    }
+
+    protected override void OnMouseClick(MouseEventArgs e)
+    {
+        base.OnMouseClick(e);
+        if (_themeToggleRect.Contains(e.Location))
+        {
+            Theme.ToggleTheme();
+        }
+    }
+
+    protected override void OnMouseMove(MouseEventArgs e)
+    {
+        base.OnMouseMove(e);
+        bool inToggle = _themeToggleRect.Contains(e.Location);
+        if (inToggle != _themeHover)
+        {
+            _themeHover = inToggle;
+            Cursor = inToggle ? Cursors.Hand : Cursors.Default;
+            Invalidate();
+        }
+    }
+
+    protected override void OnMouseLeave(EventArgs e)
+    {
+        base.OnMouseLeave(e);
+        if (_themeHover)
+        {
+            _themeHover = false;
+            Cursor = Cursors.Default;
+            Invalidate();
         }
     }
 

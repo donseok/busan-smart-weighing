@@ -394,9 +394,9 @@ WeighingCS/
 ├── MainForm.cs                  # 메인 폼 (계량 관제 UI + 이벤트 처리)
 ├── MainForm.Designer.cs         # 레이아웃 코드 (Header→Content→Footer 구조)
 ├── Controls/
-│   ├── Theme.cs                 # 디자인 토큰 (색상/폰트/간격/유틸리티, Tailwind Slate 팔레트)
+│   ├── Theme.cs                 # 디자인 토큰 (색상/폰트/간격/유틸리티, Tailwind Slate 팔레트, FontScale=1.5/LayoutScale=1.25)
 │   ├── RoundedRectHelper.cs     # 라운드 사각형 GraphicsPath 유틸리티
-│   ├── HeaderBar.cs             # 상단 헤더 (로고, 제목, 연결 상태 LED, 실시간 시계)
+│   ├── HeaderBar.cs             # 상단 헤더 (로고, 제목, 연결 상태 LED, 테마 토글, 실시간 시계)
 │   ├── StatusFooter.cs          # 하단 상태바 (계량대 정보, 모드, 동기화 상태, 시간)
 │   ├── WeightDisplayPanel.cs    # 대형 중량 디스플레이 (글로우 효과, 안정성 뱃지)
 │   ├── CardPanel.cs             # 카드 패널 (유리 효과, 그림자, 액센트 바)
@@ -405,7 +405,7 @@ WeighingCS/
 │   ├── ModernTextBox.cs         # 텍스트 입력 (라운드 테두리, 포커스 글로우, 플레이스홀더)
 │   ├── ModernComboBox.cs        # 콤보박스 (커스텀 드롭다운 렌더링, 포커스 효과)
 │   ├── ModernCheckBox.cs        # 체크박스 (커스텀 GDI+ 렌더링, 호버 효과)
-│   ├── ModernListView.cs        # 리스트뷰 (교대 행 색상, 커스텀 헤더, 상태 색상)
+│   ├── ModernListView.cs        # 리스트뷰 (교대 행 색상, 커스텀 헤더, 상태 색상, 마지막 컬럼 자동 채움)
 │   ├── ModernProgressBar.cs     # 진행바 (스플래시 화면용)
 │   ├── ProcessStepBar.cs        # 프로세스 단계 표시 (원형 인디케이터, 체크마크)
 │   ├── TerminalLogPanel.cs      # 터미널 스타일 로그 패널
@@ -437,7 +437,8 @@ WeighingCS/
 ### 주요 패턴
 
 - **GDI+ 커스텀 UI 시스템**: 모든 컨트롤을 `OnPaint`에서 직접 렌더링 (AntiAlias, ClearTypeGridFit)
-- **Theme 디자인 토큰**: Tailwind CSS Slate 팔레트 기반 다크 테마 (색상/폰트/간격/유틸리티 중앙 관리)
+- **Theme 디자인 토큰**: Tailwind CSS Slate 팔레트 기반 다크/라이트 테마 (색상/폰트/간격/유틸리티 중앙 관리, FontScale=1.5, LayoutScale=1.25)
+- **테마 전환**: HeaderBar의 토글 아이콘으로 다크↔라이트 전환 (현재 모드 표시: 다크=🌙, 라이트=☀), theme.dat 파일에 설정 저장
 - **3단 레이아웃**: HeaderBar(Top) → panelContent(Fill: Left+Divider+Right) → StatusFooter(Bottom)
 - **Wrapper 패턴**: ModernTextBox/ModernComboBox가 네이티브 컨트롤을 감싸며 커스텀 테두리/글로우 렌더링
 - **카드 기반 UI**: CardPanel로 모든 섹션을 유리 효과 + 그림자 + 액센트 바 카드에 배치
@@ -448,7 +449,7 @@ WeighingCS/
 - 전광판/차단기와 TCP 네트워크 통신 (DisplayBoardService, BarrierService)
 - SQLite 로컬 캐시 (오프라인 대비, LocalCacheService)
 - 스플래시 폼으로 초기화 상태 표시 (그라디언트 배경, 방사형 글로우)
-- **주의**: Theme 폰트는 정적 캐시이므로 `using var`로 참조 금지 (Dispose 시 전역 오류 발생)
+- **주의**: Theme 폰트는 정적 캐시이므로 `using var`로 참조 금지. `InvalidateFontCache()`는 참조만 null 처리하고 Dispose하지 않음 (컨트롤이 이전 폰트를 아직 참조할 수 있어 Dispose 시 "Parameter is not valid" 예외 발생)
 - xUnit 테스트: ApiServiceTests, IndicatorServiceTests, LocalCacheServiceTests
 
 ## 코드 컨벤션

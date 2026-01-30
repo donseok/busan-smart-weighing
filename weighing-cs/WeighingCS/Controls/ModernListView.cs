@@ -28,6 +28,39 @@ public class ModernListView : ListView
         DrawColumnHeader += OnDrawHeader;
         DrawItem += OnDrawItem;
         DrawSubItem += OnDrawSubItem;
+
+        Theme.ThemeChanged += (_, _) =>
+        {
+            BackColor = Theme.BgElevated;
+            ForeColor = Theme.TextPrimary;
+            Font = Theme.FontBody;
+            Invalidate();
+        };
+
+        Resize += (_, _) => FillLastColumn();
+    }
+
+    /// <summary>
+    /// Stretches the last column to fill remaining horizontal space,
+    /// preventing an empty white gap on the right side.
+    /// </summary>
+    private void FillLastColumn()
+    {
+        if (Columns.Count == 0) return;
+
+        int usedWidth = 0;
+        for (int i = 0; i < Columns.Count - 1; i++)
+            usedWidth += Columns[i].Width;
+
+        int remaining = ClientSize.Width - usedWidth;
+        if (remaining > 0)
+            Columns[Columns.Count - 1].Width = remaining;
+    }
+
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        FillLastColumn();
     }
 
     /// <summary>
@@ -59,7 +92,8 @@ public class ModernListView : ListView
         }
 
         // Header text
-        var textRect = new Rectangle(e.Bounds.X + 8, e.Bounds.Y, e.Bounds.Width - 16, e.Bounds.Height);
+        int textPad = (int)(8 * Theme.LayoutScale);
+        var textRect = new Rectangle(e.Bounds.X + textPad, e.Bounds.Y, e.Bounds.Width - textPad * 2, e.Bounds.Height);
         using var textBrush = new SolidBrush(Theme.TextSecondary);
         using var sf = new StringFormat
         {
@@ -73,7 +107,6 @@ public class ModernListView : ListView
     private void OnDrawItem(object? sender, DrawListViewItemEventArgs e)
     {
         // Row background handled in OnDrawSubItem
-        // e.DrawDefault = false is implicit with OwnerDraw
     }
 
     private void OnDrawSubItem(object? sender, DrawListViewSubItemEventArgs e)
@@ -121,7 +154,8 @@ public class ModernListView : ListView
             else if (status.Contains("오류") || status.Contains("실패")) textColor = Theme.Error;
         }
 
-        var textRect = new Rectangle(e.Bounds.X + 8, e.Bounds.Y, e.Bounds.Width - 16, e.Bounds.Height);
+        int textPad = (int)(8 * Theme.LayoutScale);
+        var textRect = new Rectangle(e.Bounds.X + textPad, e.Bounds.Y, e.Bounds.Width - textPad * 2, e.Bounds.Height);
         using var textBrush = new SolidBrush(textColor);
         using var sf = new StringFormat
         {

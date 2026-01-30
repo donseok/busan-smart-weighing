@@ -22,6 +22,8 @@ partial class MainForm
     {
         this.components = new System.ComponentModel.Container();
 
+        float s = Theme.LayoutScale; // shorthand for layout scale
+
         // =====================================================================
         // HEADER BAR (Dock.Top)
         // =====================================================================
@@ -41,7 +43,7 @@ partial class MainForm
 
         this.panelLeftCol = new Panel();
         this.panelLeftCol.Dock = DockStyle.Left;
-        this.panelLeftCol.Width = 420;
+        this.panelLeftCol.Width = (int)(700 * s / 2.5f);
         this.panelLeftCol.Padding = new Padding(Theme.SpacingMd, Theme.SpacingMd, Theme.SpacingSm, Theme.SpacingMd);
         this.panelLeftCol.BackColor = Theme.BgBase;
 
@@ -62,20 +64,20 @@ partial class MainForm
         // -- Weight display ---------------------------------------------------
         this.weightDisplay = new WeightDisplayPanel();
         this.weightDisplay.Dock = DockStyle.Top;
-        this.weightDisplay.Height = 220;
+        this.weightDisplay.Height = (int)(220 * s);
 
         // -- Vehicle / dispatch info card ------------------------------------
         this.cardVehicle = new CardPanel();
         this.cardVehicle.Title = "차량 / 배차 정보";
         this.cardVehicle.AccentColor = Theme.Primary;
         this.cardVehicle.Dock = DockStyle.Top;
-        this.cardVehicle.Height = 190;
+        this.cardVehicle.Height = (int)(250 * s);
 
         this.tableVehicle = new TableLayoutPanel();
         this.tableVehicle.Dock = DockStyle.Fill;
         this.tableVehicle.ColumnCount = 2;
         this.tableVehicle.RowCount = 5;
-        this.tableVehicle.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90F));
+        this.tableVehicle.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90F * s));
         this.tableVehicle.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
         for (int i = 0; i < 5; i++)
             this.tableVehicle.RowStyles.Add(new RowStyle(SizeType.Percent, 20F));
@@ -112,11 +114,11 @@ partial class MainForm
         this.lvHistory = new ModernListView();
         this.lvHistory.Dock = DockStyle.Fill;
         this.lvHistory.HeaderStyle = ColumnHeaderStyle.Clickable;
-        this.lvHistory.Columns.Add("시간", 85);
-        this.lvHistory.Columns.Add("차량번호", 110);
-        this.lvHistory.Columns.Add("중량(kg)", 90);
-        this.lvHistory.Columns.Add("모드", 65);
-        this.lvHistory.Columns.Add("상태", 70);
+        this.lvHistory.Columns.Add("시간", (int)(75 * s));       // HH:mm:ss
+        this.lvHistory.Columns.Add("차량번호", (int)(120 * s));  // 서울12가1234
+        this.lvHistory.Columns.Add("중량(kg)", (int)(85 * s));   // 12345.6
+        this.lvHistory.Columns.Add("모드", (int)(55 * s));       // 자동/수동
+        this.lvHistory.Columns.Add("상태", (int)(60 * s));       // 완료 (auto-fills remaining)
 
         this.ctxHistory = new ContextMenuStrip();
         this.ctxHistory.Items.Add("CSV로 내보내기", null, OnExportCsvClick);
@@ -138,36 +140,36 @@ partial class MainForm
         // -- Mode toggle (custom control) ------------------------------------
         this.modeToggle = new ModernToggle();
         this.modeToggle.Dock = DockStyle.Top;
-        this.modeToggle.Height = 44;
+        this.modeToggle.Height = (int)(44 * s);
 
         // -- Process step bar (custom control) --------------------------------
         this.processStepBar = new ProcessStepBar();
         this.processStepBar.Dock = DockStyle.Top;
-        this.processStepBar.Height = 64;
+        this.processStepBar.Height = (int)(64 * s);
 
         // -- Manual controls card --------------------------------------------
         this.cardManual = new CardPanel();
         this.cardManual.Title = "수동 계량 컨트롤";
         this.cardManual.Dock = DockStyle.Top;
-        this.cardManual.Height = 185;
+        this.cardManual.Height = (int)(185 * s);
         this.cardManual.Enabled = false;
 
         this.lblSearchPlate = new Label();
         this.lblSearchPlate.Text = "차량번호";
-        this.lblSearchPlate.Location = new Point(16, 44);
+        this.lblSearchPlate.Location = new Point((int)(16 * s), (int)(44 * s));
         this.lblSearchPlate.AutoSize = true;
         this.lblSearchPlate.Font = Theme.FontSmall;
         this.lblSearchPlate.ForeColor = Theme.TextMuted;
 
         this.txtSearchPlate = new ModernTextBox();
-        this.txtSearchPlate.Location = new Point(80, 40);
-        this.txtSearchPlate.Size = new Size(150, Theme.InputHeight);
+        this.txtSearchPlate.Location = new Point((int)(80 * s), (int)(40 * s));
+        this.txtSearchPlate.Size = new Size((int)(150 * s), Theme.InputHeight);
         this.txtSearchPlate.Font = Theme.FontBody;
         this.txtSearchPlate.Placeholder = "12가1234";
 
         this.lblPlateValidation = new Label();
         this.lblPlateValidation.Text = "";
-        this.lblPlateValidation.Location = new Point(80, 78);
+        this.lblPlateValidation.Location = new Point((int)(80 * s), (int)(78 * s));
         this.lblPlateValidation.AutoSize = true;
         this.lblPlateValidation.Font = Theme.FontCaption;
         this.lblPlateValidation.ForeColor = Theme.TextSecondary;
@@ -175,27 +177,27 @@ partial class MainForm
         this.btnSearch = new ModernButton();
         this.btnSearch.Text = "검색";
         this.btnSearch.Variant = ModernButton.ButtonVariant.Secondary;
-        this.btnSearch.Location = new Point(240, 40);
-        this.btnSearch.Size = new Size(80, Theme.InputHeight);
+        this.btnSearch.Location = new Point((int)(240 * s), (int)(40 * s));
+        this.btnSearch.Size = new Size((int)(80 * s), Theme.InputHeight);
         this.btnSearch.Font = Theme.FontBody;
 
         this.lblSelectDispatch = new Label();
         this.lblSelectDispatch.Text = "배차";
-        this.lblSelectDispatch.Location = new Point(16, 98);
+        this.lblSelectDispatch.Location = new Point((int)(16 * s), (int)(98 * s));
         this.lblSelectDispatch.AutoSize = true;
         this.lblSelectDispatch.Font = Theme.FontSmall;
         this.lblSelectDispatch.ForeColor = Theme.TextMuted;
 
         this.cboDispatches = new ModernComboBox();
-        this.cboDispatches.Location = new Point(80, 93);
-        this.cboDispatches.Size = new Size(240, Theme.InputHeight);
+        this.cboDispatches.Location = new Point((int)(80 * s), (int)(93 * s));
+        this.cboDispatches.Size = new Size((int)(240 * s), Theme.InputHeight);
         this.cboDispatches.Font = Theme.FontBody;
 
         this.btnConfirmWeight = new ModernButton();
         this.btnConfirmWeight.Text = "중량 확인";
         this.btnConfirmWeight.Variant = ModernButton.ButtonVariant.Primary;
-        this.btnConfirmWeight.Location = new Point(80, 138);
-        this.btnConfirmWeight.Size = new Size(240, 38);
+        this.btnConfirmWeight.Location = new Point((int)(80 * s), (int)(138 * s));
+        this.btnConfirmWeight.Size = new Size((int)(240 * s), (int)(38 * s));
         this.btnConfirmWeight.Font = Theme.FontBodyBold;
 
         this.cardManual.Controls.Add(this.lblSearchPlate);
@@ -210,27 +212,27 @@ partial class MainForm
         this.cardActions = new CardPanel();
         this.cardActions.Title = "작업";
         this.cardActions.Dock = DockStyle.Top;
-        this.cardActions.Height = 88;
+        this.cardActions.Height = (int)(88 * s);
 
         this.btnReWeigh = new ModernButton();
         this.btnReWeigh.Text = "재계량";
         this.btnReWeigh.Variant = ModernButton.ButtonVariant.Secondary;
-        this.btnReWeigh.Location = new Point(16, 40);
-        this.btnReWeigh.Size = new Size(100, 36);
+        this.btnReWeigh.Location = new Point((int)(16 * s), (int)(40 * s));
+        this.btnReWeigh.Size = new Size((int)(100 * s), (int)(36 * s));
         this.btnReWeigh.Font = Theme.FontBody;
 
         this.btnReset = new ModernButton();
         this.btnReset.Text = "초기화";
         this.btnReset.Variant = ModernButton.ButtonVariant.Secondary;
-        this.btnReset.Location = new Point(124, 40);
-        this.btnReset.Size = new Size(90, 36);
+        this.btnReset.Location = new Point((int)(124 * s), (int)(40 * s));
+        this.btnReset.Size = new Size((int)(90 * s), (int)(36 * s));
         this.btnReset.Font = Theme.FontBody;
 
         this.btnBarrierOpen = new ModernButton();
         this.btnBarrierOpen.Text = "차단기 열기";
         this.btnBarrierOpen.Variant = ModernButton.ButtonVariant.Danger;
-        this.btnBarrierOpen.Location = new Point(222, 40);
-        this.btnBarrierOpen.Size = new Size(100, 36);
+        this.btnBarrierOpen.Location = new Point((int)(222 * s), (int)(40 * s));
+        this.btnBarrierOpen.Size = new Size((int)(100 * s), (int)(36 * s));
         this.btnBarrierOpen.Font = Theme.FontBody;
 
         this.cardActions.Controls.Add(this.btnReWeigh);
@@ -241,43 +243,43 @@ partial class MainForm
         this.cardSimulator = new CardPanel();
         this.cardSimulator.Title = "시뮬레이터";
         this.cardSimulator.Dock = DockStyle.Top;
-        this.cardSimulator.Height = 90;
+        this.cardSimulator.Height = (int)(130 * s);
 
         this.chkSimulatorMode = new ModernCheckBox();
         this.chkSimulatorMode.Text = "시뮬레이터 모드";
-        this.chkSimulatorMode.Location = new Point(16, 40);
-        this.chkSimulatorMode.Size = new Size(160, 24);
+        this.chkSimulatorMode.Location = new Point((int)(16 * s), (int)(40 * s));
+        this.chkSimulatorMode.Size = new Size((int)(200 * s), (int)(28 * s));
         this.chkSimulatorMode.Font = Theme.FontBody;
 
         this.btnSimSensor = new ModernButton();
         this.btnSimSensor.Text = "차량 감지";
         this.btnSimSensor.Variant = ModernButton.ButtonVariant.Secondary;
-        this.btnSimSensor.Location = new Point(16, 68);
-        this.btnSimSensor.Size = new Size(85, 28);
+        this.btnSimSensor.Location = new Point((int)(16 * s), (int)(68 * s));
+        this.btnSimSensor.Size = new Size((int)(85 * s), (int)(28 * s));
         this.btnSimSensor.Font = Theme.FontSmall;
         this.btnSimSensor.Enabled = false;
 
         this.btnSimLpr = new ModernButton();
         this.btnSimLpr.Text = "LPR 촬영";
         this.btnSimLpr.Variant = ModernButton.ButtonVariant.Secondary;
-        this.btnSimLpr.Location = new Point(108, 68);
-        this.btnSimLpr.Size = new Size(85, 28);
+        this.btnSimLpr.Location = new Point((int)(108 * s), (int)(68 * s));
+        this.btnSimLpr.Size = new Size((int)(85 * s), (int)(28 * s));
         this.btnSimLpr.Font = Theme.FontSmall;
         this.btnSimLpr.Enabled = false;
 
         this.btnSimPosition = new ModernButton();
         this.btnSimPosition.Text = "정위치";
         this.btnSimPosition.Variant = ModernButton.ButtonVariant.Secondary;
-        this.btnSimPosition.Location = new Point(200, 68);
-        this.btnSimPosition.Size = new Size(75, 28);
+        this.btnSimPosition.Location = new Point((int)(200 * s), (int)(68 * s));
+        this.btnSimPosition.Size = new Size((int)(75 * s), (int)(28 * s));
         this.btnSimPosition.Font = Theme.FontSmall;
         this.btnSimPosition.Enabled = false;
 
         this.btnSyncNow = new ModernButton();
         this.btnSyncNow.Text = "동기화";
         this.btnSyncNow.Variant = ModernButton.ButtonVariant.Secondary;
-        this.btnSyncNow.Location = new Point(282, 68);
-        this.btnSyncNow.Size = new Size(75, 28);
+        this.btnSyncNow.Location = new Point((int)(282 * s), (int)(68 * s));
+        this.btnSyncNow.Size = new Size((int)(75 * s), (int)(28 * s));
         this.btnSyncNow.Font = Theme.FontSmall;
         this.btnSyncNow.Enabled = false;
 
@@ -322,8 +324,8 @@ partial class MainForm
         this.AutoScaleDimensions = new SizeF(7F, 15F);
         this.AutoScaleMode = AutoScaleMode.Font;
         this.ClientSize = new Size(1280, 900);
-        this.Text = "부산 스마트 계량 시스템";
-        this.MinimumSize = new Size(1100, 700);
+        this.Text = "동국씨엠 스마트 계량 시스템";
+        this.MinimumSize = new Size(960, 540);
         this.StartPosition = FormStartPosition.CenterScreen;
         this.WindowState = FormWindowState.Maximized;
         this.Font = Theme.FontBody;

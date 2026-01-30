@@ -3,19 +3,44 @@ using System.Drawing;
 namespace WeighingCS.Controls;
 
 /// <summary>
-/// Centralized visual design tokens for the modern dark theme UI.
+/// Centralized visual design tokens with dark/light theme support.
 /// Inspired by Tailwind CSS Slate palette for a web-like appearance.
 /// </summary>
 public static class Theme
 {
-    // ── Background hierarchy (darkest → lightest) ──────────────────────
-    public static readonly Color BgDarkest = Color.FromArgb(6, 13, 27);         // #060D1B  header/footer
-    public static readonly Color BgBase = Color.FromArgb(11, 17, 32);           // #0B1120  main background
-    public static readonly Color BgElevated = Color.FromArgb(15, 23, 42);       // #0F172A  inputs, elevated
-    public static readonly Color BgSurface = Color.FromArgb(30, 41, 59);        // #1E293B  cards
-    public static readonly Color BgHover = Color.FromArgb(40, 53, 72);          // #283548  hover state
+    // ── Theme state ───────────────────────────────────────────────────
+    private static bool _isDarkMode = true;
+    public static bool IsDarkMode => _isDarkMode;
 
-    // ── Accent / semantic colors ───────────────────────────────────────
+    // ── Scale factors ─────────────────────────────────────────────────
+    public static readonly float FontScale = 1.5f;
+    public static readonly float LayoutScale = 1.25f;
+
+    // ── Theme changed event ───────────────────────────────────────────
+    public static event EventHandler? ThemeChanged;
+
+    // ── Background hierarchy (darkest -> lightest) ────────────────────
+    public static Color BgDarkest => _isDarkMode
+        ? Color.FromArgb(6, 13, 27)      // #060D1B
+        : Color.FromArgb(226, 232, 240);  // #E2E8F0
+
+    public static Color BgBase => _isDarkMode
+        ? Color.FromArgb(11, 17, 32)      // #0B1120
+        : Color.FromArgb(248, 250, 252);  // #F8FAFC
+
+    public static Color BgElevated => _isDarkMode
+        ? Color.FromArgb(15, 23, 42)      // #0F172A
+        : Color.FromArgb(255, 255, 255);  // #FFFFFF
+
+    public static Color BgSurface => _isDarkMode
+        ? Color.FromArgb(30, 41, 59)      // #1E293B
+        : Color.FromArgb(241, 245, 249);  // #F1F5F9
+
+    public static Color BgHover => _isDarkMode
+        ? Color.FromArgb(40, 53, 72)      // #283548
+        : Color.FromArgb(226, 232, 240);  // #E2E8F0
+
+    // ── Accent / semantic colors (same in both modes) ─────────────────
     public static readonly Color Primary = Color.FromArgb(6, 182, 212);         // #06B6D4  cyan
     public static readonly Color PrimaryLight = Color.FromArgb(34, 211, 238);   // #22D3EE
     public static readonly Color PrimaryDark = Color.FromArgb(8, 145, 178);     // #0891B2
@@ -25,39 +50,56 @@ public static class Theme
     public static readonly Color Purple = Color.FromArgb(139, 92, 246);         // #8B5CF6
     public static readonly Color Blue = Color.FromArgb(59, 130, 246);           // #3B82F6
 
-    // ── Text colors ────────────────────────────────────────────────────
-    public static readonly Color TextPrimary = Color.FromArgb(248, 250, 252);   // #F8FAFC
-    public static readonly Color TextSecondary = Color.FromArgb(148, 163, 184); // #94A3B8
-    public static readonly Color TextMuted = Color.FromArgb(100, 116, 139);     // #64748B
-    public static readonly Color TextDisabled = Color.FromArgb(71, 85, 105);    // #475569
+    // ── Text colors ───────────────────────────────────────────────────
+    public static Color TextPrimary => _isDarkMode
+        ? Color.FromArgb(248, 250, 252)   // #F8FAFC
+        : Color.FromArgb(15, 23, 42);     // #0F172A
 
-    // ── Border / divider ───────────────────────────────────────────────
-    public static readonly Color Border = Color.FromArgb(51, 65, 85);           // #334155
-    public static readonly Color BorderLight = Color.FromArgb(71, 85, 105);     // #475569
-    public static readonly Color BorderFocus = Color.FromArgb(6, 182, 212);     // primary
+    public static Color TextSecondary => _isDarkMode
+        ? Color.FromArgb(148, 163, 184)   // #94A3B8
+        : Color.FromArgb(71, 85, 105);    // #475569
 
-    // ── Corner radius ──────────────────────────────────────────────────
-    public const int RadiusXs = 4;
-    public const int RadiusSmall = 6;
-    public const int RadiusMedium = 8;
-    public const int RadiusLarge = 12;
-    public const int RadiusXl = 16;
-    public const int RadiusRound = 999;
+    public static Color TextMuted => _isDarkMode
+        ? Color.FromArgb(100, 116, 139)   // #64748B
+        : Color.FromArgb(148, 163, 184);  // #94A3B8
 
-    // ── Spacing ────────────────────────────────────────────────────────
-    public const int SpacingXs = 4;
-    public const int SpacingSm = 8;
-    public const int SpacingMd = 12;
-    public const int SpacingLg = 16;
-    public const int SpacingXl = 24;
-    public const int SpacingXxl = 32;
+    public static Color TextDisabled => _isDarkMode
+        ? Color.FromArgb(71, 85, 105)     // #475569
+        : Color.FromArgb(203, 213, 225);  // #CBD5E1
 
-    // ── Layout constants ───────────────────────────────────────────────
-    public const int HeaderHeight = 56;
-    public const int FooterHeight = 32;
-    public const int InputHeight = 36;
+    // ── Border / divider ──────────────────────────────────────────────
+    public static Color Border => _isDarkMode
+        ? Color.FromArgb(51, 65, 85)      // #334155
+        : Color.FromArgb(203, 213, 225);  // #CBD5E1
 
-    // ── Fonts (lazy-created, cached) ───────────────────────────────────
+    public static Color BorderLight => _isDarkMode
+        ? Color.FromArgb(71, 85, 105)     // #475569
+        : Color.FromArgb(148, 163, 184);  // #94A3B8
+
+    public static Color BorderFocus => Primary;
+
+    // ── Corner radius ─────────────────────────────────────────────────
+    public static int RadiusXs => (int)(4 * LayoutScale);
+    public static int RadiusSmall => (int)(6 * LayoutScale);
+    public static int RadiusMedium => (int)(8 * LayoutScale);
+    public static int RadiusLarge => (int)(12 * LayoutScale);
+    public static int RadiusXl => (int)(16 * LayoutScale);
+    public static int RadiusRound => 999;
+
+    // ── Spacing ───────────────────────────────────────────────────────
+    public static int SpacingXs => (int)(4 * LayoutScale);
+    public static int SpacingSm => (int)(8 * LayoutScale);
+    public static int SpacingMd => (int)(12 * LayoutScale);
+    public static int SpacingLg => (int)(16 * LayoutScale);
+    public static int SpacingXl => (int)(24 * LayoutScale);
+    public static int SpacingXxl => (int)(32 * LayoutScale);
+
+    // ── Layout constants ──────────────────────────────────────────────
+    public static int HeaderHeight => (int)(56 * LayoutScale);
+    public static int FooterHeight => (int)(32 * LayoutScale);
+    public static int InputHeight => (int)(36 * LayoutScale);
+
+    // ── Fonts (lazy-created, cached, with FontScale applied) ──────────
     private static Font? _fontCaption;
     private static Font? _fontSmall;
     private static Font? _fontSmallBold;
@@ -71,20 +113,85 @@ public static class Theme
     private static Font? _fontMonoSmall;
     private static Font? _fontMonoLarge;
 
-    public static Font FontCaption => _fontCaption ??= new Font("Segoe UI", 7.5F);
-    public static Font FontSmall => _fontSmall ??= new Font("Segoe UI", 8F);
-    public static Font FontSmallBold => _fontSmallBold ??= new Font("Segoe UI", 8F, FontStyle.Bold);
-    public static Font FontBody => _fontBody ??= new Font("Segoe UI", 9.5F);
-    public static Font FontBodyBold => _fontBodyBold ??= new Font("Segoe UI", 9.5F, FontStyle.Bold);
-    public static Font FontMedium => _fontMedium ??= new Font("Segoe UI", 10.5F);
-    public static Font FontMediumBold => _fontMediumBold ??= new Font("Segoe UI", 10.5F, FontStyle.Bold);
-    public static Font FontHeading => _fontHeading ??= new Font("Segoe UI", 11F, FontStyle.Bold);
-    public static Font FontTitle => _fontTitle ??= new Font("Segoe UI", 14F, FontStyle.Bold);
-    public static Font FontMono => _fontMono ??= new Font("Consolas", 10F);
-    public static Font FontMonoSmall => _fontMonoSmall ??= new Font("Consolas", 8.5F);
-    public static Font FontMonoLarge => _fontMonoLarge ??= new Font("Consolas", 48F, FontStyle.Bold);
+    public static Font FontCaption => _fontCaption ??= new Font("Segoe UI", 7.5F * FontScale);
+    public static Font FontSmall => _fontSmall ??= new Font("Segoe UI", 8F * FontScale);
+    public static Font FontSmallBold => _fontSmallBold ??= new Font("Segoe UI", 8F * FontScale, FontStyle.Bold);
+    public static Font FontBody => _fontBody ??= new Font("Segoe UI", 9.5F * FontScale);
+    public static Font FontBodyBold => _fontBodyBold ??= new Font("Segoe UI", 9.5F * FontScale, FontStyle.Bold);
+    public static Font FontMedium => _fontMedium ??= new Font("Segoe UI", 10.5F * FontScale);
+    public static Font FontMediumBold => _fontMediumBold ??= new Font("Segoe UI", 10.5F * FontScale, FontStyle.Bold);
+    public static Font FontHeading => _fontHeading ??= new Font("Segoe UI", 11F * FontScale, FontStyle.Bold);
+    public static Font FontTitle => _fontTitle ??= new Font("Segoe UI", 14F * FontScale, FontStyle.Bold);
+    public static Font FontMono => _fontMono ??= new Font("Consolas", 10F * FontScale);
+    public static Font FontMonoSmall => _fontMonoSmall ??= new Font("Consolas", 8.5F * FontScale);
+    public static Font FontMonoLarge => _fontMonoLarge ??= new Font("Consolas", 48F * FontScale, FontStyle.Bold);
 
-    // ── Color helpers ──────────────────────────────────────────────────
+    // ── Font cache invalidation ───────────────────────────────────────
+
+    public static void InvalidateFontCache()
+    {
+        // Do NOT dispose old fonts here — controls may still hold references
+        // to them and would crash on Paint with "Parameter is not valid".
+        // Let GC collect the old Font objects after controls update their refs.
+        _fontCaption = null;
+        _fontSmall = null;
+        _fontSmallBold = null;
+        _fontBody = null;
+        _fontBodyBold = null;
+        _fontMedium = null;
+        _fontMediumBold = null;
+        _fontHeading = null;
+        _fontTitle = null;
+        _fontMono = null;
+        _fontMonoSmall = null;
+        _fontMonoLarge = null;
+    }
+
+    // ── Theme toggle ──────────────────────────────────────────────────
+
+    public static void ToggleTheme()
+    {
+        _isDarkMode = !_isDarkMode;
+        InvalidateFontCache();
+        SavePreference();
+        ThemeChanged?.Invoke(null, EventArgs.Empty);
+    }
+
+    // ── Theme persistence ─────────────────────────────────────────────
+
+    private static string PreferenceFilePath =>
+        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "theme.dat");
+
+    public static void SavePreference()
+    {
+        try
+        {
+            File.WriteAllText(PreferenceFilePath, _isDarkMode ? "dark" : "light");
+        }
+        catch
+        {
+            // Ignore file write errors silently.
+        }
+    }
+
+    public static void LoadPreference()
+    {
+        try
+        {
+            if (File.Exists(PreferenceFilePath))
+            {
+                string content = File.ReadAllText(PreferenceFilePath).Trim().ToLowerInvariant();
+                _isDarkMode = content != "light";
+                InvalidateFontCache();
+            }
+        }
+        catch
+        {
+            // Ignore file read errors, keep default (dark).
+        }
+    }
+
+    // ── Color helpers ─────────────────────────────────────────────────
 
     public static Color WithAlpha(Color c, int alpha) =>
         Color.FromArgb(Math.Clamp(alpha, 0, 255), c.R, c.G, c.B);
