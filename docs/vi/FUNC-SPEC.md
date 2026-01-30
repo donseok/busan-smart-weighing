@@ -1,8 +1,8 @@
 # Hệ thống Cân thông minh Busan - Đặc tả Chức năng (Functional Specification)
 
-**Phiên bản**: 1.1
+**Phiên bản**: 1.2
 **Ngày tạo**: 2026-01-27
-**Cập nhật lần cuối**: 2026-01-29
+**Cập nhật lần cuối**: 2026-01-30
 **Tài liệu tham chiếu**: PRD-20260127-154446, TRD-20260127-155235, WBS-20260127-160043
 **Trạng thái**: Updated
 
@@ -28,7 +28,7 @@
 Tài liệu này định nghĩa chi tiết hoạt động của từng chức năng trong Hệ thống Cân thông minh Busan, dựa trên PRD, TRD và WBS. Được sử dụng làm tài liệu chuẩn cho phát triển, kiểm thử và nghiệm thu.
 
 ### 1.2 Phạm vi
-Đặc tả chi tiết tất cả yêu cầu chức năng từ PRD FR-001 đến FR-008, phân loại thành 7 mô-đun.
+Đặc tả chi tiết tất cả yêu cầu chức năng từ PRD FR-001 đến FR-008, phân loại thành 7 mô-đun. Trong phiên bản v1.2, các chức năng sau đã được bổ sung: Yêu thích, Hướng dẫn sử dụng/FAQ, Giám sát thiết bị, Trang cá nhân, Thông báo, Cài đặt hệ thống, Hỏi đáp/Khiếu nại, Thống kê/Báo cáo, Cải thiện layout Frontend.
 
 ### 1.3 Thuật ngữ
 | Thuật ngữ | Định nghĩa |
@@ -39,6 +39,10 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 | Indicator | Thiết bị hiển thị giá trị trọng lượng tại trạm cân |
 | Phiếu cân điện tử | Chứng từ cân kỹ thuật số cung cấp qua ứng dụng di động |
 | Điều phối xe | Phân công lịch trình vận chuyển cho xe |
+| FCM | Firebase Cloud Messaging - Dịch vụ thông báo đẩy trên di động |
+| Healthcheck | Quy trình kiểm tra định kỳ trạng thái kết nối thiết bị |
+| Yêu thích | Chức năng đăng ký menu/mục thường dùng để truy cập nhanh |
+| FAQ | Frequently Asked Questions - Câu hỏi thường gặp |
 
 ---
 
@@ -726,6 +730,601 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 
 ---
 
+### FUNC-031: Chức năng Yêu thích
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-031 |
+| **Tên chức năng** | Chức năng Yêu thích |
+| **Ánh xạ PRD** | FR-004 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | MEDIUM |
+
+**Mô tả chức năng**: Cho phép người dùng đăng ký menu, điều phối xe, xe, công ty vận tải, trạm cân thường dùng làm yêu thích để truy cập nhanh.
+
+**Điều kiện tiên quyết (Preconditions)**:
+- Đăng nhập hoàn tất
+
+**Điều kiện hậu (Postconditions)**:
+- Lưu/xóa mục yêu thích
+- Phản ánh thay đổi thứ tự yêu thích
+
+**Dữ liệu đầu vào**:
+
+| Tên trường | Kiểu | Bắt buộc | Quy tắc kiểm tra |
+|------------|------|----------|-------------------|
+| target_type | varchar(20) | Y | MENU / DISPATCH / VEHICLE / COMPANY / SCALE |
+| target_id | bigint | N | ID mục đích (đường dẫn chuỗi trong trường hợp menu) |
+| sort_order | int | N | Thứ tự sắp xếp |
+
+**Dữ liệu đầu ra**:
+
+| Tên trường | Kiểu | Mô tả |
+|------------|------|-------|
+| favorite_id | bigint | ID mục yêu thích |
+| favorite_list | array | Danh sách toàn bộ yêu thích |
+
+**Quy tắc nghiệp vụ**:
+- BR-031-1: Mỗi người dùng đăng ký tối đa 20 mục yêu thích
+- BR-031-2: Ngăn chặn đăng ký trùng lặp (dựa trên target_type + target_id)
+- BR-031-3: Hoạt động theo phương thức toggle (nhấn mục đã đăng ký thì xóa, nhấn mục chưa đăng ký thì thêm)
+- BR-031-4: Thay đổi thứ tự yêu thích bằng kéo thả (dựa trên @dnd-kit)
+- BR-031-5: Toggle yêu thích trang hiện tại bằng nút yêu thích trên header
+
+**Luồng chính (Main Flow)**:
+1. Người dùng nhấn nút yêu thích (biểu tượng ngôi sao) trên header để toggle yêu thích trang hiện tại
+2. Hoặc nhấn nút yêu thích của mục riêng lẻ trên màn hình danh sách để toggle
+3. Xác nhận danh sách yêu thích trong bảng Popover
+4. Nhấn mục yêu thích để chuyển nhanh đến trang/mục đó
+5. Thay đổi thứ tự bằng kéo thả
+
+**Luồng thay thế (Alternative Flow)**:
+- AF-031-1: Khi vượt quá 20 mục yêu thích → Thông báo "Đã vượt quá số lượng đăng ký tối đa"
+
+**Yêu cầu UI/UX**:
+- Nút toggle yêu thích trên header (component FavoriteButton)
+- Hiển thị danh sách yêu thích trong bảng Popover (component FavoritesList)
+- Sắp xếp kéo thả dựa trên @dnd-kit
+
+**Chức năng liên quan**: FUNC-005 (Quản lý điều phối xe), FUNC-008 (Quản lý thông tin cơ sở)
+
+---
+
+### FUNC-032: Hướng dẫn sử dụng/FAQ
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-032 |
+| **Tên chức năng** | Hướng dẫn sử dụng/FAQ |
+| **Ánh xạ PRD** | FR-004 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | LOW |
+
+**Mô tả chức năng**: Cung cấp hướng dẫn sử dụng hệ thống và câu hỏi thường gặp (FAQ) theo danh mục để hỗ trợ người dùng tự giải quyết.
+
+**Điều kiện tiên quyết (Preconditions)**:
+- Đăng nhập hoàn tất
+- Quản lý FAQ: Quyền ADMIN
+
+**Điều kiện hậu (Postconditions)**:
+- Tự động tăng lượt xem khi xem FAQ
+- Phản ánh dữ liệu khi tạo/sửa/xóa FAQ
+
+**Dữ liệu đầu vào**:
+
+| Tên trường | Kiểu | Bắt buộc | Quy tắc kiểm tra |
+|------------|------|----------|-------------------|
+| category | varchar(20) | Y | WEIGHING / DISPATCH / ACCOUNT / SYSTEM / ETC |
+| question | varchar(200) | Y | Tiêu đề câu hỏi (tối đa 200 ký tự) |
+| answer | text | Y | Nội dung trả lời |
+| is_published | boolean | Y | Trạng thái công khai |
+| sort_order | int | N | Thứ tự sắp xếp |
+
+**Dữ liệu đầu ra**:
+
+| Tên trường | Kiểu | Mô tả |
+|------------|------|-------|
+| faq_id | bigint | ID FAQ |
+| category | string | Danh mục |
+| question | string | Câu hỏi |
+| answer | string | Trả lời |
+| view_count | int | Lượt xem |
+| is_published | boolean | Trạng thái công khai |
+
+**Quy tắc nghiệp vụ**:
+- BR-032-1: Danh mục FAQ: Cân (WEIGHING), Điều phối xe (DISPATCH), Tài khoản (ACCOUNT), Hệ thống (SYSTEM), Khác (ETC)
+- BR-032-2: Tự động tăng 1 lượt xem (view_count) khi xem chi tiết FAQ
+- BR-032-3: Chỉ quản trị viên (ADMIN) mới được tạo/sửa/xóa FAQ
+- BR-032-4: Chỉ FAQ ở trạng thái công khai (is_published=true) mới hiển thị cho người dùng thông thường
+- BR-032-5: Có thể chỉ định thứ tự sắp xếp trong danh mục bằng sort_order
+
+**Luồng chính (Main Flow)**:
+1. Người dùng vào màn hình hướng dẫn sử dụng (/help)
+2. Chọn tab danh mục (Cân/Điều phối xe/Tài khoản/Hệ thống/Khác)
+3. Hiển thị danh sách FAQ (tiêu đề câu hỏi + lượt xem)
+4. Nhấn FAQ để hiển thị trả lời + tăng lượt xem
+
+**Luồng thay thế (Alternative Flow)**:
+- AF-032-1: Người dùng ADMIN → Chức năng quản lý FAQ (đăng ký/sửa/xóa/toggle công khai)
+
+**Yêu cầu UI/UX**:
+- UI tab hoặc bộ lọc theo danh mục
+- Hiển thị câu hỏi-trả lời theo mẫu Ant Design Collapse/Accordion
+
+**Chức năng liên quan**: FUNC-023 (Thông báo/Cuộc gọi hỏi đáp)
+
+---
+
+### FUNC-033: Giám sát thiết bị
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-033 |
+| **Tên chức năng** | Giám sát thiết bị |
+| **Ánh xạ PRD** | FR-004, FR-005 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | HIGH |
+
+**Mô tả chức năng**: Giám sát theo thời gian thực trạng thái kết nối của tất cả thiết bị trong hệ thống (trạm cân, camera LPR, indicator, thanh chắn), tự động gửi thông báo khi phát hiện bất thường.
+
+**Điều kiện tiên quyết (Preconditions)**:
+- Đăng nhập hoàn tất
+- Đã đăng ký thông tin cơ sở thiết bị
+- Thiết lập kết nối WebSocket
+
+**Điều kiện hậu (Postconditions)**:
+- Ghi lại thay đổi trạng thái thiết bị
+- Gửi thông báo khi phát hiện bất thường
+
+**Dữ liệu đầu vào**:
+
+| Tên trường | Kiểu | Bắt buộc | Quy tắc kiểm tra |
+|------------|------|----------|-------------------|
+| device_type | varchar(20) | Y | SCALE / LPR_CAMERA / INDICATOR / BARRIER_GATE |
+| device_id | bigint | Y | Mã định danh thiết bị |
+| heartbeat | timestamptz | Y | Thời điểm phản hồi cuối cùng |
+
+**Dữ liệu đầu ra**:
+
+| Tên trường | Kiểu | Mô tả |
+|------------|------|-------|
+| device_id | bigint | ID thiết bị |
+| device_type | string | Loại thiết bị |
+| connection_status | string | ONLINE / OFFLINE / ERROR |
+| last_heartbeat | timestamptz | Thời điểm phản hồi cuối cùng |
+| summary | object | Tóm tắt thiết bị (tổng số, số lượng theo trạng thái) |
+
+**Quy tắc nghiệp vụ**:
+- BR-033-1: Loại thiết bị: Trạm cân (SCALE), Camera LPR (LPR_CAMERA), Indicator (INDICATOR), Thanh chắn (BARRIER_GATE)
+- BR-033-2: Trạng thái kết nối: Trực tuyến (ONLINE), Ngoại tuyến (OFFLINE), Lỗi (ERROR)
+- BR-033-3: Tự động chuyển sang trạng thái OFFLINE khi healthcheck không phản hồi trong 5 phút (300 giây)
+- BR-033-4: Broadcast thông báo thời gian thực qua WebSocket (/topic/equipment-status) khi trạng thái thiết bị thay đổi
+- BR-033-5: Cung cấp thông tin tóm tắt thiết bị: Tổng số thiết bị, số lượng trực tuyến/ngoại tuyến/lỗi, đếm theo loại/trạng thái
+
+**Luồng chính (Main Flow)**:
+1. Người dùng vào màn hình giám sát thiết bị (/monitoring)
+2. Thiết lập đăng ký WebSocket (/topic/equipment-status)
+3. Hiển thị danh sách toàn bộ thiết bị và trạng thái (nhóm theo loại)
+4. Hiển thị bảng điều khiển tóm tắt thiết bị (đếm trực tuyến/ngoại tuyến/lỗi)
+5. Cập nhật thời gian thực khi trạng thái thiết bị thay đổi
+
+**Luồng thay thế (Alternative Flow)**:
+- AF-033-1: Kết nối WebSocket thất bại → Polling REST API (mỗi 10 giây)
+- AF-033-2: Phát sinh lỗi thiết bị → Gửi thông báo Push cho quản trị viên
+
+**Luồng ngoại lệ (Exception Flow)**:
+- EF-033-1: Toàn bộ thiết bị chuyển OFFLINE do sự cố mạng → Hiển thị cảnh báo hệ thống
+
+**Yêu cầu UI/UX**:
+- Hiển thị dạng thẻ/danh sách theo loại thiết bị
+- Phân biệt màu sắc theo trạng thái (trực tuyến=xanh lá, ngoại tuyến=xám, lỗi=đỏ)
+- Thẻ KPI tóm tắt thiết bị
+
+**Chức năng liên quan**: FUNC-010 (Nhận giá trị trọng lượng từ Indicator), FUNC-040 (Tích hợp camera LPR), FUNC-042 (Tích hợp bộ phát hiện xe)
+
+**Ánh xạ yêu cầu phi chức năng**:
+- NFR-001 Hiệu năng: Truyền thay đổi trạng thái thiết bị qua WebSocket thời gian thực trong vòng 500ms
+- NFR-004 Tính sẵn sàng: Tự động phát hiện healthcheck, thông báo sự cố
+
+---
+
+### FUNC-034: Trang cá nhân
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-034 |
+| **Tên chức năng** | Trang cá nhân |
+| **Ánh xạ PRD** | FR-004 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | MEDIUM |
+
+**Mô tả chức năng**: Người dùng đã đăng nhập có thể xem/sửa thông tin hồ sơ cá nhân, đổi mật khẩu và quản lý cài đặt thông báo.
+
+**Điều kiện tiên quyết (Preconditions)**:
+- Đăng nhập hoàn tất
+
+**Điều kiện hậu (Postconditions)**:
+- Cập nhật thông tin người dùng
+- Khi đổi mật khẩu, duy trì phiên hiện tại (không cần đăng nhập lại)
+
+**Dữ liệu đầu vào**:
+
+| Tên trường | Kiểu | Bắt buộc | Quy tắc kiểm tra |
+|------------|------|----------|-------------------|
+| name | varchar(50) | Y | Tên (tối đa 50 ký tự) |
+| phone_number | varchar(20) | N | Định dạng số điện thoại |
+| email | varchar(100) | N | Kiểm tra định dạng email |
+| current_password | varchar(255) | Y* | Bắt buộc khi đổi mật khẩu |
+| new_password | varchar(255) | Y* | Tối thiểu 8 ký tự |
+| push_enabled | boolean | N | Bật/tắt thông báo đẩy |
+| email_notification_enabled | boolean | N | Bật/tắt thông báo email |
+
+**Dữ liệu đầu ra**:
+
+| Tên trường | Kiểu | Mô tả |
+|------------|------|-------|
+| user_id | bigint | ID người dùng |
+| name | string | Tên |
+| login_id | string | ID đăng nhập |
+| phone_number | string | Số điện thoại |
+| email | string | Email |
+| role | string | Vai trò (ADMIN/MANAGER/DRIVER) |
+| company_name | string | Tên công ty vận tải trực thuộc |
+| created_at | timestamptz | Ngày đăng ký |
+| last_login_at | timestamptz | Thời điểm đăng nhập cuối cùng |
+| push_enabled | boolean | Cài đặt thông báo đẩy |
+| email_notification_enabled | boolean | Cài đặt thông báo email |
+
+**Quy tắc nghiệp vụ**:
+- BR-034-1: Khi xem hồ sơ, hiển thị thông tin người dùng, công ty vận tải trực thuộc, vai trò, ngày đăng ký, thời điểm đăng nhập cuối cùng
+- BR-034-2: Mục có thể sửa hồ sơ: Tên, số điện thoại, email (login_id, role không thể sửa)
+- BR-034-3: Khi đổi mật khẩu, bắt buộc xác nhận mật khẩu hiện tại (xác minh bcrypt)
+- BR-034-4: Mật khẩu mới tối thiểu 8 ký tự
+- BR-034-5: Cài đặt thông báo: Toggle bật/tắt thông báo đẩy (FCM), toggle bật/tắt thông báo email
+
+**Luồng chính (Main Flow)**:
+1. Người dùng vào trang cá nhân (/mypage)
+2. Hiển thị thông tin hồ sơ (GET /api/v1/users/me)
+3. Sửa hồ sơ → PUT /api/v1/users/me
+4. Đổi mật khẩu → PUT /api/v1/users/me/password
+5. Thay đổi cài đặt thông báo → PUT /api/v1/users/me/notification-settings
+
+**Luồng ngoại lệ (Exception Flow)**:
+- EF-034-1: Mật khẩu hiện tại không khớp → Lỗi "Mật khẩu hiện tại không chính xác"
+- EF-034-2: Mật khẩu mới dưới 8 ký tự → Lỗi "Mật khẩu phải có tối thiểu 8 ký tự"
+
+**Yêu cầu UI/UX**:
+- Layout header cố định + cuộn (áp dụng TablePageLayout)
+- Phân chia section Hồ sơ/Mật khẩu/Cài đặt thông báo
+- Áp dụng Ant Design Form + quy tắc kiểm tra
+
+**Chức năng liên quan**: FUNC-025-API (API Người dùng/Xác thực), FUNC-024 (Nhận thông báo Push)
+
+---
+
+### FUNC-035: Thông báo
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-035 |
+| **Tên chức năng** | Thông báo |
+| **Ánh xạ PRD** | FR-004 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | MEDIUM |
+
+**Mô tả chức năng**: Quản trị viên hệ thống đăng ký/quản lý thông báo, người dùng có thể xem thông báo.
+
+**Điều kiện tiên quyết (Preconditions)**:
+- Đăng nhập hoàn tất
+- Quản lý thông báo: Quyền ADMIN
+
+**Điều kiện hậu (Postconditions)**:
+- Tạo/sửa/xóa bản ghi thông báo
+- Tự động tăng lượt xem
+
+**Dữ liệu đầu vào**:
+
+| Tên trường | Kiểu | Bắt buộc | Quy tắc kiểm tra |
+|------------|------|----------|-------------------|
+| title | varchar(200) | Y | Tiêu đề (tối đa 200 ký tự) |
+| content | text | Y | Nội dung |
+| category | varchar(20) | Y | SYSTEM / MAINTENANCE / UPDATE / GENERAL |
+| is_pinned | boolean | N | Ghim lên đầu (mặc định false) |
+| is_published | boolean | N | Phát hành (mặc định false) |
+
+**Dữ liệu đầu ra**:
+
+| Tên trường | Kiểu | Mô tả |
+|------------|------|-------|
+| notice_id | bigint | ID thông báo |
+| title | string | Tiêu đề |
+| content | string | Nội dung |
+| category | string | Danh mục |
+| is_pinned | boolean | Ghim lên đầu |
+| is_published | boolean | Trạng thái phát hành |
+| view_count | int | Lượt xem |
+| created_at | timestamptz | Thời điểm tạo |
+
+**Quy tắc nghiệp vụ**:
+- BR-035-1: Danh mục: Hệ thống (SYSTEM), Bảo trì (MAINTENANCE), Cập nhật (UPDATE), Chung (GENERAL)
+- BR-035-2: Chức năng ghim (Pin): Hiển thị thông báo có is_pinned=true ở đầu danh sách
+- BR-035-3: Chức năng phát hành (Publish): Chỉ hiển thị thông báo có is_published=true cho người dùng thông thường
+- BR-035-4: Hỗ trợ tìm kiếm từ khóa dựa trên tiêu đề
+- BR-035-5: Tự động tăng 1 lượt xem (view_count) khi xem chi tiết
+- BR-035-6: Chỉ quản trị viên (ADMIN) mới có thể tạo/sửa/xóa/toggle ghim/toggle phát hành
+- BR-035-7: Hỗ trợ phân trang (mặc định 10 bản ghi/trang)
+
+**Luồng chính (Main Flow)**:
+1. Người dùng vào màn hình thông báo (/notices)
+2. Thông báo ghim hiển thị ở đầu, sau đó sắp xếp theo thời gian mới nhất
+3. Lọc thông báo bằng bộ lọc danh mục hoặc tìm kiếm từ khóa
+4. Nhấn thông báo để hiển thị nội dung chi tiết + tăng lượt xem
+
+**Luồng thay thế (Alternative Flow)**:
+- AF-035-1: Người dùng ADMIN → Có thể đăng ký/sửa/xóa thông báo, toggle ghim/phát hành
+
+**Yêu cầu UI/UX**:
+- Hiển thị tag/badge theo danh mục
+- Biểu tượng phân biệt thông báo ghim
+- Phân trang + thanh tìm kiếm
+
+**Chức năng liên quan**: FUNC-024 (Nhận thông báo Push)
+
+---
+
+### FUNC-036: Cài đặt hệ thống
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-036 |
+| **Tên chức năng** | Cài đặt hệ thống |
+| **Ánh xạ PRD** | FR-004 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | MEDIUM |
+
+**Mô tả chức năng**: Quản trị viên (ADMIN) có thể xem và sửa các giá trị cài đặt cần thiết cho vận hành hệ thống.
+
+**Điều kiện tiên quyết (Preconditions)**:
+- Đăng nhập với quyền ADMIN
+
+**Điều kiện hậu (Postconditions)**:
+- Cập nhật giá trị cài đặt hệ thống
+- Áp dụng ngay cài đặt đã thay đổi (cập nhật cache Redis khi cần)
+
+**Dữ liệu đầu vào**:
+
+| Tên trường | Kiểu | Bắt buộc | Quy tắc kiểm tra |
+|------------|------|----------|-------------------|
+| setting_key | varchar(100) | Y | Khóa cài đặt (UNIQUE) |
+| setting_value | text | Y | Giá trị cài đặt |
+| value_type | varchar(20) | Y | STRING / NUMBER / BOOLEAN / JSON |
+| category | varchar(20) | Y | GENERAL / WEIGHING / NOTIFICATION / SECURITY |
+| is_editable | boolean | Y | Có thể chỉnh sửa |
+
+**Dữ liệu đầu ra**:
+
+| Tên trường | Kiểu | Mô tả |
+|------------|------|-------|
+| setting_id | bigint | ID cài đặt |
+| setting_key | string | Khóa cài đặt |
+| setting_value | string | Giá trị cài đặt |
+| value_type | string | Loại giá trị |
+| category | string | Danh mục cài đặt |
+| is_editable | boolean | Có thể chỉnh sửa |
+| description | string | Mô tả cài đặt |
+
+**Quy tắc nghiệp vụ**:
+- BR-036-1: Chức năng chỉ dành cho quản trị viên (ADMIN) (MANAGER, DRIVER không thể truy cập)
+- BR-036-2: Loại giá trị cài đặt: Chuỗi (STRING), Số (NUMBER), Đúng/Sai (BOOLEAN), JSON
+- BR-036-3: Danh mục cài đặt: Chung (GENERAL), Cân (WEIGHING), Thông báo (NOTIFICATION), Bảo mật (SECURITY)
+- BR-036-4: Hỗ trợ sửa cài đặt riêng lẻ (PUT /api/v1/admin/settings/{key}) và sửa hàng loạt (PUT /api/v1/admin/settings/batch)
+- BR-036-5: Cài đặt có is_editable=false không thể sửa (chỉ đọc)
+- BR-036-6: Kiểm tra giá trị đầu vào theo value_type (không thể nhập chuỗi cho loại NUMBER, v.v.)
+
+**Luồng chính (Main Flow)**:
+1. Quản trị viên vào màn hình cài đặt hệ thống (/admin/settings)
+2. Hiển thị danh sách cài đặt theo danh mục
+3. Chọn cài đặt có thể chỉnh sửa → Sửa giá trị
+4. Nhấn "Lưu" → PUT /api/v1/admin/settings/{key}
+5. Kiểm tra giá trị cài đặt rồi lưu
+
+**Luồng ngoại lệ (Exception Flow)**:
+- EF-036-1: Cố sửa cài đặt không thể chỉnh sửa → Lỗi "Đây là cài đặt không thể sửa đổi"
+- EF-036-2: Loại giá trị không khớp → Lỗi "Vui lòng nhập giá trị đúng định dạng"
+
+**Yêu cầu UI/UX**:
+- Hiển thị nhóm theo danh mục
+- UI nhập liệu theo loại giá trị (văn bản/số/toggle/JSON editor)
+- Cài đặt không thể chỉnh sửa hiển thị dạng vô hiệu hóa
+
+**Chức năng liên quan**: FUNC-008 (Quản lý thông tin cơ sở)
+
+---
+
+### FUNC-037: Hỏi đáp/Khiếu nại
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-037 |
+| **Tên chức năng** | Hỏi đáp/Khiếu nại |
+| **Ánh xạ PRD** | FR-004, FR-007 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | MEDIUM |
+
+**Mô tả chức năng**: Người dùng đăng ký hỏi đáp và khiếu nại qua hệ thống, quản trị viên/quản lý tiếp nhận và quản lý các yêu cầu.
+
+**Điều kiện tiên quyết (Preconditions)**:
+- Đăng nhập hoàn tất
+
+**Điều kiện hậu (Postconditions)**:
+- Tạo bản ghi hỏi đáp
+- Gửi thông báo cho quản trị viên/quản lý
+
+**Dữ liệu đầu vào**:
+
+| Tên trường | Kiểu | Bắt buộc | Quy tắc kiểm tra |
+|------------|------|----------|-------------------|
+| inquiry_type | varchar(20) | Y | WEIGHING_ISSUE / DISPATCH_ISSUE / SYSTEM_ERROR / GENERAL / COMPLAINT / ETC |
+| title | varchar(200) | Y | Tiêu đề hỏi đáp (tối đa 200 ký tự) |
+| content | text | Y | Nội dung hỏi đáp |
+| related_dispatch_id | bigint | N | ID điều phối xe liên quan |
+| related_weighing_id | bigint | N | ID lượt cân liên quan |
+
+**Dữ liệu đầu ra**:
+
+| Tên trường | Kiểu | Mô tả |
+|------------|------|-------|
+| inquiry_id | bigint | ID hỏi đáp |
+| inquiry_type | string | Loại hỏi đáp |
+| title | string | Tiêu đề |
+| content | string | Nội dung |
+| user_name | string | Tên người hỏi (tự động liên kết) |
+| user_phone | string | Số điện thoại người hỏi (tự động liên kết) |
+| status | string | Tiếp nhận/Đang xử lý/Hoàn thành |
+| created_at | timestamptz | Thời điểm đăng ký |
+
+**Quy tắc nghiệp vụ**:
+- BR-037-1: Loại hỏi đáp: Vấn đề cân (WEIGHING_ISSUE), Vấn đề điều phối xe (DISPATCH_ISSUE), Lỗi hệ thống (SYSTEM_ERROR), Hỏi đáp chung (GENERAL), Khiếu nại (COMPLAINT), Khác (ETC)
+- BR-037-2: Khi đăng ký hỏi đáp, tự động liên kết thông tin người dùng (tên, số điện thoại) dựa trên người dùng đã đăng nhập
+- BR-037-3: Có thể liên kết tùy chọn ID điều phối xe liên quan (related_dispatch_id) hoặc ID lượt cân liên quan (related_weighing_id)
+- BR-037-4: Quản trị viên (ADMIN) và quản lý (MANAGER) có thể xem toàn bộ danh sách hỏi đáp
+- BR-037-5: Người dùng thông thường (DRIVER) chỉ xem được hỏi đáp do mình đăng ký
+
+**Luồng chính (Main Flow)**:
+1. Người dùng vào màn hình hỏi đáp
+2. Nhấn nút "Đăng ký hỏi đáp"
+3. Chọn loại hỏi đáp + nhập tiêu đề/nội dung
+4. (Tùy chọn) Liên kết ID điều phối xe/lượt cân liên quan
+5. Nhấn "Gửi" → POST /api/v1/inquiries
+6. Máy chủ tự động liên kết thông tin người dùng rồi lưu
+7. Gửi thông báo hỏi đáp mới cho quản trị viên/quản lý
+
+**Luồng thay thế (Alternative Flow)**:
+- AF-037-1: ADMIN/MANAGER → Xem toàn bộ danh sách hỏi đáp + thay đổi trạng thái (Tiếp nhận/Đang xử lý/Hoàn thành)
+
+**Chức năng liên quan**: FUNC-023 (Thông báo/Cuộc gọi hỏi đáp), FUNC-025 (Phân luồng cuộc gọi cố định)
+
+---
+
+### FUNC-038: Thống kê/Báo cáo
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-038 |
+| **Tên chức năng** | Thống kê/Báo cáo |
+| **Ánh xạ PRD** | FR-004 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | MEDIUM |
+
+**Mô tả chức năng**: Cung cấp các thống kê đa dạng (theo ngày, theo tháng, tóm tắt) về thực tích cân và hỗ trợ chức năng xuất file Excel.
+
+**Điều kiện tiên quyết (Preconditions)**:
+- Đăng nhập hoàn tất
+- Tồn tại dữ liệu thực tích cân
+
+**Điều kiện hậu (Postconditions)**:
+- Trả về kết quả tra cứu dữ liệu thống kê
+- Tải xuống file Excel (khi xuất)
+
+**Dữ liệu đầu vào**:
+
+| Tên trường | Kiểu | Bắt buộc | Quy tắc kiểm tra |
+|------------|------|----------|-------------------|
+| date_from | date | N | Ngày bắt đầu tra cứu |
+| date_to | date | N | Ngày kết thúc tra cứu |
+| company_id | bigint | N | Bộ lọc công ty vận tải |
+| item_type | varchar(20) | N | Bộ lọc loại hàng hóa |
+
+**Dữ liệu đầu ra**:
+
+| Tên trường | Kiểu | Mô tả |
+|------------|------|-------|
+| daily_statistics | array | Thống kê theo ngày (số lượng, tổng trọng lượng kg/ton theo ngày/công ty vận tải/hàng hóa) |
+| monthly_statistics | array | Thống kê theo tháng (số lượng, tổng trọng lượng kg/ton theo năm/tháng/công ty vận tải/hàng hóa) |
+| summary | object | Thống kê tóm tắt (tổng số lượng, tổng trọng lượng, phân bổ theo hàng hóa/công ty vận tải) |
+| excel_file | binary | File Excel (xlsx) |
+
+**Quy tắc nghiệp vụ**:
+- BR-038-1: Thống kê theo ngày: Tổng hợp theo ngày/công ty vận tải/hàng hóa (số lượng, tổng trọng lượng đơn vị kg và ton)
+- BR-038-2: Thống kê theo tháng: Tổng hợp theo năm/tháng/công ty vận tải/hàng hóa
+- BR-038-3: Thống kê tóm tắt: Tổng số lượng, tổng trọng lượng, phân bổ theo hàng hóa, phân bổ theo công ty vận tải
+- BR-038-4: Xuất Excel: Tạo file xlsx bằng Apache POI (cấu trúc sheet theo ngày/tháng/toàn bộ)
+- BR-038-5: Điều kiện lọc: Có thể kết hợp khoảng thời gian (date_from~date_to), công ty vận tải (company_id), hàng hóa (item_type)
+
+**Luồng chính (Main Flow)**:
+1. Người dùng vào màn hình thống kê/báo cáo (/statistics)
+2. Thiết lập điều kiện lọc (khoảng thời gian, công ty vận tải, hàng hóa)
+3. Nhấn "Tra cứu" → GET /api/v1/statistics/daily hoặc /monthly
+4. Hiển thị bảng thống kê và biểu đồ (ECharts)
+5. Nhấn "Tải xuống Excel" → GET /api/v1/statistics/export/excel
+
+**Luồng thay thế (Alternative Flow)**:
+- AF-038-1: Khi không thiết lập bộ lọc, hiển thị toàn bộ dữ liệu tháng hiện tại
+- AF-038-2: Khi chọn tab tóm tắt, hiển thị biểu đồ tròn theo hàng hóa/công ty vận tải
+
+**Yêu cầu UI/UX**:
+- Cấu trúc tab theo ngày/tháng/tóm tắt
+- Biểu đồ dựa trên ECharts (biểu đồ đường xu hướng theo ngày, biểu đồ tròn theo hàng hóa/công ty vận tải)
+- Nút tải xuống Excel
+
+**Chức năng liên quan**: FUNC-006 (Quản lý hiện trạng cân), FUNC-007 (Xử lý thực tích cân)
+
+**Ánh xạ yêu cầu phi chức năng**:
+- NFR-001 Hiệu năng: Truy vấn thống kê trong vòng 3 giây (tối ưu hóa chỉ mục và truy vấn tổng hợp)
+- NFR-005 Tính dùng được: Trực quan hóa ECharts, xuất Excel
+
+---
+
+### FUNC-039: Cải thiện layout Frontend
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-039 |
+| **Tên chức năng** | Cải thiện layout Frontend |
+| **Ánh xạ PRD** | FR-004 |
+| **Mô-đun** | Hệ thống quản lý cân thông minh trên Web |
+| **Độ ưu tiên** | MEDIUM |
+
+**Mô tả chức năng**: Cải thiện toàn diện layout UI của hệ thống quản lý web để nâng cao tính dùng được và thẩm mỹ.
+
+**Hạng mục cải thiện**:
+
+**1. Component TablePageLayout**:
+- Cấu trúc gồm vùng header cố định (FixedArea) và vùng cuộn (ScrollArea)
+- Header cố định chứa tiêu đề trang, tìm kiếm/bộ lọc, nút hành động
+- Vùng cuộn hiển thị bảng dữ liệu
+- Áp dụng layout nhất quán cho toàn bộ trang bảng
+
+**2. Ẩn thanh cuộn toàn cục**:
+- Ẩn thanh cuộn toàn cục bằng CSS (cải thiện thẩm mỹ)
+- Duy trì chức năng cuộn bằng chuột và cảm ứng
+
+**3. SortableTable fill-height**:
+- Áp dụng CSS flex layout để bảng chiếm 100% không gian khả dụng
+- Vùng bảng mở rộng đến cuối màn hình bất kể lượng dữ liệu
+
+**4. Cải thiện header MainLayout**:
+- Áp dụng hiệu ứng backdrop-filter: blur (hiệu ứng kính mờ bán trong suốt)
+- Bố trí nút yêu thích, toggle theme (sáng/tối), menu người dùng
+- Header cố định, luôn hiển thị khi cuộn
+
+**5. Cải thiện điều hướng đa tab**:
+- Hỗ trợ menu ngữ cảnh nhấn chuột phải (đóng tab, đóng tab khác, đóng tất cả)
+- Phím tắt: Ctrl+W (đóng tab hiện tại), Ctrl+Tab (chuyển tab tiếp)
+- Hiển thị đồng thời tối đa 10 tab, hỗ trợ tab cố định (điều khiển trạm cân)
+
+**Quy tắc nghiệp vụ**:
+- BR-039-1: Áp dụng TablePageLayout cho toàn bộ trang bảng để cung cấp UX nhất quán
+- BR-039-2: Ẩn thanh cuộn chỉ là hiệu ứng thị giác, không ảnh hưởng chức năng cuộn
+- BR-039-3: Phản ánh ngay lập tức các thành phần layout khi chuyển đổi theme sáng/tối
+
+**Chức năng liên quan**: FUNC-005 (Quản lý điều phối xe), FUNC-006 (Hiện trạng cân), FUNC-008 (Quản lý thông tin cơ sở), FUNC-030 (Quản lý xuất cổng)
+
+**Ánh xạ yêu cầu phi chức năng**:
+- NFR-005 Tính dùng được: Layout nhất quán, phím tắt, quản lý tab trực quan
+
+---
+
 ## 4. Mô-đun 3: Chương trình CS cân
 
 ### FUNC-010: Nhận giá trị trọng lượng từ Indicator
@@ -1371,6 +1970,161 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 
 ---
 
+### FUNC-029-API: API Yêu thích
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-029-API |
+| **Tên chức năng** | API Yêu thích |
+| **Ánh xạ PRD** | FR-008 |
+| **Mô-đun** | API di động |
+| **Độ ưu tiên** | MEDIUM |
+
+**Endpoint API**:
+
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | /api/v1/favorites | Tra cứu danh sách yêu thích |
+| POST | /api/v1/favorites | Đăng ký yêu thích |
+| DELETE | /api/v1/favorites/{id} | Xóa yêu thích |
+| PUT | /api/v1/favorites/reorder | Thay đổi thứ tự yêu thích |
+
+---
+
+### FUNC-030-API: API Thông báo/FAQ
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-030-API |
+| **Tên chức năng** | API Thông báo/FAQ |
+| **Ánh xạ PRD** | FR-008 |
+| **Mô-đun** | API di động |
+| **Độ ưu tiên** | MEDIUM |
+
+**Endpoint API**:
+
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | /api/v1/notices | Danh sách thông báo |
+| GET | /api/v1/notices/{id} | Chi tiết thông báo |
+| POST | /api/v1/notices | Đăng ký thông báo (ADMIN) |
+| PUT | /api/v1/notices/{id} | Sửa thông báo (ADMIN) |
+| DELETE | /api/v1/notices/{id} | Xóa thông báo (ADMIN) |
+| PUT | /api/v1/notices/{id}/pin | Toggle ghim thông báo (ADMIN) |
+| PUT | /api/v1/notices/{id}/publish | Toggle phát hành thông báo (ADMIN) |
+| GET | /api/v1/faqs | Danh sách FAQ (theo danh mục) |
+| GET | /api/v1/faqs/{id} | Chi tiết FAQ |
+| POST | /api/v1/faqs | Đăng ký FAQ (ADMIN) |
+| PUT | /api/v1/faqs/{id} | Sửa FAQ (ADMIN) |
+| DELETE | /api/v1/faqs/{id} | Xóa FAQ (ADMIN) |
+
+---
+
+### FUNC-031-API: API Giám sát thiết bị
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-031-API |
+| **Tên chức năng** | API Giám sát thiết bị |
+| **Ánh xạ PRD** | FR-008 |
+| **Mô-đun** | API di động |
+| **Độ ưu tiên** | HIGH |
+
+**Endpoint API**:
+
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | /api/v1/devices | Tra cứu danh sách thiết bị |
+| GET | /api/v1/devices/{id} | Tra cứu chi tiết thiết bị |
+| GET | /api/v1/devices/summary | Tóm tắt thiết bị (đếm theo trạng thái) |
+| PUT | /api/v1/devices/{id}/heartbeat | Cập nhật healthcheck thiết bị |
+
+---
+
+### FUNC-032-API: API Trang cá nhân/Hồ sơ
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-032-API |
+| **Tên chức năng** | API Trang cá nhân/Hồ sơ |
+| **Ánh xạ PRD** | FR-008 |
+| **Mô-đun** | API di động |
+| **Độ ưu tiên** | MEDIUM |
+
+**Endpoint API**:
+
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | /api/v1/users/me | Tra cứu hồ sơ cá nhân |
+| PUT | /api/v1/users/me | Sửa hồ sơ |
+| PUT | /api/v1/users/me/password | Đổi mật khẩu |
+| PUT | /api/v1/users/me/notification-settings | Thay đổi cài đặt thông báo |
+
+---
+
+### FUNC-033-API: API Hỏi đáp/Khiếu nại
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-033-API |
+| **Tên chức năng** | API Hỏi đáp/Khiếu nại |
+| **Ánh xạ PRD** | FR-008 |
+| **Mô-đun** | API di động |
+| **Độ ưu tiên** | MEDIUM |
+
+**Endpoint API**:
+
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | /api/v1/inquiries | Tra cứu danh sách hỏi đáp |
+| GET | /api/v1/inquiries/{id} | Tra cứu chi tiết hỏi đáp |
+| POST | /api/v1/inquiries | Đăng ký hỏi đáp |
+| PUT | /api/v1/inquiries/{id}/status | Thay đổi trạng thái hỏi đáp (ADMIN/MANAGER) |
+
+---
+
+### FUNC-034-API: API Thống kê/Báo cáo
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-034-API |
+| **Tên chức năng** | API Thống kê/Báo cáo |
+| **Ánh xạ PRD** | FR-008 |
+| **Mô-đun** | API di động |
+| **Độ ưu tiên** | MEDIUM |
+
+**Endpoint API**:
+
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | /api/v1/statistics/daily | Tra cứu thống kê theo ngày |
+| GET | /api/v1/statistics/monthly | Tra cứu thống kê theo tháng |
+| GET | /api/v1/statistics/summary | Tra cứu thống kê tóm tắt |
+| GET | /api/v1/statistics/export/excel | Xuất Excel (xlsx) |
+
+---
+
+### FUNC-035-API: API Cài đặt hệ thống
+
+| Hạng mục | Nội dung |
+|----------|---------|
+| **Mã chức năng** | FUNC-035-API |
+| **Tên chức năng** | API Cài đặt hệ thống |
+| **Ánh xạ PRD** | FR-008 |
+| **Mô-đun** | API di động |
+| **Độ ưu tiên** | MEDIUM |
+
+**Endpoint API**:
+
+| Method | Path | Mô tả |
+|--------|------|-------|
+| GET | /api/v1/admin/settings | Tra cứu toàn bộ cài đặt (ADMIN) |
+| GET | /api/v1/admin/settings/{key} | Tra cứu cài đặt riêng lẻ (ADMIN) |
+| PUT | /api/v1/admin/settings/{key} | Sửa cài đặt riêng lẻ (ADMIN) |
+| PUT | /api/v1/admin/settings/batch | Sửa cài đặt hàng loạt (ADMIN) |
+
+---
+
 ## 7. Mô-đun 6: Tích hợp hạ tầng H/W
 
 ### FUNC-040: Tích hợp camera LPR
@@ -1526,6 +2280,15 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 | FR-004 | Hệ thống quản lý cân trên Web | FUNC-006 | Quản lý hiện trạng cân | M2: Web |
 | FR-004 | Hệ thống quản lý cân trên Web | FUNC-008 | Quản lý thông tin cơ sở | M2: Web |
 | FR-004 | Hệ thống quản lý cân trên Web | FUNC-030 | Quản lý xuất cổng | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-031 | Chức năng Yêu thích | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-032 | Hướng dẫn sử dụng/FAQ | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-033 | Giám sát thiết bị | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-034 | Trang cá nhân | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-035 | Thông báo | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-036 | Cài đặt hệ thống | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-037 | Hỏi đáp/Khiếu nại | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-038 | Thống kê/Báo cáo | M2: Web |
+| FR-004 | Hệ thống quản lý cân trên Web | FUNC-039 | Cải thiện layout Frontend | M2: Web |
 | FR-005 | Chương trình CS trạm cân | FUNC-010 | Nhận giá trị trọng lượng từ Indicator | M3: CS |
 | FR-005 | Chương trình CS trạm cân | FUNC-011 | Quy trình cân tự động LPR | M3: CS |
 | FR-005 | Chương trình CS trạm cân | FUNC-013 | Điều khiển thanh chắn tự động | M3: CS |
@@ -1542,6 +2305,13 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 | FR-008 | API di động | FUNC-026-API | API Thông tin điều phối xe | M5: API |
 | FR-008 | API di động | FUNC-027-API | API Xử lý cân | M5: API |
 | FR-008 | API di động | FUNC-028-API | API Thông báo Push | M5: API |
+| FR-008 | API di động | FUNC-029-API | API Yêu thích | M5: API |
+| FR-008 | API di động | FUNC-030-API | API Thông báo/FAQ | M5: API |
+| FR-008 | API di động | FUNC-031-API | API Giám sát thiết bị | M5: API |
+| FR-008 | API di động | FUNC-032-API | API Trang cá nhân/Hồ sơ | M5: API |
+| FR-008 | API di động | FUNC-033-API | API Hỏi đáp/Khiếu nại | M5: API |
+| FR-008 | API di động | FUNC-034-API | API Thống kê/Báo cáo | M5: API |
+| FR-008 | API di động | FUNC-035-API | API Cài đặt hệ thống | M5: API |
 
 ### 9.2 Kết quả xác minh ánh xạ
 
@@ -1550,13 +2320,13 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 | FR-001 | 5 | 100% | COVERED |
 | FR-002 | 3 | 100% | COVERED |
 | FR-003 | 7 | 100% | COVERED |
-| FR-004 | 4 | 100% | COVERED |
+| FR-004 | 13 | 100% | COVERED |
 | FR-005 | 7 | 100% | COVERED |
 | FR-006 | 2 | 100% | COVERED |
 | FR-007 | 3 | 100% | COVERED |
-| FR-008 | 4 | 100% | COVERED |
+| FR-008 | 11 | 100% | COVERED |
 
-**Tổng cộng 35 đặc tả chức năng bao phủ 100% 8 yêu cầu chức năng PRD.**
+**Tổng cộng 51 đặc tả chức năng bao phủ 100% 8 yêu cầu chức năng PRD.**
 
 ### 9.3 Xác minh ánh xạ NFR
 

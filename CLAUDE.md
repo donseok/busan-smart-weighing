@@ -78,7 +78,7 @@ dotnet test                           # xUnit 테스트
 
 `Controller` → `Service` → `Repository` → `Entity/DB`
 
-### 패키지 구조 (도메인별)
+### 패키지 구조 (22개 도메인)
 
 ```
 com.dongkuk.weighing/
@@ -130,6 +130,44 @@ com.dongkuk.weighing/
 │   └── service/      #   OtpService (Redis 기반 OTP 관리)
 ├── dashboard/        # 대시보드 통계
 ├── audit/            # 감사 로그
+├── favorite/         # 즐겨찾기 관리
+│   ├── controller/   #   FavoriteController (조회/추가/삭제/토글/체크/순서변경)
+│   ├── domain/       #   Favorite, FavoriteType(MENU/DISPATCH/VEHICLE/COMPANY/SCALE), FavoriteRepository
+│   ├── dto/          #   FavoriteCreateRequest, FavoriteCheckRequest, FavoriteReorderRequest, FavoriteResponse
+│   └── service/      #   FavoriteService (최대 20개, 중복 방지, 드래그 순서 변경)
+├── help/             # 이용 안내 (FAQ)
+│   ├── controller/   #   HelpController (FAQ CRUD, 카테고리별 조회)
+│   ├── domain/       #   Faq, FaqCategory(WEIGHING/DISPATCH/ACCOUNT/SYSTEM/OTHER), FaqRepository
+│   ├── dto/          #   FaqCreateRequest, FaqUpdateRequest, FaqResponse
+│   └── service/      #   FaqService (조회수 카운팅, 공개/비공개 관리)
+├── inquiry/          # 문의/민원 관리
+│   ├── controller/   #   InquiryCallController (등록/전체조회/내 문의 조회)
+│   ├── domain/       #   InquiryCall, InquiryType(WEIGHING_ISSUE/DISPATCH_ISSUE/SYSTEM_ERROR/GENERAL_INQUIRY/COMPLAINT/OTHER)
+│   ├── dto/          #   InquiryCallCreateRequest, InquiryCallResponse
+│   └── service/      #   InquiryCallService (사용자 정보 자동 연결, 페이징)
+├── monitoring/       # 장비 모니터링
+│   ├── controller/   #   DeviceMonitoringController (장비 조회/상태 변경/요약/헬스체크)
+│   ├── domain/       #   DeviceStatus, DeviceType(SCALE/LPR_CAMERA/INDICATOR/BARRIER_GATE), ConnectionStatus(ONLINE/OFFLINE/ERROR)
+│   ├── dto/          #   DeviceStatusUpdateRequest, DeviceStatusResponse, DeviceSummaryResponse
+│   └── service/      #   DeviceMonitoringService (5분 무응답 시 오프라인 전환, WebSocket 알림)
+├── mypage/           # 마이페이지
+│   ├── controller/   #   MyPageController (프로필 조회/수정, 비밀번호 변경, 알림 설정)
+│   ├── dto/          #   MyPageResponse, ProfileUpdateRequest, PasswordChangeRequest, NotificationSettingsRequest
+│   └── service/      #   MyPageService (프로필/비밀번호/알림 설정 관리)
+├── notice/           # 공지사항 관리
+│   ├── controller/   #   NoticeController (CRUD + 검색/고정/공개 토글, 카테고리별 조회)
+│   ├── domain/       #   Notice, NoticeCategory(SYSTEM/MAINTENANCE/UPDATE/GENERAL), NoticeRepository
+│   ├── dto/          #   NoticeCreateRequest, NoticeUpdateRequest, NoticeResponse
+│   └── service/      #   NoticeService (고정 우선 정렬, 조회수, 발행일 자동 설정)
+├── setting/          # 시스템 설정 (ADMIN 전용)
+│   ├── controller/   #   SystemSettingController (조회/수정/일괄수정)
+│   ├── domain/       #   SystemSetting, SettingType(STRING/NUMBER/BOOLEAN/JSON), SettingCategory(GENERAL/WEIGHING/NOTIFICATION/SECURITY)
+│   ├── dto/          #   SystemSettingRequest, SystemSettingResponse, BulkSettingRequest
+│   └── service/      #   SystemSettingService (편집 가능 여부 검증)
+├── statistics/       # 통계/보고서
+│   ├── controller/   #   StatisticsController (일별/월별/요약/엑셀 내보내기)
+│   ├── dto/          #   DailyStatisticsResponse, MonthlyStatisticsResponse, StatisticsSummaryResponse
+│   └── service/      #   StatisticsService (집계 쿼리, Apache POI 엑셀 생성)
 ├── websocket/        # STOMP 실시간 메시지
 │   ├── dto/          #   WeighingUpdateMessage, ScaleStatusMessage
 │   └── service/      #   WebSocketNotificationService (실시간 계량/장비 상태 브로드캐스트)
@@ -158,6 +196,14 @@ com.dongkuk.weighing/
 | 기준정보 | `/api/v1/master/*` | 운송사/차량/계량대/공통코드 CRUD |
 | 관리자 | `/api/v1/admin/*` | 사용자 관리, 감사 로그, 시스템 설정 |
 | 대시보드 | `/api/v1/dashboard` | 일별/월별/품목별 통계 |
+| 즐겨찾기 | `/api/v1/favorites` | 조회, 추가, 삭제, 토글, 체크, 순서 변경 (최대 20개) |
+| 문의/민원 | `/api/v1/inquiries` | 문의 등록, 전체 조회(ADMIN/MANAGER), 내 문의 조회 |
+| 통계 | `/api/v1/statistics` | 일별/월별 통계, 요약, 엑셀 내보내기 (Apache POI) |
+| 장비 관제 | `/api/v1/monitoring` | 장비 목록/상세, 상태 변경, 요약, 헬스체크 |
+| 공지사항 | `/api/v1/notices` | CRUD + 검색, 고정/공개 토글, 카테고리별 조회 (ADMIN 관리) |
+| 마이페이지 | `/api/v1/mypage` | 프로필 조회/수정, 비밀번호 변경, 알림 설정 |
+| 이용 안내 | `/api/v1/help` | FAQ CRUD, 카테고리별 조회, 조회수 카운팅 (ADMIN 관리) |
+| 시스템 설정 | `/api/v1/admin/settings` | 설정 조회/수정/일괄수정 (ADMIN 전용) |
 
 ### API 응답 형식
 
@@ -202,6 +248,7 @@ src/
 │   ├── MasterCrudPage.tsx     # 기준정보 CRUD 공통 컴포넌트 (테이블+모달+검색)
 │   ├── OnboardingTour.tsx     # 신규 사용자 온보딩 가이드 (Ant Design Tour)
 │   ├── SortableTable.tsx      # 드래그 정렬 가능 테이블 (@dnd-kit)
+│   ├── TablePageLayout.tsx    # 테이블 페이지 공통 레이아웃 (고정 헤더+스크롤)
 │   ├── dashboard/             # 대시보드 탭 컴포넌트
 │   │   ├── OverviewTab.tsx    #   개요 탭 (KPI 카드, 차트)
 │   │   ├── RealtimeTab.tsx    #   실시간 탭 (WebSocket 기반)
@@ -258,10 +305,12 @@ src/
 │       ├── MasterCompanyPage.tsx  # 운송사 관리
 │       ├── MasterScalePage.tsx    # 계량대 관리
 │       └── MasterVehiclePage.tsx  # 차량 관리
+├── styles/
+│   └── tableScroll.css        # 전역 스크롤바 숨김 + 테이블 고정 헤더/스크롤 바디 CSS
 ├── theme/
 │   └── themeConfig.ts         # Ant Design 5 테마 토큰 (다크/라이트)
 ├── types/
-│   ├── index.ts               # 공통 TypeScript 인터페이스
+│   ├── index.ts               # 공통 TypeScript 인터페이스 (27개 도메인 타입)
 │   └── weighingStation.ts     # 계량소 관제 전용 타입
 └── utils/
     ├── chartOptions.ts        # ECharts 공통 차트 옵션
@@ -299,15 +348,20 @@ src/
 - `MasterCrudPage.tsx` 공통 컴포넌트로 기준정보 CRUD 패턴 표준화
 - `useCrudState.ts` + `useApiCall.ts`로 CRUD 상태 관리 재사용
 - `AuthContext.tsx`에서 인증 상태를 전역 관리 (로그인/로그아웃/토큰 자동갱신)
-- `TabContext.tsx`로 다중 탭 네비게이션 (최대 10탭, 고정탭 지원)
+- `TabContext.tsx`로 다중 탭 네비게이션 (최대 10탭, 고정탭: WeighingStation, 컨텍스트 메뉴, Ctrl+W/Ctrl+Tab)
+- `ThemeContext.tsx`로 다크/라이트 테마 전환 (세션 간 유지)
 - Ant Design Form + rules 배열로 폼 검증 (validators.ts에 공통 규칙 정의)
 - `useWebSocket.ts` + `useWeighingStationSocket.ts`로 WebSocket 연결 관리
-- `SortableTable.tsx`에 @dnd-kit 기반 드래그 정렬
+- `SortableTable.tsx`에 @dnd-kit 기반 드래그 컬럼 정렬 + localStorage 순서 저장 + fill-height 지원
+- **테이블 페이지 레이아웃**: `TablePageLayout.tsx` (FixedArea + ScrollArea) + `tableScroll.css`로 고정 헤더/스크롤 바디 표준화
 - `AnimatedNumber.tsx`로 대시보드 KPI 숫자 애니메이션
 - `OnboardingTour.tsx`로 신규 사용자 가이드 투어
+- `FavoriteButton.tsx` + `FavoritesList.tsx`로 즐겨찾기 기능 (Popover 패널)
+- **MainLayout**: 사이드바(240px 접기 가능) + 고정 헤더(backdrop blur) + 다중 탭(편집 가능 카드) + 콘텐츠 영역
 - Vite 개발 서버 프록시: `/api` → `localhost:8080`, `/ws` → `localhost:8080`
 - 빌드 시 vendor/antd/echarts 청크 분리
 - ECharts 6.0 tree-shaking 설정 (`echartsSetup.ts`)
+- 전역 스크롤바 숨김 (Firefox scrollbar-width:none + WebKit ::-webkit-scrollbar)
 
 ### TypeScript 설정
 

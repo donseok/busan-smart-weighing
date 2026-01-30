@@ -1,9 +1,9 @@
 # Busan Smart Weighing System - Operator Manual
 
 **Document Number**: MAN-OPS-002
-**Version**: 1.1
-**Date**: 2026-01-29
-**Target Audience**: System Administrator / Operator (ADMIN)
+**Version**: 1.3
+**Date**: 2026-01-30
+**Target Audience**: System Administrator / Operator (ADMIN, MANAGER)
 **Reference Documents**: TRD-20260127-155235, PRD-20260127-154446, FUNC-SPEC v1.0
 **Status**: Draft
 
@@ -18,6 +18,13 @@
 5. [System Monitoring](#5-system-monitoring)
 6. [Database Management](#6-database-management)
 7. [Master Data Management](#7-master-data-management)
+   - 7.5 [System Settings Management](#75-system-settings-management)
+   - 7.6 [Notice Management](#76-notice-management)
+   - 7.7 [FAQ Management](#77-faq-management)
+   - 7.8 [Device Monitoring Management](#78-device-monitoring-management)
+   - 7.9 [Inquiry Management](#79-inquiry-management)
+   - 7.10 [Statistics/Report Management](#710-statisticsreport-management)
+   - 7.11 [Favorites Management](#711-favorites-management)
 8. [Equipment Management](#8-equipment-management)
 9. [Incident Response](#9-incident-response)
 10. [Backup and Recovery](#10-backup-and-recovery)
@@ -1889,11 +1896,50 @@ System settings management (`/admin/settings`) allows adjustment of system-wide 
 3. Modify setting values and click the **[Save]** button.
 4. Individual item modification or **bulk modification** functionality is available.
 
+#### Setting Categories
+
+System settings are classified into the following four categories:
+
+| Category | Description | Example Settings |
+|----------|-------------|------------------|
+| General (GENERAL) | Core system operational parameters | System name, default language, timezone |
+| Weighing (WEIGHING) | Weighing process related settings | Stabilization wait time, max re-weigh count, overload threshold ratio |
+| Notification (NOTIFICATION) | Notification delivery settings | FCM enabled, notification retention period, SMS delivery enabled |
+| Security (SECURITY) | Security and authentication settings | Session timeout, password expiry days, max login failure count |
+
+#### Setting Value Types
+
+Each setting item has one of the following data types:
+
+| Type | Description | Input Control |
+|------|-------------|---------------|
+| String (STRING) | Text value | Text input field |
+| Number (NUMBER) | Integer or decimal value | Numeric input field |
+| Boolean (BOOLEAN) | Enabled/disabled value | Toggle switch |
+| JSON | Complex structured data | JSON editor |
+
+#### Individual Setting Modification
+
+1. Locate the item to change in the settings list (filter by category tab).
+2. Click the **[Edit]** button for the target item.
+3. Enter the new setting value.
+4. Click the **[Save]** button to apply the change immediately.
+
+> **Note**: Some settings are designated as **non-editable (read-only)**. These settings can only be changed through environment variables or server configuration files, and the edit button is disabled on screen.
+
+#### Bulk Setting Modification
+
+When multiple settings need to be changed at once, use the bulk modification feature:
+
+1. Click the **[Bulk Edit]** button at the top of the settings screen.
+2. Modify the values of the desired setting items.
+3. Click the **[Bulk Save]** button to apply all changes at once.
+
 > **Caution**: System setting changes take effect immediately. Record the current values before making changes and verify normal operation after changes. Setting change history is automatically recorded in the audit log.
 
 ### 7.6 Notice Management
 
-Administrators can create, edit, and delete notices in the web system.
+Administrators (ADMIN) can create, edit, and delete notices in the web system and manage their publication status. Notice management functionality is available only to the ADMIN role.
 
 #### Creating a Notice
 
@@ -1903,25 +1949,55 @@ Administrators can create, edit, and delete notices in the web system.
    | Field | Required | Description |
    |-------|:--------:|-------------|
    | Title | O | Notice title |
-   | Category | O | Notice classification (System, Operations, Maintenance, Other, etc.) |
-   | Content | O | Notice body (markdown supported) |
-   | Attachments | X | Related file attachments |
+   | Category | O | Select from System / Maintenance / Update / General |
+   | Content | O | Notice body |
 
-3. Click the **[Save]** button. After saving, the notice is in **unpublished** status by default.
+3. Click the **[Save]** button. After saving, the notice is in **unpublished (private)** status by default.
 
-#### Publishing/Unpublishing Notices
+#### Notice Categories
 
-- Click the **[Publish]** button on a notice in the list to make it visible to users.
-- To make a published notice private, click the **[Unpublish]** button.
+| Category | Description | Usage Examples |
+|----------|-------------|----------------|
+| System | Important system-related announcements | Server migration, system upgrade |
+| Maintenance | Scheduled/unscheduled maintenance notices | Night maintenance, equipment calibration schedule |
+| Update | Feature addition and change announcements | New feature release, UI change notice |
+| General | Other operational notices | Operating hours change, general announcements |
 
-#### Pinning/Unpinning Notices
+#### Editing/Deleting Notices
 
-- Important notices can be pinned to the top of the list by clicking the **[Pin (📌)]** button.
-- To unpin a notice, click the **[Unpin]** button.
+- **Edit**: Click the **[Edit]** button on the target notice in the list to modify the title, content, and category.
+- **Delete**: Click the **[Delete]** button on the target notice in the list. Deleted notices cannot be recovered, so proceed with caution.
+
+#### Publish Toggle
+
+Notices have either a **published (public)** or **unpublished (private)** status.
+
+- Click the **[Publish]** toggle on a notice in the list to make it visible to users.
+- The **publication date/time** is automatically recorded when published.
+- To make a published notice private again, click the toggle once more. The original publication date/time record is preserved even after switching to private.
+
+> **Note**: Unpublished (private) notices are not displayed to regular users and are only visible in the ADMIN-only management list.
+
+#### Pin Toggle
+
+Important notices can be pinned to the top of the list.
+
+- Click the **[Pin]** toggle on a notice in the list to fix it at the top of the list.
+- To unpin, click the toggle again.
+- Multiple notices can be pinned simultaneously; pinned notices are sorted in descending order by publication date/time.
+
+#### Admin-Only List
+
+ADMIN users can view the complete list including unpublished notices on the **[Notice Management]** screen. The admin-only list displays the following additional information:
+
+- Publication status indicator (Published/Unpublished badge)
+- Pin status indicator
+- Publication date/time
+- Author information
 
 ### 7.7 FAQ Management
 
-Administrators can create and manage Frequently Asked Questions (FAQ).
+Administrators (ADMIN) can create, edit, and delete Frequently Asked Questions (FAQ) and manage their visibility.
 
 #### Creating a FAQ
 
@@ -1931,18 +2007,241 @@ Administrators can create and manage Frequently Asked Questions (FAQ).
 
    | Field | Required | Description |
    |-------|:--------:|-------------|
-   | Category | O | Question classification (Login, Dispatch, Weighing, Gate Pass, Other, etc.) |
-   | Question | O | Frequently asked question |
-   | Answer | O | Answer to the question |
+   | Category | O | Select from Weighing / Dispatch / Account / System / Other |
+   | Question | O | Frequently asked question content |
+   | Answer | O | Detailed answer to the question |
+   | Sort Order | O | Display order in the list (lower numbers appear higher) |
 
-4. Click the **[Save]** button.
+4. Click the **[Save]** button. By default, the FAQ is saved in **published (public)** status.
 
-#### Editing/Deleting FAQs
+#### FAQ Categories
 
-- Click the **[Edit]** or **[Delete]** button on the target item in the FAQ list.
-- Deleted FAQs are immediately removed from the user-facing screen.
+| Category | Description | Example Questions |
+|----------|-------------|-------------------|
+| Weighing | Weighing process related questions | How do I request a re-weigh? |
+| Dispatch | Dispatch management related questions | Can I modify a dispatch after registration? |
+| Account | Login and account related questions | I forgot my password. |
+| System | System usage related questions | What browsers are supported? |
+| Other | Other general questions | What are the operating hours? |
 
-> **Note**: FAQs are exposed to users immediately upon registration, without a publish/unpublish setting.
+#### Editing FAQs
+
+Click the **[Edit]** button on the target item in the FAQ list to modify the following:
+
+- Question content
+- Answer content
+- Category
+- Sort order
+- Visibility (Public/Private toggle)
+
+FAQs switched to private are not displayed to regular users and are only visible in the admin-only list.
+
+#### Deleting FAQs
+
+- Click the **[Delete]** button on the target item in the FAQ list.
+- Deleted FAQs are immediately removed from the user-facing screen and cannot be recovered.
+
+#### Admin-Only List
+
+ADMIN users can view the complete list including private FAQs on the **[FAQ Management]** screen. The admin-only list displays the following additional information:
+
+- Visibility status indicator (Public/Private badge)
+- View count statistics (number of times each FAQ has been viewed by users)
+- Sort order value
+- Created date/time and last modified date/time
+
+> **Note**: Use view count statistics to identify frequently accessed questions and adjust sort order to place high-priority FAQs at the top of the list.
+
+### 7.8 Device Monitoring Management
+
+Device monitoring management provides real-time visibility into the connection status of all equipment installed at the weighbridge site.
+
+#### Device Status Inquiry
+
+View the status of all devices from **[System Management] > [Device Monitoring]** in the web management interface. The following filters are available:
+
+**Filter by Type**:
+
+| Device Type | Code | Description |
+|-------------|------|-------------|
+| Weighbridge | SCALE | Weighing equipment that measures vehicle weight |
+| LPR Camera | LPR_CAMERA | Camera that recognizes vehicle license plates |
+| Indicator | INDICATOR | Device that displays and transmits weight values |
+| Barrier | BARRIER | Barrier that controls vehicle entry/exit |
+
+**Filter by Status**:
+
+| Status | Display Color | Description |
+|--------|---------------|-------------|
+| ONLINE (Normal) | Green | Device is communicating normally |
+| OFFLINE | Gray | Communication is disconnected |
+| ERROR | Red | Device is responding but returning abnormal data |
+
+#### Manual Device Status Change
+
+Administrators (ADMIN, MANAGER) can manually change a device's connection status:
+
+1. Select the target device from the device list.
+2. Click the **[Change Status]** button.
+3. Select the connection status (ONLINE/OFFLINE/ERROR) and enter an error message if needed.
+4. Click the **[Save]** button to apply the status change immediately.
+
+> **Note**: When a device status changes, a real-time notification is sent to all connected users via WebSocket. The updated status is immediately reflected on the Device Monitoring screen and the Weighing Station Control screen.
+
+#### Health Check Execution
+
+Administrators (ADMIN) can manually execute a health check across all devices:
+
+1. Click the **[Run Health Check]** button on the Device Monitoring screen.
+2. The system checks the communication status of all registered devices.
+3. Devices that have been **unresponsive for more than 5 minutes** are automatically set to OFFLINE status.
+4. Health check results are displayed on screen.
+
+API-based health check execution:
+
+```
+POST /api/v1/monitoring/health-check
+Authorization: Bearer {admin_access_token}
+```
+
+#### Device Summary Dashboard
+
+A device health summary is displayed as cards at the top of the Device Monitoring screen:
+
+| Summary Item | Description |
+|--------------|-------------|
+| Total Devices | Total number of devices registered in the system |
+| Online | Number of devices communicating normally (green) |
+| Offline | Number of devices with disconnected communication (gray) |
+| Error | Number of devices in abnormal status (red) |
+
+The summary dashboard provides an at-a-glance view of distribution by type and status. It is also available via API:
+
+```
+GET /api/v1/monitoring/summary
+```
+
+### 7.9 Inquiry Management
+
+Administrators (ADMIN) and operators (MANAGER) can view and process inquiries and complaints submitted by users.
+
+#### Inquiry List
+
+1. Select **[Inquiry Management]** from the left menu or **[Inquiries/Complaints]** from the admin menu.
+2. The full inquiry list is displayed with pagination.
+3. Filter by inquiry type, processing status, or date range.
+
+#### Inquiry Types
+
+| Inquiry Type | Code | Description |
+|--------------|------|-------------|
+| Weighing Issue | WEIGHING_ISSUE | Weighing errors, re-weigh requests, etc. |
+| Dispatch Issue | DISPATCH_ISSUE | Missing dispatches, dispatch modification requests, etc. |
+| System Error | SYSTEM_ERROR | Screen errors, feature malfunctions, etc. |
+| General Inquiry | GENERAL_INQUIRY | System usage questions, operational inquiries, etc. |
+| Complaint | COMPLAINT | Service dissatisfaction, improvement requests, etc. |
+| Other | ETC | Inquiries not covered by the above categories |
+
+#### Related Information
+
+The inquiry detail screen displays dispatch and weighing information related to the inquiry:
+
+- **Related Dispatch Information**: Dispatch number, vehicle number, and dispatch status linked to the inquiry
+- **Related Weighing Information**: Weighing record, gross weight/tare weight/net weight, and weighing status linked to the inquiry
+
+#### Handler Notes
+
+Administrators or operators can record processing details as notes on an inquiry:
+
+1. Locate the **[Write Note]** area on the inquiry detail screen.
+2. Enter the processing details, actions taken, response history, etc.
+3. Click the **[Save]** button to save the note. The author and date/time are recorded automatically.
+
+> **Note**: Handler notes are for internal management purposes only and are not displayed to the user who submitted the inquiry.
+
+### 7.10 Statistics/Report Management
+
+The statistics and reporting feature aggregates weighing performance data by period and condition for viewing and export to Excel files.
+
+#### Statistics Inquiry
+
+View statistics from the **[Statistics/Reports]** menu in the web management interface using the following criteria:
+
+**Period-Based Inquiry**:
+
+| Inquiry Type | Description | API Endpoint |
+|--------------|-------------|--------------|
+| Daily Statistics | Weighing performance aggregated by day within the specified period | `GET /api/v1/statistics/daily` |
+| Monthly Statistics | Weighing performance aggregated by month within the specified period | `GET /api/v1/statistics/monthly` |
+
+**Filter Conditions**:
+
+| Filter | Description |
+|--------|-------------|
+| Start Date / End Date | Set the inquiry period |
+| Transport Company | Filter by specific transport company |
+| Item Type | Filter by specific item type (By-product / Waste / Sub-material / Export / General) |
+
+#### Summary Statistics
+
+Summary statistics (`GET /api/v1/statistics/summary`) provide an at-a-glance view of key metrics for the inquiry period:
+
+| Summary Item | Description |
+|--------------|-------------|
+| Total Count | Total number of weighing transactions within the inquiry period |
+| Total Weight | Sum of all net weights within the inquiry period |
+| Distribution by Item Type | Weighing count and weight ratio by item type |
+| Distribution by Transport Company | Weighing count and weight ratio by transport company |
+
+#### Excel Export
+
+Statistics data can be downloaded as an Excel (xlsx) file:
+
+1. Set the desired period and filter conditions on the statistics inquiry screen.
+2. Click the **[Export to Excel]** button.
+3. An xlsx file containing the following sheets is downloaded:
+
+| Sheet Name | Content |
+|------------|---------|
+| Daily Statistics | Weighing count, gross weight, and net weight aggregated by day |
+| Monthly Statistics | Weighing count, gross weight, and net weight aggregated by month |
+| Full Data | Detailed weighing records matching the inquiry conditions |
+
+> **Note**: The Excel export API is `GET /api/v1/statistics/export`, with inquiry conditions passed as query parameters.
+
+### 7.11 Favorites Management
+
+The per-user favorites feature allows quick access to frequently used menus, dispatches, vehicles, transport companies, and weighbridges.
+
+#### Favorite Types
+
+| Type | Code | Description |
+|------|------|-------------|
+| Menu | MENU | Frequently used menu pages |
+| Dispatch | DISPATCH | Frequently viewed dispatch information |
+| Vehicle | VEHICLE | Frequently viewed vehicle information |
+| Transport Company | COMPANY | Frequently viewed transport company information |
+| Weighbridge | SCALE | Frequently viewed weighbridge information |
+
+#### Adding/Removing Favorites
+
+- Click the **star** icon next to an item on any list screen to add it to favorites.
+- Click the star icon again on an already favorited item to remove it from favorites.
+- The favorites toggle API (`POST /api/v1/favorites/toggle`) handles both add and remove in a single call.
+
+#### Favorites Limit
+
+- Each user can register up to **20** favorites.
+- Attempting to add more than 20 displays a notification message; an existing item must be removed before adding a new one.
+
+#### Reordering Favorites
+
+The display order of the favorites list can be changed:
+
+1. Drag and drop items in the favorites panel to the desired position.
+2. The updated order is saved automatically.
+
+> **Note**: Favorites are managed independently per user and do not affect other users' favorites.
 
 ---
 

@@ -19,6 +19,11 @@
 10. [Development Environment Setup](#10-development-environment-setup)
 11. [Code Conventions and Patterns](#11-code-conventions-and-patterns)
 12. [Common Mistakes and Precautions](#12-common-mistakes-and-precautions)
+13. [Recently Added Frontend Patterns](#13-recently-added-frontend-patterns)
+14. [Recently Added Mobile Patterns](#14-recently-added-mobile-patterns)
+15. [Recently Added Desktop Patterns](#15-recently-added-desktop-patterns)
+16. [Recently Added Backend Modules](#16-recently-added-backend-modules)
+17. [Recently Added Frontend Components](#17-recently-added-frontend-components)
 
 ---
 
@@ -60,6 +65,14 @@ busan-smart-weighing/
 │   │   ├── weighing/           # Core Weighing Logic
 │   │   ├── gatepass/           # Gate Pass Management
 │   │   ├── slip/               # Slip Management
+│   │   ├── favorite/           # Favorites Management
+│   │   ├── help/               # Help / FAQ
+│   │   ├── monitoring/         # Device Monitoring
+│   │   ├── mypage/             # My Page
+│   │   ├── notice/             # Notices
+│   │   ├── setting/            # System Settings
+│   │   ├── inquiry/            # Inquiry / Complaint Management
+│   │   ├── statistics/         # Statistics / Reports
 │   │   ├── notification/       # Push Notifications (FCM)
 │   │   ├── dashboard/          # Dashboard Statistics
 │   │   ├── audit/              # Audit Logs
@@ -2288,6 +2301,514 @@ dotnet test      # Run xUnit tests
 
 ---
 
+## 16. Recently Added Backend Modules
+
+As the project expanded, the following backend modules were newly added. Each module follows the same layered architecture (Controller -> Service -> Repository -> Entity) as the existing modules.
+
+### 16.1 Favorites (favorite)
+
+A module for registering and managing per-user favorites for menus, dispatches, vehicles, companies, and scales. It integrates with the frontend `FavoriteButton`/`FavoritesList` components.
+
+**Package Structure:**
+
+```
+favorite/
+├── controller/   FavoriteController
+├── domain/       Favorite (Entity), FavoriteType (Enum), FavoriteRepository
+├── dto/          FavoriteCreateRequest, FavoriteCheckRequest, FavoriteReorderRequest, FavoriteResponse
+└── service/      FavoriteService
+```
+
+**Key Entity Fields:**
+
+```java
+@Entity
+@Table(name = "favorites")
+public class Favorite extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long favoriteId;
+
+    private Long userId;
+    @Enumerated(EnumType.STRING)
+    private FavoriteType favoriteType;  // MENU, DISPATCH, VEHICLE, COMPANY, SCALE
+    private String targetId;
+    private String targetPath;
+    private String displayName;
+    private String icon;
+    private Integer sortOrder;
+    private LocalDateTime createdAt;
+}
+```
+
+**API Endpoints:**
+
+| HTTP | Path | Description | Permission |
+|------|------|-------------|------------|
+| `GET` | `/api/v1/favorites` | Get all favorites list | All |
+| `GET` | `/api/v1/favorites/type/{type}` | Get favorites by type | All |
+| `POST` | `/api/v1/favorites` | Register a favorite | All |
+| `DELETE` | `/api/v1/favorites/{favoriteId}` | Delete a favorite | All |
+| `POST` | `/api/v1/favorites/toggle` | Toggle favorite on/off | All |
+| `POST` | `/api/v1/favorites/check` | Check if item is favorited | All |
+| `PUT` | `/api/v1/favorites/reorder` | Reorder favorites (drag) | All |
+
+**Business Rules:**
+- Maximum of 20 favorites per user
+- Prevents duplicate registration of the same target
+- Bulk updates `sortOrder` when reordering via drag and drop
+
+### 16.2 Help / FAQ (help)
+
+A FAQ management module. Users can browse FAQs by category, and administrators can create/edit/delete FAQs.
+
+**Package Structure:**
+
+```
+help/
+├── controller/   HelpController
+├── domain/       Faq (Entity), FaqCategory (Enum), FaqRepository
+├── dto/          FaqCreateRequest, FaqUpdateRequest, FaqResponse
+└── service/      HelpService
+```
+
+**Key Entity Fields:**
+
+```java
+@Entity
+@Table(name = "faqs")
+public class Faq extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long faqId;
+
+    private String question;
+    @Column(columnDefinition = "TEXT")
+    private String answer;
+    @Enumerated(EnumType.STRING)
+    private FaqCategory category;  // WEIGHING, DISPATCH, ACCOUNT, SYSTEM, OTHER
+    private Integer sortOrder;
+    private Boolean isPublished;
+    private Long viewCount;
+}
+```
+
+**API Endpoints:**
+
+| HTTP | Path | Description | Permission |
+|------|------|-------------|------------|
+| `GET` | `/api/v1/help/faqs` | Get all published FAQs | All |
+| `GET` | `/api/v1/help/faqs/category/{category}` | Get FAQs by category | All |
+| `GET` | `/api/v1/help/faqs/{faqId}` | Get FAQ detail (increments view count) | All |
+| `GET` | `/api/v1/help/faqs/admin` | Admin FAQ list (includes unpublished) | ADMIN |
+| `POST` | `/api/v1/help/faqs` | Create FAQ | ADMIN |
+| `PUT` | `/api/v1/help/faqs/{faqId}` | Update FAQ | ADMIN |
+| `DELETE` | `/api/v1/help/faqs/{faqId}` | Delete FAQ | ADMIN |
+
+### 16.3 Device Monitoring (monitoring)
+
+A module for real-time monitoring of weighing station hardware devices (scales, LPR cameras, indicators, barrier gates). When device status changes, real-time notifications are sent to the frontend via WebSocket.
+
+**Package Structure:**
+
+```
+monitoring/
+├── controller/   DeviceMonitoringController
+├── domain/       DeviceStatus (Entity), DeviceType (Enum), ConnectionStatus (Enum), DeviceStatusRepository
+├── dto/          DeviceStatusResponse, DeviceStatusUpdateRequest, DeviceSummaryResponse
+└── service/      DeviceMonitoringService
+```
+
+**Key Entity Fields:**
+
+```java
+@Entity
+@Table(name = "device_statuses")
+public class DeviceStatus extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long deviceId;
+
+    private String deviceCode;
+    private String deviceName;
+    @Enumerated(EnumType.STRING)
+    private DeviceType deviceType;        // SCALE, LPR_CAMERA, INDICATOR, BARRIER_GATE
+    private String location;
+    @Enumerated(EnumType.STRING)
+    private ConnectionStatus connectionStatus;  // ONLINE, OFFLINE, ERROR
+    private LocalDateTime lastConnectedAt;
+    private String ipAddress;
+    private String errorMessage;
+    private Boolean isActive;
+}
+```
+
+**API Endpoints:**
+
+| HTTP | Path | Description | Permission |
+|------|------|-------------|------------|
+| `GET` | `/api/v1/monitoring/devices` | Get all devices list | All |
+| `GET` | `/api/v1/monitoring/devices/type/{deviceType}` | Get devices by type | All |
+| `GET` | `/api/v1/monitoring/devices/{deviceId}` | Get device detail | All |
+| `PUT` | `/api/v1/monitoring/devices/{deviceId}/status` | Update device status | All |
+| `GET` | `/api/v1/monitoring/summary` | Get device status summary statistics | All |
+| `POST` | `/api/v1/monitoring/health-check` | Run health check on all devices | ADMIN, MANAGER |
+
+**Business Rules:**
+- Devices automatically transition to `OFFLINE` status after 5 minutes without response
+- Device status changes are broadcast in real time via the `/topic/equipment-status` WebSocket topic
+- Status is visualized on the frontend `MonitoringPage` and the desktop `ConnectionStatusPanel`
+
+### 16.4 My Page (mypage)
+
+A module for managing the user's own profile view/edit, password change, and notification settings.
+
+**Package Structure:**
+
+```
+mypage/
+├── controller/   MyPageController
+├── dto/          MyPageResponse, ProfileUpdateRequest, PasswordChangeRequest, NotificationSettingsRequest
+└── service/      MyPageService
+```
+
+**API Endpoints:**
+
+| HTTP | Path | Description | Permission |
+|------|------|-------------|------------|
+| `GET` | `/api/v1/mypage` | Get my profile | All |
+| `PUT` | `/api/v1/mypage/profile` | Update profile (name, phone number, etc.) | All |
+| `PUT` | `/api/v1/mypage/password` | Change password | All |
+| `PUT` | `/api/v1/mypage/notifications` | Change notification settings | All |
+
+**Password Change Rules:**
+- Current password verification is required
+- New password and confirmation password must match
+- Minimum 8 characters (Bean Validation: `@Size(min = 8)`)
+- Hashed with BCrypt before storing
+
+### 16.5 Notices (notice)
+
+A module for managing system announcements, maintenance notices, and update notifications. Supports pinning to the top and search functionality.
+
+**Package Structure:**
+
+```
+notice/
+├── controller/   NoticeController
+├── domain/       Notice (Entity), NoticeCategory (Enum), NoticeRepository
+├── dto/          NoticeCreateRequest, NoticeUpdateRequest, NoticeResponse
+└── service/      NoticeService
+```
+
+**Key Entity Fields:**
+
+```java
+@Entity
+@Table(name = "notices")
+public class Notice extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long noticeId;
+
+    private String title;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    @Enumerated(EnumType.STRING)
+    private NoticeCategory category;  // SYSTEM, MAINTENANCE, UPDATE, GENERAL
+    private Long authorId;
+    private String authorName;
+    private Boolean isPublished;
+    private Boolean isPinned;
+    private LocalDateTime publishedAt;
+    private Long viewCount;
+}
+```
+
+**API Endpoints:**
+
+| HTTP | Path | Description | Permission |
+|------|------|-------------|------------|
+| `GET` | `/api/v1/notices` | Get published notices list (paginated) | All |
+| `GET` | `/api/v1/notices/category/{category}` | Get notices by category | All |
+| `GET` | `/api/v1/notices/pinned` | Get pinned notices | All |
+| `GET` | `/api/v1/notices/search?keyword=` | Search by keyword | All |
+| `GET` | `/api/v1/notices/{noticeId}` | Get notice detail (increments view count) | All |
+| `GET` | `/api/v1/notices/admin` | Admin notice list (includes unpublished) | ADMIN |
+| `POST` | `/api/v1/notices` | Create notice | ADMIN |
+| `PUT` | `/api/v1/notices/{noticeId}` | Update notice | ADMIN |
+| `DELETE` | `/api/v1/notices/{noticeId}` | Delete notice | ADMIN |
+| `PATCH` | `/api/v1/notices/{noticeId}/publish` | Toggle publish/unpublish | ADMIN |
+| `PATCH` | `/api/v1/notices/{noticeId}/pin` | Toggle pin/unpin | ADMIN |
+
+**Business Rules:**
+- Pinned notices (`isPinned = true`) always appear at the top of the list
+- Supports pagination (Spring Data Pageable)
+- Management functions (create/edit/delete/publish/pin) are ADMIN-only
+
+### 16.6 System Settings (setting)
+
+A module for managing system-wide configuration values. All endpoints are ADMIN-only.
+
+**Package Structure:**
+
+```
+setting/
+├── controller/   SystemSettingController
+├── domain/       SystemSetting (Entity), SettingType (Enum), SettingCategory (Enum), SystemSettingRepository
+├── dto/          SystemSettingResponse, SystemSettingUpdateRequest, BulkUpdateRequest
+└── service/      SystemSettingService
+```
+
+**Key Entity Fields:**
+
+```java
+@Entity
+@Table(name = "system_settings")
+public class SystemSetting extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long settingId;
+
+    @Column(unique = true)
+    private String settingKey;
+    private String settingValue;
+    @Enumerated(EnumType.STRING)
+    private SettingType settingType;        // STRING, NUMBER, BOOLEAN, JSON
+    @Enumerated(EnumType.STRING)
+    private SettingCategory category;       // GENERAL, WEIGHING, NOTIFICATION, SECURITY
+    private String description;
+    private Boolean isEditable;
+}
+```
+
+**API Endpoints:**
+
+| HTTP | Path | Description | Permission |
+|------|------|-------------|------------|
+| `GET` | `/api/v1/admin/settings` | Get all settings list | ADMIN |
+| `GET` | `/api/v1/admin/settings/category/{category}` | Get settings by category | ADMIN |
+| `PUT` | `/api/v1/admin/settings/{settingId}` | Update individual setting | ADMIN |
+| `PUT` | `/api/v1/admin/settings/bulk` | Bulk update settings | ADMIN |
+
+**Business Rules:**
+- Settings with `isEditable = false` throw `BusinessException` on modification attempt
+- Value format validation based on `settingType` (NUMBER -> numeric parsing, BOOLEAN -> true/false, JSON -> valid JSON)
+- Bulk update API allows changing multiple settings in a single transaction
+
+### 16.7 Inquiry / Complaint (inquiry)
+
+A module for managing phone inquiry records. It receives and records processing results for weighing/dispatch-related inquiries from drivers and transport companies.
+
+**Package Structure:**
+
+```
+inquiry/
+├── controller/   InquiryCallController
+├── domain/       InquiryCall (Entity), InquiryType (Enum), InquiryCallRepository
+├── dto/          InquiryCallCreateRequest, InquiryCallResponse
+└── service/      InquiryCallService
+```
+
+**Key Entity Fields:**
+
+```java
+@Entity
+@Table(name = "inquiry_calls")
+public class InquiryCall extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long inquiryCallId;
+
+    private Long callerId;
+    private String callerName;
+    private String callerPhone;
+    @Enumerated(EnumType.STRING)
+    private InquiryType inquiryType;  // WEIGHING_ISSUE, DISPATCH_ISSUE, SYSTEM_ERROR,
+                                       // GENERAL_INQUIRY, COMPLAINT, OTHER
+    private String subject;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    private Long dispatchId;    // Related dispatch (optional)
+    private Long weighingId;    // Related weighing (optional)
+    private Long handlerId;     // Handler
+    @Column(columnDefinition = "TEXT")
+    private String handlerNote; // Handler notes
+}
+```
+
+**API Endpoints:**
+
+| HTTP | Path | Description | Permission |
+|------|------|-------------|------------|
+| `POST` | `/api/v1/inquiries/call-log` | Register phone inquiry record | All |
+| `GET` | `/api/v1/inquiries/call-log` | Get all inquiry records | ADMIN, MANAGER |
+| `GET` | `/api/v1/inquiries/call-log/my` | Get my registered inquiries | All |
+
+### 16.8 Statistics / Reports (statistics)
+
+A module providing daily/monthly weighing statistics queries and Excel export. Uses the Apache POI library.
+
+**Package Structure:**
+
+```
+statistics/
+├── controller/   StatisticsController
+├── dto/          DailyStatisticsResponse, MonthlyStatisticsResponse, StatisticsSummaryResponse
+└── service/      StatisticsService
+```
+
+**API Endpoints:**
+
+| HTTP | Path | Description | Permission |
+|------|------|-------------|------------|
+| `GET` | `/api/v1/statistics/daily` | Get daily statistics | All |
+| `GET` | `/api/v1/statistics/monthly` | Get monthly statistics | All |
+| `GET` | `/api/v1/statistics/summary` | Get statistics summary (KPI) | All |
+| `GET` | `/api/v1/statistics/export` | Export Excel file | ADMIN, MANAGER |
+
+**Common Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `date_from` | LocalDate | Query start date |
+| `date_to` | LocalDate | Query end date |
+| `company_id` | Long | Transport company filter (optional) |
+| `item_type` | String | Item type filter (optional) |
+
+**Excel Export:**
+- Uses Apache POI library (`poi-ooxml`)
+- Content-Type: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+- Filename: `statistics_YYYYMMDD.xlsx`
+- Outputs statistical data separated into sheets
+
+### 16.9 Added Module API Endpoints Summary
+
+Items added to the existing API endpoint summary:
+
+| Domain | Base Path | Key Endpoints |
+|--------|-----------|---------------|
+| Favorites | `/api/v1/favorites` | List, by type, register, delete, toggle, reorder |
+| FAQ | `/api/v1/help` | FAQ list, by category, detail, CRUD (ADMIN) |
+| Device Monitoring | `/api/v1/monitoring` | Device list, by type, status update, summary, health check |
+| My Page | `/api/v1/mypage` | Profile view/edit, password change, notification settings |
+| Notices | `/api/v1/notices` | List, search, detail, pin, CRUD (ADMIN) |
+| System Settings | `/api/v1/admin/settings` | All/by category, individual/bulk update (ADMIN) |
+| Inquiry / Complaint | `/api/v1/inquiries` | Register inquiry, get all/my inquiries |
+| Statistics | `/api/v1/statistics` | Daily/monthly/summary statistics, Excel export |
+
+---
+
+## 17. Recently Added Frontend Components
+
+### 17.1 Table Page Layout (TablePageLayout.tsx)
+
+A standard layout component for pages containing data tables. It arranges the search area, table area, and pagination area in a 3-tier Flex layout so that the table fills the remaining space precisely.
+
+```tsx
+// components/TablePageLayout.tsx
+<TablePageLayout>
+    {/* FixedArea: Search/filters (fixed height) */}
+    <TablePageLayout.FixedArea>
+        <SearchForm ... />
+    </TablePageLayout.FixedArea>
+
+    {/* ScrollArea: Table (fills remaining space, scrollable) */}
+    <TablePageLayout.ScrollArea>
+        <SortableTable ... />
+    </TablePageLayout.ScrollArea>
+
+    {/* FixedArea: Pagination (fixed height) */}
+    <TablePageLayout.FixedArea>
+        <Pagination ... />
+    </TablePageLayout.FixedArea>
+</TablePageLayout>
+```
+
+**Key CSS Properties:**
+- Root: `height: 100%`, `display: flex`, `flexDirection: column`
+- ScrollArea: `flex: 1`, `minHeight: 0` (the key property preventing Flex children from overflowing the parent)
+- FixedArea: Maintains natural height (flex-shrink: 0)
+
+**Rationale:**
+- To set Ant Design Table's `scroll.y` to `100%` instead of a fixed px value, the parent layout must have an exact height
+- Previously, hardcoded values like `calc(100vh - XXXpx)` were needed, but this component handles the calculation automatically
+
+### 17.2 Table Scroll Styles (tableScroll.css)
+
+A global CSS file implementing fixed header + scrollable body for tables.
+
+```css
+/* Hide scrollbar (Firefox) */
+.st-fill-height .ant-table-body {
+    scrollbar-width: none;
+}
+
+/* Hide scrollbar (Chrome, Safari, Edge) */
+.st-fill-height .ant-table-body::-webkit-scrollbar {
+    display: none;
+}
+```
+
+**`.st-fill-height` Class:**
+- Automatically applied when `scroll.y` is set on the `SortableTable` component
+- Fixes the table header and makes only the body scrollable
+- Hides the scrollbar for a clean UI (mouse wheel/touch scroll works normally)
+
+### 17.3 MainLayout Improvements
+
+The following features have been added to `layouts/MainLayout.tsx`:
+
+**Sidebar:**
+- Width 240px, collapsible/expandable toggle
+- Filters and displays only menus matching the current user's role from `PAGE_REGISTRY`
+- Integrated favorite button (`FavoriteButton`)
+
+**Header:**
+- Transparent glass effect with `backdrop-filter: blur(12px)`
+- Favorites button, theme toggle (dark/light), and user menu placement
+
+**Multi-Tab Context Menu:**
+- Right-click on a tab shows a context menu:
+  - Close: Close the selected tab
+  - Close Other Tabs: Keep only the selected tab and pinned tabs
+  - Close Tabs to the Right: Close all tabs to the right of the selected tab
+  - Close All Tabs: Keep only pinned tabs
+
+**Keyboard Shortcuts:**
+- `Ctrl+W`: Close current tab
+- `Ctrl+Tab`: Switch to next tab
+
+**Role-Based Menu Filtering:**
+- Automatically hides menus the current user cannot access based on the `roles` setting in `PAGE_REGISTRY`
+- Example: Users with the DRIVER role do not see admin menus (`/admin/*`, `/master/*`) in the sidebar
+
+### 17.4 SortableTable Improvements
+
+The following features have been added to `components/SortableTable.tsx`:
+
+**Column Order Persistence (localStorage):**
+- Column order changed by the user via drag is automatically saved to `localStorage`
+- Storage key: `table-column-order-{tableKey}` (tableKey is a unique identifier per page)
+- Automatically restored to the saved order on the next visit
+
+```tsx
+<SortableTable
+    tableKey="dispatch-table"   // localStorage storage key
+    columns={columns}
+    dataSource={data}
+    scroll={{ y: '100%' }}
+/>
+```
+
+**Skeleton Loading:**
+- Displays row-shaped placeholders using Ant Design Skeleton component during data loading
+- Provides a more natural loading experience than the traditional Spin loader
+
+**Column Order Reset Button:**
+- Displays a column order reset button at the top of the table
+- Clicking it deletes the localStorage saved value and restores the original column order
+
+**fill-height CSS Class:**
+- Automatically applies the `st-fill-height` CSS class to the table when a `scroll.y` value is set
+- Works with `tableScroll.css` to implement fixed header + scrollable body
+
+---
+
 ## Appendix: Key Terms Glossary
 
 | Term | Description |
@@ -2315,6 +2836,8 @@ dotnet test      # Run xUnit tests
 | **Tree-shaking** | Optimization technique that automatically removes unused code during build |
 | **Code Splitting** | Technique of separating JS bundles per page using React.lazy |
 | **@dnd-kit** | React drag and drop library (used for table row sorting) |
+| **Apache POI** | Apache library for creating/modifying Excel files in Java |
+| **fill-height** | CSS pattern where the table fills the parent height and implements fixed header + scrollable body |
 
 ---
 

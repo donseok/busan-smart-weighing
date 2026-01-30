@@ -19,6 +19,11 @@
 10. [개발 환경 설정](#10-개발-환경-설정)
 11. [코드 컨벤션과 패턴](#11-코드-컨벤션과-패턴)
 12. [자주 하는 실수와 주의사항](#12-자주-하는-실수와-주의사항)
+13. [최근 추가된 프론트엔드 패턴](#13-최근-추가된-프론트엔드-패턴)
+14. [최근 추가된 모바일 패턴](#14-최근-추가된-모바일-패턴)
+15. [최근 추가된 데스크톱 패턴](#15-최근-추가된-데스크톱-패턴)
+16. [최근 추가된 백엔드 모듈](#16-최근-추가된-백엔드-모듈)
+17. [최근 추가된 프론트엔드 컴포넌트](#17-최근-추가된-프론트엔드-컴포넌트)
 
 ---
 
@@ -60,6 +65,14 @@ busan-smart-weighing/
 │   │   ├── weighing/           # 계량 핵심 로직
 │   │   ├── gatepass/           # 출문 관리
 │   │   ├── slip/               # 전표 관리
+│   │   ├── favorite/           # 즐겨찾기 관리
+│   │   ├── help/               # 이용 안내 (FAQ)
+│   │   ├── monitoring/         # 장비 모니터링
+│   │   ├── mypage/             # 마이페이지
+│   │   ├── notice/             # 공지사항
+│   │   ├── setting/            # 시스템 설정
+│   │   ├── inquiry/            # 문의/민원 관리
+│   │   ├── statistics/         # 통계/보고서
 │   │   ├── notification/       # 푸시 알림 (FCM)
 │   │   ├── dashboard/          # 대시보드 통계
 │   │   ├── audit/              # 감사 로그
@@ -2098,28 +2111,6 @@ setItems(prev => prev.map(item =>
 
 ---
 
-## 부록: 핵심 용어 사전
-
-| 용어 | 설명 |
-|------|------|
-| **REST API** | HTTP 메서드(GET/POST/PUT/DELETE)로 리소스를 조작하는 API 설계 방식 |
-| **SPA** | Single Page Application. 페이지 전환 없이 컴포넌트만 교체하는 웹 앱 |
-| **ORM** | Object-Relational Mapping. 객체와 DB 테이블을 매핑하는 기술 (JPA) |
-| **DTO** | Data Transfer Object. API 요청/응답에 사용되는 데이터 구조체 |
-| **DI** | Dependency Injection. 객체를 직접 생성하지 않고 외부에서 주입받는 패턴 |
-| **JWT** | JSON Web Token. 서버가 발급하는 인증 토큰 |
-| **STOMP** | WebSocket 위의 메시징 프로토콜 (Pub/Sub 패턴) |
-| **HMR** | Hot Module Replacement. 코드 수정 시 브라우저 새로고침 없이 반영 |
-| **CORS** | Cross-Origin Resource Sharing. 다른 도메인에서 API 호출 허용 설정 |
-| **HikariCP** | JDBC 커넥션 풀 라이브러리 (DB 연결 재사용으로 성능 향상) |
-| **FCM** | Firebase Cloud Messaging. Google의 푸시 알림 서비스 |
-| **Dirty Checking** | JPA가 Entity 변경을 자동 감지하여 UPDATE 쿼리를 생성하는 기능 |
-| **Bean** | Spring이 관리하는 객체 (Controller, Service, Repository 등) |
-| **Profile** | Spring의 환경별 설정 분리 기능 (dev, prod, test) |
-| **Interceptor** | 요청/응답을 가로채서 공통 처리하는 미들웨어 (Axios, Spring 모두 사용) |
-
----
-
 ## 13. 최근 추가된 프론트엔드 패턴
 
 ### 13.1 페이지 레지스트리 (pageRegistry.ts)
@@ -2418,6 +2409,514 @@ dotnet test      # xUnit 테스트 실행
 
 ---
 
+## 16. 최근 추가된 백엔드 모듈
+
+프로젝트가 확장되면서 다음 백엔드 모듈이 새로 추가되었다. 각 모듈은 기존 계층 구조(Controller → Service → Repository → Entity)를 동일하게 따른다.
+
+### 16.1 즐겨찾기 (favorite)
+
+사용자별 메뉴, 배차, 차량, 운송사, 계량대를 즐겨찾기에 등록하고 관리하는 모듈이다. 프론트엔드의 `FavoriteButton`/`FavoritesList` 컴포넌트와 연동된다.
+
+**패키지 구조:**
+
+```
+favorite/
+├── controller/   FavoriteController
+├── domain/       Favorite (Entity), FavoriteType (Enum), FavoriteRepository
+├── dto/          FavoriteCreateRequest, FavoriteCheckRequest, FavoriteReorderRequest, FavoriteResponse
+└── service/      FavoriteService
+```
+
+**Entity 주요 필드:**
+
+```java
+@Entity
+@Table(name = "favorites")
+public class Favorite extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long favoriteId;
+
+    private Long userId;
+    @Enumerated(EnumType.STRING)
+    private FavoriteType favoriteType;  // MENU, DISPATCH, VEHICLE, COMPANY, SCALE
+    private String targetId;
+    private String targetPath;
+    private String displayName;
+    private String icon;
+    private Integer sortOrder;
+    private LocalDateTime createdAt;
+}
+```
+
+**API 엔드포인트:**
+
+| HTTP | 경로 | 설명 | 권한 |
+|------|------|------|------|
+| `GET` | `/api/v1/favorites` | 전체 즐겨찾기 목록 조회 | 전체 |
+| `GET` | `/api/v1/favorites/type/{type}` | 타입별 즐겨찾기 조회 | 전체 |
+| `POST` | `/api/v1/favorites` | 즐겨찾기 등록 | 전체 |
+| `DELETE` | `/api/v1/favorites/{favoriteId}` | 즐겨찾기 삭제 | 전체 |
+| `POST` | `/api/v1/favorites/toggle` | 즐겨찾기 등록/해제 토글 | 전체 |
+| `POST` | `/api/v1/favorites/check` | 즐겨찾기 등록 여부 확인 | 전체 |
+| `PUT` | `/api/v1/favorites/reorder` | 즐겨찾기 순서 변경 (드래그) | 전체 |
+
+**비즈니스 규칙:**
+- 사용자당 최대 20개까지 즐겨찾기 등록 가능
+- 동일 대상 중복 등록 방지
+- 드래그 앤 드롭으로 순서 변경 시 `sortOrder` 일괄 업데이트
+
+### 16.2 이용 안내 / FAQ (help)
+
+FAQ 관리 모듈이다. 사용자는 카테고리별 FAQ를 조회하고, 관리자는 FAQ를 생성/수정/삭제할 수 있다.
+
+**패키지 구조:**
+
+```
+help/
+├── controller/   HelpController
+├── domain/       Faq (Entity), FaqCategory (Enum), FaqRepository
+├── dto/          FaqCreateRequest, FaqUpdateRequest, FaqResponse
+└── service/      HelpService
+```
+
+**Entity 주요 필드:**
+
+```java
+@Entity
+@Table(name = "faqs")
+public class Faq extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long faqId;
+
+    private String question;
+    @Column(columnDefinition = "TEXT")
+    private String answer;
+    @Enumerated(EnumType.STRING)
+    private FaqCategory category;  // WEIGHING, DISPATCH, ACCOUNT, SYSTEM, OTHER
+    private Integer sortOrder;
+    private Boolean isPublished;
+    private Long viewCount;
+}
+```
+
+**API 엔드포인트:**
+
+| HTTP | 경로 | 설명 | 권한 |
+|------|------|------|------|
+| `GET` | `/api/v1/help/faqs` | 공개 FAQ 전체 목록 | 전체 |
+| `GET` | `/api/v1/help/faqs/category/{category}` | 카테고리별 FAQ 조회 | 전체 |
+| `GET` | `/api/v1/help/faqs/{faqId}` | FAQ 상세 조회 (조회수 증가) | 전체 |
+| `GET` | `/api/v1/help/faqs/admin` | 관리자용 FAQ 전체 목록 (비공개 포함) | ADMIN |
+| `POST` | `/api/v1/help/faqs` | FAQ 생성 | ADMIN |
+| `PUT` | `/api/v1/help/faqs/{faqId}` | FAQ 수정 | ADMIN |
+| `DELETE` | `/api/v1/help/faqs/{faqId}` | FAQ 삭제 | ADMIN |
+
+### 16.3 장비 모니터링 (monitoring)
+
+계량소 하드웨어 장비(계량대, LPR 카메라, 인디게이터, 차단기)의 실시간 상태를 모니터링하는 모듈이다. 장비 상태 변경 시 WebSocket으로 프론트엔드에 실시간 알림을 전송한다.
+
+**패키지 구조:**
+
+```
+monitoring/
+├── controller/   DeviceMonitoringController
+├── domain/       DeviceStatus (Entity), DeviceType (Enum), ConnectionStatus (Enum), DeviceStatusRepository
+├── dto/          DeviceStatusResponse, DeviceStatusUpdateRequest, DeviceSummaryResponse
+└── service/      DeviceMonitoringService
+```
+
+**Entity 주요 필드:**
+
+```java
+@Entity
+@Table(name = "device_statuses")
+public class DeviceStatus extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long deviceId;
+
+    private String deviceCode;
+    private String deviceName;
+    @Enumerated(EnumType.STRING)
+    private DeviceType deviceType;        // SCALE, LPR_CAMERA, INDICATOR, BARRIER_GATE
+    private String location;
+    @Enumerated(EnumType.STRING)
+    private ConnectionStatus connectionStatus;  // ONLINE, OFFLINE, ERROR
+    private LocalDateTime lastConnectedAt;
+    private String ipAddress;
+    private String errorMessage;
+    private Boolean isActive;
+}
+```
+
+**API 엔드포인트:**
+
+| HTTP | 경로 | 설명 | 권한 |
+|------|------|------|------|
+| `GET` | `/api/v1/monitoring/devices` | 전체 장비 목록 조회 | 전체 |
+| `GET` | `/api/v1/monitoring/devices/type/{deviceType}` | 장비 유형별 조회 | 전체 |
+| `GET` | `/api/v1/monitoring/devices/{deviceId}` | 장비 상세 조회 | 전체 |
+| `PUT` | `/api/v1/monitoring/devices/{deviceId}/status` | 장비 상태 갱신 | 전체 |
+| `GET` | `/api/v1/monitoring/summary` | 장비 상태 요약 통계 | 전체 |
+| `POST` | `/api/v1/monitoring/health-check` | 전체 장비 헬스 체크 실행 | ADMIN, MANAGER |
+
+**비즈니스 규칙:**
+- 장비가 5분간 응답이 없으면 자동으로 `OFFLINE` 상태로 전환
+- 장비 상태 변경 시 `/topic/equipment-status` WebSocket 토픽으로 실시간 브로드캐스트
+- 프론트엔드 `MonitoringPage`와 데스크톱 `ConnectionStatusPanel`에서 상태를 시각화
+
+### 16.4 마이페이지 (mypage)
+
+사용자 본인의 프로필 조회/수정, 비밀번호 변경, 알림 설정을 관리하는 모듈이다.
+
+**패키지 구조:**
+
+```
+mypage/
+├── controller/   MyPageController
+├── dto/          MyPageResponse, ProfileUpdateRequest, PasswordChangeRequest, NotificationSettingsRequest
+└── service/      MyPageService
+```
+
+**API 엔드포인트:**
+
+| HTTP | 경로 | 설명 | 권한 |
+|------|------|------|------|
+| `GET` | `/api/v1/mypage` | 내 프로필 조회 | 전체 |
+| `PUT` | `/api/v1/mypage/profile` | 프로필 수정 (이름, 전화번호 등) | 전체 |
+| `PUT` | `/api/v1/mypage/password` | 비밀번호 변경 | 전체 |
+| `PUT` | `/api/v1/mypage/notifications` | 알림 수신 설정 변경 | 전체 |
+
+**비밀번호 변경 규칙:**
+- 현재 비밀번호 일치 검증 필수
+- 새 비밀번호와 확인 비밀번호 일치 검증
+- 최소 8자 이상 (Bean Validation: `@Size(min = 8)`)
+- BCrypt로 해싱 후 저장
+
+### 16.5 공지사항 (notice)
+
+시스템 공지, 유지보수 안내, 업데이트 알림 등을 관리하는 모듈이다. 상단 고정(pin) 기능과 검색 기능을 지원한다.
+
+**패키지 구조:**
+
+```
+notice/
+├── controller/   NoticeController
+├── domain/       Notice (Entity), NoticeCategory (Enum), NoticeRepository
+├── dto/          NoticeCreateRequest, NoticeUpdateRequest, NoticeResponse
+└── service/      NoticeService
+```
+
+**Entity 주요 필드:**
+
+```java
+@Entity
+@Table(name = "notices")
+public class Notice extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long noticeId;
+
+    private String title;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    @Enumerated(EnumType.STRING)
+    private NoticeCategory category;  // SYSTEM, MAINTENANCE, UPDATE, GENERAL
+    private Long authorId;
+    private String authorName;
+    private Boolean isPublished;
+    private Boolean isPinned;
+    private LocalDateTime publishedAt;
+    private Long viewCount;
+}
+```
+
+**API 엔드포인트:**
+
+| HTTP | 경로 | 설명 | 권한 |
+|------|------|------|------|
+| `GET` | `/api/v1/notices` | 공개 공지사항 목록 (페이징) | 전체 |
+| `GET` | `/api/v1/notices/category/{category}` | 카테고리별 조회 | 전체 |
+| `GET` | `/api/v1/notices/pinned` | 상단 고정 공지사항 | 전체 |
+| `GET` | `/api/v1/notices/search?keyword=` | 키워드 검색 | 전체 |
+| `GET` | `/api/v1/notices/{noticeId}` | 공지사항 상세 (조회수 증가) | 전체 |
+| `GET` | `/api/v1/notices/admin` | 관리자용 전체 목록 (비공개 포함) | ADMIN |
+| `POST` | `/api/v1/notices` | 공지사항 생성 | ADMIN |
+| `PUT` | `/api/v1/notices/{noticeId}` | 공지사항 수정 | ADMIN |
+| `DELETE` | `/api/v1/notices/{noticeId}` | 공지사항 삭제 | ADMIN |
+| `PATCH` | `/api/v1/notices/{noticeId}/publish` | 공개/비공개 전환 | ADMIN |
+| `PATCH` | `/api/v1/notices/{noticeId}/pin` | 상단 고정/해제 전환 | ADMIN |
+
+**비즈니스 규칙:**
+- 목록 조회 시 고정 공지(`isPinned = true`)가 항상 최상단에 표시
+- 페이징 처리 지원 (Spring Data Pageable)
+- 관리(생성/수정/삭제/공개/고정) 기능은 ADMIN 전용
+
+### 16.6 시스템 설정 (setting)
+
+시스템 전반의 설정값을 관리하는 모듈이다. 모든 엔드포인트가 ADMIN 전용이다.
+
+**패키지 구조:**
+
+```
+setting/
+├── controller/   SystemSettingController
+├── domain/       SystemSetting (Entity), SettingType (Enum), SettingCategory (Enum), SystemSettingRepository
+├── dto/          SystemSettingResponse, SystemSettingUpdateRequest, BulkUpdateRequest
+└── service/      SystemSettingService
+```
+
+**Entity 주요 필드:**
+
+```java
+@Entity
+@Table(name = "system_settings")
+public class SystemSetting extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long settingId;
+
+    @Column(unique = true)
+    private String settingKey;
+    private String settingValue;
+    @Enumerated(EnumType.STRING)
+    private SettingType settingType;        // STRING, NUMBER, BOOLEAN, JSON
+    @Enumerated(EnumType.STRING)
+    private SettingCategory category;       // GENERAL, WEIGHING, NOTIFICATION, SECURITY
+    private String description;
+    private Boolean isEditable;
+}
+```
+
+**API 엔드포인트:**
+
+| HTTP | 경로 | 설명 | 권한 |
+|------|------|------|------|
+| `GET` | `/api/v1/admin/settings` | 전체 설정 목록 조회 | ADMIN |
+| `GET` | `/api/v1/admin/settings/category/{category}` | 카테고리별 설정 조회 | ADMIN |
+| `PUT` | `/api/v1/admin/settings/{settingId}` | 개별 설정 수정 | ADMIN |
+| `PUT` | `/api/v1/admin/settings/bulk` | 설정 일괄 수정 | ADMIN |
+
+**비즈니스 규칙:**
+- `isEditable = false`인 설정은 수정 시 `BusinessException` 발생
+- 설정 수정 시 `settingType`에 맞는 값 형식 검증 (NUMBER → 숫자 파싱, BOOLEAN → true/false, JSON → 유효한 JSON)
+- 일괄 수정 API로 여러 설정을 하나의 트랜잭션으로 변경 가능
+
+### 16.7 문의/민원 (inquiry)
+
+전화 문의 기록을 관리하는 모듈이다. 운전사나 운송사의 계량/배차 관련 문의를 접수하고 처리 결과를 기록한다.
+
+**패키지 구조:**
+
+```
+inquiry/
+├── controller/   InquiryCallController
+├── domain/       InquiryCall (Entity), InquiryType (Enum), InquiryCallRepository
+├── dto/          InquiryCallCreateRequest, InquiryCallResponse
+└── service/      InquiryCallService
+```
+
+**Entity 주요 필드:**
+
+```java
+@Entity
+@Table(name = "inquiry_calls")
+public class InquiryCall extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long inquiryCallId;
+
+    private Long callerId;
+    private String callerName;
+    private String callerPhone;
+    @Enumerated(EnumType.STRING)
+    private InquiryType inquiryType;  // WEIGHING_ISSUE, DISPATCH_ISSUE, SYSTEM_ERROR,
+                                       // GENERAL_INQUIRY, COMPLAINT, OTHER
+    private String subject;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    private Long dispatchId;    // 관련 배차 (선택)
+    private Long weighingId;    // 관련 계량 (선택)
+    private Long handlerId;     // 처리 담당자
+    @Column(columnDefinition = "TEXT")
+    private String handlerNote; // 처리 메모
+}
+```
+
+**API 엔드포인트:**
+
+| HTTP | 경로 | 설명 | 권한 |
+|------|------|------|------|
+| `POST` | `/api/v1/inquiries/call-log` | 전화 문의 기록 등록 | 전체 |
+| `GET` | `/api/v1/inquiries/call-log` | 전체 문의 기록 조회 | ADMIN, MANAGER |
+| `GET` | `/api/v1/inquiries/call-log/my` | 내가 등록한 문의 조회 | 전체 |
+
+### 16.8 통계/보고서 (statistics)
+
+일별/월별 계량 통계 조회와 엑셀 내보내기를 제공하는 모듈이다. Apache POI 라이브러리를 사용한다.
+
+**패키지 구조:**
+
+```
+statistics/
+├── controller/   StatisticsController
+├── dto/          DailyStatisticsResponse, MonthlyStatisticsResponse, StatisticsSummaryResponse
+└── service/      StatisticsService
+```
+
+**API 엔드포인트:**
+
+| HTTP | 경로 | 설명 | 권한 |
+|------|------|------|------|
+| `GET` | `/api/v1/statistics/daily` | 일별 통계 조회 | 전체 |
+| `GET` | `/api/v1/statistics/monthly` | 월별 통계 조회 | 전체 |
+| `GET` | `/api/v1/statistics/summary` | 통계 요약 (KPI) | 전체 |
+| `GET` | `/api/v1/statistics/export` | 엑셀 파일 내보내기 | ADMIN, MANAGER |
+
+**공통 쿼리 파라미터:**
+
+| 파라미터 | 타입 | 설명 |
+|---------|------|------|
+| `date_from` | LocalDate | 조회 시작일 |
+| `date_to` | LocalDate | 조회 종료일 |
+| `company_id` | Long | 운송사 필터 (선택) |
+| `item_type` | String | 품목유형 필터 (선택) |
+
+**엑셀 내보내기:**
+- Apache POI 라이브러리 (`poi-ooxml`) 사용
+- Content-Type: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+- 파일명: `statistics_YYYYMMDD.xlsx`
+- 통계 데이터를 시트별로 구분하여 출력
+
+### 16.9 추가된 모듈 API 엔드포인트 요약
+
+기존 API 엔드포인트 요약에 추가되는 항목:
+
+| 도메인 | 기본 경로 | 주요 엔드포인트 |
+|--------|----------|----------------|
+| 즐겨찾기 | `/api/v1/favorites` | 목록, 타입별, 등록, 삭제, 토글, 순서 변경 |
+| FAQ | `/api/v1/help` | FAQ 목록, 카테고리별, 상세, CRUD (ADMIN) |
+| 장비 모니터링 | `/api/v1/monitoring` | 장비 목록, 유형별, 상태 갱신, 요약, 헬스 체크 |
+| 마이페이지 | `/api/v1/mypage` | 프로필 조회/수정, 비밀번호 변경, 알림 설정 |
+| 공지사항 | `/api/v1/notices` | 목록, 검색, 상세, 고정, CRUD (ADMIN) |
+| 시스템 설정 | `/api/v1/admin/settings` | 전체/카테고리별, 개별/일괄 수정 (ADMIN) |
+| 문의/민원 | `/api/v1/inquiries` | 문의 등록, 전체/내 문의 조회 |
+| 통계 | `/api/v1/statistics` | 일별/월별/요약 통계, 엑셀 내보내기 |
+
+---
+
+## 17. 최근 추가된 프론트엔드 컴포넌트
+
+### 17.1 테이블 페이지 레이아웃 (TablePageLayout.tsx)
+
+데이터 테이블이 포함된 페이지의 표준 레이아웃 컴포넌트다. 검색 영역, 테이블 영역, 페이지네이션 영역을 3단 Flex 레이아웃으로 구성하여 테이블이 남은 공간을 정확히 채우도록 한다.
+
+```tsx
+// components/TablePageLayout.tsx
+<TablePageLayout>
+    {/* FixedArea: 검색/필터 (고정 높이) */}
+    <TablePageLayout.FixedArea>
+        <SearchForm ... />
+    </TablePageLayout.FixedArea>
+
+    {/* ScrollArea: 테이블 (나머지 공간을 채움, 스크롤) */}
+    <TablePageLayout.ScrollArea>
+        <SortableTable ... />
+    </TablePageLayout.ScrollArea>
+
+    {/* FixedArea: 페이지네이션 (고정 높이) */}
+    <TablePageLayout.FixedArea>
+        <Pagination ... />
+    </TablePageLayout.FixedArea>
+</TablePageLayout>
+```
+
+**핵심 CSS 속성:**
+- 최상위: `height: 100%`, `display: flex`, `flexDirection: column`
+- ScrollArea: `flex: 1`, `minHeight: 0` (Flex 자식이 부모를 넘치지 않게 하는 핵심 속성)
+- FixedArea: 자연 높이 유지 (flex-shrink: 0)
+
+**사용 이유:**
+- Ant Design Table의 `scroll.y`를 고정 px 값이 아닌 `100%`로 설정하기 위해 부모 레이아웃이 정확한 높이를 가져야 한다
+- 기존에는 `calc(100vh - XXXpx)` 같은 하드코딩이 필요했으나, 이 컴포넌트로 자동 계산된다
+
+### 17.2 테이블 스크롤 스타일 (tableScroll.css)
+
+테이블의 고정 헤더 + 스크롤 본문을 구현하는 전역 CSS 파일이다.
+
+```css
+/* 스크롤바 숨김 (Firefox) */
+.st-fill-height .ant-table-body {
+    scrollbar-width: none;
+}
+
+/* 스크롤바 숨김 (Chrome, Safari, Edge) */
+.st-fill-height .ant-table-body::-webkit-scrollbar {
+    display: none;
+}
+```
+
+**`.st-fill-height` 클래스:**
+- `SortableTable` 컴포넌트에 `scroll.y`가 설정되면 자동 적용
+- 테이블 헤더를 고정하고 본문만 스크롤되도록 구성
+- 스크롤바를 숨겨 깔끔한 UI 유지 (마우스 휠/터치 스크롤은 정상 동작)
+
+### 17.3 MainLayout 개선사항
+
+`layouts/MainLayout.tsx`에 다음 기능이 추가되었다:
+
+**사이드바:**
+- 너비 240px, 접기/펼치기 토글 가능
+- `PAGE_REGISTRY`에서 현재 사용자 역할에 맞는 메뉴만 필터링하여 표시
+- 즐겨찾기 버튼(`FavoriteButton`) 통합
+
+**헤더:**
+- `backdrop-filter: blur(12px)` 적용으로 투명 유리 효과
+- 즐겨찾기 버튼, 테마 토글(다크/라이트), 사용자 메뉴 배치
+
+**다중 탭 컨텍스트 메뉴:**
+- 탭 우클릭 시 컨텍스트 메뉴 표시:
+  - 닫기: 해당 탭 닫기
+  - 다른 탭 모두 닫기: 선택한 탭과 고정 탭만 유지
+  - 오른쪽 탭 모두 닫기: 선택한 탭 오른쪽의 모든 탭 닫기
+  - 모든 탭 닫기: 고정 탭만 유지
+
+**키보드 단축키:**
+- `Ctrl+W`: 현재 탭 닫기
+- `Ctrl+Tab`: 다음 탭으로 이동
+
+**역할 기반 메뉴 필터링:**
+- `PAGE_REGISTRY`의 `roles` 설정을 기반으로 현재 사용자가 접근할 수 없는 메뉴를 자동으로 숨김
+- 예: DRIVER 역할은 관리자 메뉴(`/admin/*`, `/master/*`)가 사이드바에 표시되지 않음
+
+### 17.4 SortableTable 개선사항
+
+`components/SortableTable.tsx`에 다음 기능이 추가되었다:
+
+**컬럼 순서 저장 (localStorage):**
+- 사용자가 드래그로 변경한 컬럼 순서를 `localStorage`에 자동 저장
+- 저장 키: `table-column-order-{tableKey}` (tableKey는 페이지별 고유 식별자)
+- 다음 방문 시 저장된 순서로 자동 복원
+
+```tsx
+<SortableTable
+    tableKey="dispatch-table"   // localStorage 저장 키
+    columns={columns}
+    dataSource={data}
+    scroll={{ y: '100%' }}
+/>
+```
+
+**스켈레톤 로딩:**
+- 데이터 로딩 중 Ant Design Skeleton 컴포넌트로 행 모양의 플레이스홀더 표시
+- 기존 Spin 로딩보다 자연스러운 로딩 경험 제공
+
+**컬럼 순서 초기화 버튼:**
+- 테이블 상단에 컬럼 순서 리셋 버튼 표시
+- 클릭 시 localStorage 저장값을 삭제하고 원래 컬럼 순서로 복원
+
+**fill-height CSS 클래스:**
+- `scroll.y` 값이 설정되면 자동으로 `st-fill-height` CSS 클래스를 테이블에 적용
+- `tableScroll.css`와 연동하여 고정 헤더 + 스크롤 본문 구현
+
+---
+
 ## 부록: 핵심 용어 사전
 
 | 용어 | 설명 |
@@ -2445,6 +2944,8 @@ dotnet test      # xUnit 테스트 실행
 | **Tree-shaking** | 사용하지 않는 코드를 빌드 시 자동 제거하는 최적화 기법 |
 | **Code Splitting** | React.lazy를 이용해 페이지별 JS 번들을 분리하는 기법 |
 | **@dnd-kit** | React 드래그 앤 드롭 라이브러리 (테이블 행 정렬에 사용) |
+| **Apache POI** | Java에서 엑셀 파일을 생성/수정하는 Apache 라이브러리 |
+| **fill-height** | 테이블이 부모 높이를 채우고 고정 헤더 + 스크롤 본문을 구현하는 CSS 패턴 |
 
 ---
 

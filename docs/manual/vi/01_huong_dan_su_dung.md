@@ -3,8 +3,8 @@
 | Muc | Noi dung |
 |------|------|
 | **Ten tai lieu** | Huong dan Su dung He thong Can thong minh Busan |
-| **Phien ban** | 1.2 |
-| **Ngay cap nhat cuoi** | 2026-01-29 |
+| **Phien ban** | 1.3 |
+| **Ngay cap nhat cuoi** | 2026-01-30 |
 | **Doi tuong doc gia** | Tai xe (DRIVER), Nhan vien phu trach (MANAGER) |
 | **Muc do bao mat** | Noi bo |
 
@@ -17,6 +17,14 @@
 3. [Chuc nang tai xe](#3-chuc-nang-tai-xe)
 4. [Chuc nang nhan vien phu trach](#4-chuc-nang-nhan-vien-phu-trach)
 5. [Chuc nang chung](#5-chuc-nang-chung)
+   - 5.1 Trang ca nhan (Xem/sua ho so, doi mat khau, cai dat thong bao)
+   - 5.2 Thong bao
+   - 5.3 Thong bao chung (Loc danh muc, tim kiem, ghim)
+   - 5.4 Tro giup/FAQ (Cau hoi thuong gap theo danh muc)
+   - 5.5 Lien he/Khieu nai
+   - 5.6 Yeu thich (Web)
+   - 5.7 Chuyen doi giao dien Toi/Sang
+   - 5.8 Phim tat va quan ly tab (Web)
 6. [Cau hoi thuong gap (FAQ)](#6-cau-hoi-thuong-gap-faq)
 7. [Huong dan xu ly su co](#7-huong-dan-xu-ly-su-co)
 8. [Thuat ngu](#8-thuat-ngu)
@@ -177,11 +185,13 @@ Bo cuc man hinh he thong quan ly web nhu sau:
 
 | Vung | Mo ta |
 |------|------|
-| **Thanh tieu de** | Logo he thong, bieu tuong thong bao (hien thi so thong bao chua doc), menu nguoi dung (trang ca nhan, dang xuat) |
+| **Thanh tieu de** | Logo he thong, bieu tuong ngoi sao yeu thich (dang ky/huy yeu thich trang hien tai), nut chuyen doi giao dien (chuyen doi Toi/Sang), bieu tuong thong bao (hien thi so thong bao chua doc), menu nguoi dung (trang ca nhan, dang xuat) |
 | **Thanh dieu huong ben trai** | Danh sach menu chinh. Du lieu goc bao gom menu con (doanh nghiep, xe, can, ma chung) |
 | **Vung noi dung** | Vung hien thi chuc nang chi tiet cua menu duoc chon |
 
-> **Luu y**: He thong web ho tro **che do toi** va **che do sang**. Ban co the chuyen doi giao dien tai menu nguoi dung goc tren ben phai.
+> **Luu y**: He thong web ho tro **che do toi** va **che do sang**. Nhan vao **nut chuyen doi giao dien** tren thanh tieu de de chuyen doi giua che do toi va che do sang. Cai dat giao dien duoc tu dong luu va duy tri khi truy cap lan sau. Xem chi tiet tai [5.7 Chuyen doi giao dien Toi/Sang](#57-chuyen-doi-giao-dien-toisang).
+>
+> **Luu y**: Chuong trinh CS (chuong trinh hien truong tram can) cung ho tro giao dien toi/sang. Nhan vao bieu tuong chuyen doi giao dien tren thanh tieu de de chuyen doi. Cai dat duoc tu dong luu.
 
 #### 2.4.2 Bo cuc man hinh ung dung di dong (Tai xe)
 
@@ -218,7 +228,7 @@ Bo cuc man hinh he thong quan ly web nhu sau:
 | Thong ke | `/statistics` | Bao cao va phan tich | Nhan vien phu trach |
 | Giam sat | `/monitoring` | Giam sat trang thai thiet bi | Nhan vien phu trach |
 | Thong bao | `/notice` | Xem thong bao | Chung |
-| Lien he | `/inquiry` | Lien he phong dieu do/kho vat tu | Chung |
+| Lien he | `/inquiry` | Dang ky va xem lien he/khieu nai | Chung |
 | Trang ca nhan | `/mypage` | Thong tin ca nhan va cai dat | Chung |
 | Du lieu goc - Doanh nghiep | `/master/company` | Quan ly doi tac | Nhan vien phu trach |
 | Du lieu goc - Xe | `/master/vehicle` | Quan ly thong tin xe | Nhan vien phu trach |
@@ -437,6 +447,8 @@ Ban co the them dieu phoi hoac doanh nghiep thuong xem vao danh sach yeu thich d
 3. Nhan vao muc de chuyen truc tiep den man hinh chi tiet.
 
 > **Luu y**: Ban co the thay doi thu tu danh sach yeu thich. Nhan giu muc trong danh sach de keo va sap xep lai thu tu.
+>
+> **Luu y**: Chuc nang yeu thich tren he thong web duoc huong dan tai [5.6 Yeu thich (Web)](#56-yeu-thich-web).
 
 ### 3.6 Xem thong bao
 
@@ -829,29 +841,33 @@ Chuc nang thong ke (`/statistics`) phan tich du lieu can theo nhieu tieu chi va 
 1. Nhan **Thong ke** o menu ben trai.
 2. Chon tab **Theo ngay** o phia tren.
 3. Cai dat khoang thoi gian xem (ngay bat dau ~ ngay ket thuc).
-4. Nhan nut **Xem**.
-5. So chuyen can, tong trong luong, ty le theo loai hang duoc hien thi bang bang va bieu do.
+4. Neu can, chon bo loc **theo doanh nghiep van tai**, **theo loai hang** de thu hep dieu kien.
+5. Nhan nut **Xem**.
+6. So chuyen can, tong trong luong, ty le theo loai hang duoc hien thi bang bang va bieu do.
 
 #### 4.7.2 Thong ke theo thang
 
 1. Chon tab **Theo thang** o phia tren.
 2. Cai dat nam va khoang thang xem.
-3. Nhan nut **Xem**.
-4. Bieu do xu huong theo thang va du lieu chi tiet duoc hien thi.
+3. Neu can, chon bo loc **theo doanh nghiep van tai**, **theo loai hang** de thu hep dieu kien.
+4. Nhan nut **Xem**.
+5. Bieu do xu huong theo thang va du lieu chi tiet duoc hien thi.
 
 #### 4.7.3 Thong ke theo loai hang
 
 1. Chon tab **Theo loai hang** o phia tren.
 2. Cai dat khoang thoi gian va loai hang (co the chon nhieu).
-3. Nhan nut **Xem**.
-4. So chuyen can, tong trong luong, ty le theo loai hang duoc hien thi.
+3. Neu can, chon bo loc **theo doanh nghiep van tai** de xem thong ke loai hang cua doanh nghiep cu the.
+4. Nhan nut **Xem**.
+5. So chuyen can, tong trong luong, ty le theo loai hang duoc hien thi.
 
 #### 4.7.4 Thong ke theo doanh nghiep
 
 1. Chon tab **Theo doanh nghiep** o phia tren.
 2. Cai dat khoang thoi gian va doanh nghiep (co the chon nhieu).
-3. Nhan nut **Xem**.
-4. Ket qua can theo doanh nghiep duoc hien thi.
+3. Neu can, chon bo loc **theo loai hang** de xem thong ke doanh nghiep cho loai hang cu the.
+4. Nhan nut **Xem**.
+5. Ket qua can theo doanh nghiep duoc hien thi.
 
 #### 4.7.5 Tai xuong Excel
 
@@ -863,6 +879,8 @@ Tren tat ca man hinh thong ke, ban co the tai xuong ket qua xem duoi dang file E
 4. Ten file theo dinh dang `ThongKeCan_[Loai]_[ThoiGian].xlsx`.
 
 > **Luu y**: Khi tai xuong du lieu lon co the mat thoi gian. Vui long kiem tra tien do tai xuong tren trinh duyet.
+>
+> **Luu y**: Tren tat ca cac tab thong ke, ban co the ket hop bo loc **theo doanh nghiep van tai** va **theo loai hang**. Khi tai xuong Excel voi bo loc da ap dung, ket qua tai xuong se phan anh dieu kien bo loc.
 
 ### 4.8 Trang thai tram can thoi gian thuc
 
@@ -886,14 +904,25 @@ Man hinh trang thai tram can thoi gian thuc (`/weighing-station`) la chuc nang g
 
 > **Luu y**: Man hinh nay cap nhat thoi gian thuc qua WebSocket. Trang thai moi nhat duoc phan anh ma khong can lam moi rieng.
 
-### 4.9 Giam sat
+### 4.9 Giam sat (Quan ly thiet bi)
 
-Chuc nang giam sat (`/monitoring`) cho phep kiem tra trang thai thoi gian thuc cua thiet bi hien truong.
+Chuc nang giam sat (`/monitoring`) cho phep kiem tra trang thai ket noi thoi gian thuc cua thiet bi tram can (tram can, camera, bo chi thi, thanh chan).
+
+#### Bang tom tat thiet bi
+
+Phia tren man hinh giam sat hien thi **bang tom tat thiet bi**. Ban co the nam bat tong quan trang thai toan bo thiet bi.
+
+| Muc tom tat | Mo ta |
+|-----------|------|
+| **Tong so thiet bi** | Tong so thiet bi da dang ky trong he thong |
+| **Truc tuyen** | So thiet bi dang hoat dong binh thuong (mau xanh) |
+| **Ngoai tuyen** | So thiet bi mat ket noi (mau xam) |
+| **Loi** | So thiet bi gap su co (mau do) |
 
 #### Kiem tra trang thai thiet bi
 
 1. Nhan **Giam sat** o menu ben trai.
-2. Danh sach thiet bi hien truong va trang thai se duoc hien thi.
+2. Phia tren hien thi bang tom tat thiet bi, phia duoi hien thi danh sach thiet bi hien truong va trang thai.
 
 | Trang thai | Hien thi | Mo ta |
 |------|------|------|
@@ -933,29 +962,55 @@ Day la cac chuc nang chung ma ca tai xe va nhan vien phu trach deu co the su dun
 
 ### 5.1 Trang ca nhan
 
-Trang ca nhan (`/mypage`) cho phep xem thong tin ca nhan va thay doi mat khau.
+Trang ca nhan (`/mypage`) cho phep xem va sua thong tin ho so ca nhan, thay doi mat khau, va cai dat phuong thuc nhan thong bao.
 
-#### 5.1.1 Xem thong tin ca nhan
+#### 5.1.1 Xem thong tin ho so
 
 1. Web: Nhan **bieu tuong nguoi dung** goc tren ben phai, sau do chon **Trang ca nhan**
    Di dong: Chon tab **Ca nhan** o thanh dieu huong duoi
-2. Thong tin ca nhan se duoc hien thi.
+2. Thong tin ho so ca nhan se duoc hien thi.
 
    | Muc | Mo ta |
    |------|------|
    | ID nguoi dung | ID dang nhap (khong the thay doi) |
    | Ho ten | Ten nguoi dung |
-   | Vai tro | Quan tri vien, nhan vien phu trach, tai xe |
-   | Don vi | Doanh nghiep hoac bo phan truc thuoc |
    | So dien thoai | So dien thoai da dang ky |
    | Email | Dia chi email da dang ky |
+   | Don vi | Doanh nghiep hoac bo phan truc thuoc |
+   | Vai tro | Quan tri vien, nhan vien phu trach, tai xe |
 
-#### 5.1.2 Cai dat thong bao
+#### 5.1.2 Sua thong tin ho so
 
-Ban co the cai dat tiep nhan thong bao tai trang ca nhan.
+Ban co the sua thong tin ca nhan nhu ho ten, so dien thoai, email tai trang ca nhan.
+
+1. Nhan nut **Sua ho so** tren man hinh trang ca nhan.
+2. Thay doi gia tri cua cac muc can sua.
+
+   | Muc | Co the sua | Mo ta |
+   |------|----------------|------|
+   | ID nguoi dung | Khong the thay doi | ID dang nhap khong the thay doi |
+   | Ho ten | Co the sua | Sua ten nguoi dung |
+   | So dien thoai | Co the sua | Thay doi so lien lac |
+   | Email | Co the sua | Thay doi dia chi email |
+   | Don vi | Khong the thay doi | Yeu cau quan tri vien thay doi don vi |
+   | Vai tro | Khong the thay doi | Yeu cau quan tri vien thay doi vai tro |
+
+3. Kiem tra noi dung da sua, sau do nhan nut **Luu**.
+4. Khi hien thi thong bao "Ho so da duoc sua.", viec thay doi hoan tat.
+
+#### 5.1.3 Cai dat thong bao
+
+Ban co the cai dat nhan thong bao va phuong thuc nhan tai trang ca nhan.
 
 1. Kiem tra muc **Cai dat thong bao** tren man hinh trang ca nhan.
-2. Co the cai dat tiep nhan theo tung loai thong bao:
+2. Co the bat hoac tat theo tung phuong thuc nhan:
+
+   | Phuong thuc nhan | Mo ta |
+   |-----------|------|
+   | **Thong bao day** | Nhan thong bao day thoi gian thuc qua ung dung di dong va trinh duyet |
+   | **Thong bao email** | Nhan thong bao qua dia chi email da dang ky |
+
+3. Ngoai ra, co the cai dat nhan theo tung loai thong bao:
 
    | Loai thong bao | Mo ta |
    |-----------|------|
@@ -965,12 +1020,14 @@ Ban co the cai dat tiep nhan thong bao tai trang ca nhan.
    | Thong bao chung | Nhan thong bao khi co thong bao moi |
    | Thong bao he thong | Nhan thong bao lien quan tai khoan, bao tri he thong... |
 
-3. Bat hoac tat cong tac cua thong bao mong muon.
-4. Thay doi duoc luu ngay lap tuc.
+4. Bat hoac tat cong tac cua thong bao mong muon.
+5. Thay doi duoc luu ngay lap tuc.
 
 > **Luu y**: De nhan thong bao day tren ung dung di dong, quyen thong bao cua ung dung phai duoc cho phep trong cai dat dien thoai. Token thong bao day duoc tu dong dang ky khi khoi dong ung dung lan dau.
+>
+> **Luu y**: De nhan thong bao email, dia chi email chinh xac phai duoc dang ky trong trang ca nhan.
 
-#### 5.1.3 Thay doi mat khau
+#### 5.1.4 Thay doi mat khau
 
 1. Nhan nut **Thay doi mat khau** tren man hinh trang ca nhan.
 2. Nhap cac thong tin sau:

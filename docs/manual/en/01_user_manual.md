@@ -3,8 +3,8 @@
 | Item | Details |
 |------|---------|
 | **Document Title** | Busan Smart Weighing System User Manual |
-| **Version** | 1.2 |
-| **Last Updated** | 2026-01-29 |
+| **Version** | 1.3 |
+| **Last Updated** | 2026-01-30 |
 | **Target Audience** | Drivers (DRIVER), Weighing Managers (MANAGER) |
 | **Security Level** | Internal Use Only |
 
@@ -17,6 +17,14 @@
 3. [Driver Functions](#3-driver-functions)
 4. [Manager Functions](#4-manager-functions)
 5. [Common Functions](#5-common-functions)
+   - 5.1 My Page (Profile View/Edit, Password Change, Notification Settings)
+   - 5.2 Notifications
+   - 5.3 Announcements (Category Filters, Search, Pinned Posts)
+   - 5.4 Help/FAQ (Categorized Frequently Asked Questions)
+   - 5.5 Inquiries/Support
+   - 5.6 Favorites (Web)
+   - 5.7 Dark/Light Theme Toggle
+   - 5.8 Keyboard Shortcuts and Tab Management (Web)
 6. [Frequently Asked Questions (FAQ)](#6-frequently-asked-questions-faq)
 7. [Troubleshooting Guide](#7-troubleshooting-guide)
 8. [Glossary](#8-glossary)
@@ -174,11 +182,13 @@ The web management system screen is organized as follows:
 
 | Area | Description |
 |------|-------------|
-| **Top Header** | System logo, notification icon (displays unread notification count), user menu (My Page, Logout) |
+| **Top Header** | System logo, favorites star icon (add/remove current page from favorites), theme toggle button (dark/light mode switch), notification icon (displays unread notification count), user menu (My Page, Logout) |
 | **Left Navigation** | Main menu list. Master Data includes sub-menus (Company, Vehicle, Scale, Common Code) |
 | **Main Content Area** | Area displaying detailed functions of the selected menu |
 
-> **Note**: The web system supports **Dark Mode** and **Light Mode**. You can switch themes from the user menu in the upper right corner.
+> **Note**: The web system supports **Dark Mode** and **Light Mode**. Click the **theme toggle button** in the top header to switch between dark mode and light mode. The theme setting is automatically saved and will persist on your next visit. For detailed instructions, see [5.7 Dark/Light Theme Toggle](#57-darklight-theme-toggle).
+>
+> **Note**: The CS program (on-site weighing application) also supports dark/light themes. Click the theme toggle icon in the top header bar to switch. The setting is automatically saved.
 
 #### 2.4.2 Mobile App Screen Layout (Driver)
 
@@ -434,6 +444,8 @@ You can register frequently checked dispatches or companies as favorites for qui
 3. Tap an item to navigate directly to its detail screen.
 
 > **Note**: You can change the order of the favorites list. Long-press an item in the list and drag to rearrange the order.
+>
+> **Note**: For web system favorites, see [5.6 Favorites (Web)](#56-favorites-web).
 
 ### 3.6 Checking Notifications
 
@@ -826,29 +838,33 @@ The Statistics (`/statistics`) function analyzes weighing data by various criter
 1. Click **Statistics** in the left menu.
 2. Select the **Daily** tab at the top.
 3. Set the query period (start date to end date).
-4. Click the **Search** button.
-5. Daily weighing count, total weight, and item type ratios are displayed in tables and charts.
+4. Optionally, select **By Carrier** or **By Item Type** filters to narrow the results.
+5. Click the **Search** button.
+6. Daily weighing count, total weight, and item type ratios are displayed in tables and charts.
 
 #### 4.7.2 Monthly Statistics
 
 1. Select the **Monthly** tab at the top.
 2. Set the query year and month range.
-3. Click the **Search** button.
-4. Monthly trend charts are displayed along with detailed data.
+3. Optionally, select **By Carrier** or **By Item Type** filters to narrow the results.
+4. Click the **Search** button.
+5. Monthly trend charts are displayed along with detailed data.
 
 #### 4.7.3 Statistics by Item Type
 
 1. Select the **By Item Type** tab at the top.
 2. Set the query period and item types (multiple selection available).
-3. Click the **Search** button.
-4. Weighing count, weight totals, and ratios by item type are displayed.
+3. Optionally, select the **Carrier** filter to view item type statistics for a specific carrier.
+4. Click the **Search** button.
+5. Weighing count, weight totals, and ratios by item type are displayed.
 
 #### 4.7.4 Statistics by Company
 
 1. Select the **By Company** tab at the top.
 2. Set the query period and companies (multiple selection available).
-3. Click the **Search** button.
-4. Weighing results by company are displayed.
+3. Optionally, select the **Item Type** filter to view company statistics for specific item types.
+4. Click the **Search** button.
+5. Weighing results by company are displayed.
 
 #### 4.7.5 Excel Download
 
@@ -860,6 +876,8 @@ Query results can be downloaded as an Excel file from all statistics screens.
 4. The filename follows the format `WeighingStatistics_[Type]_[QueryPeriod].xlsx`.
 
 > **Note**: Downloading large amounts of data may take time. Check the browser's download progress.
+>
+> **Note**: All statistics tabs support combined **By Carrier** and **By Item Type** filters. When you download to Excel with filters applied, the downloaded results reflect the filter criteria.
 
 ### 4.8 Weighing Station Real-time Status
 
@@ -883,14 +901,25 @@ The Weighing Station Real-time Status (`/weighing-station`) screen provides real
 
 > **Note**: This screen is updated in real-time via WebSocket. The latest status is reflected without any manual refresh.
 
-### 4.9 Monitoring
+### 4.9 Monitoring (Equipment Control)
 
-The Monitoring (`/monitoring`) function allows you to check the real-time status of on-site equipment.
+The Monitoring (`/monitoring`) function allows you to check the real-time connection status of weighing station equipment (weighbridges, cameras, indicators, barriers).
+
+#### Equipment Summary Dashboard
+
+An **Equipment Summary Dashboard** is displayed at the top of the monitoring screen. It provides an at-a-glance overview of all equipment status.
+
+| Summary Item | Description |
+|-------------|-------------|
+| **Total Equipment** | Total number of registered equipment |
+| **Online** | Number of equipment operating normally (green) |
+| **Offline** | Number of equipment with disconnected communication (gray) |
+| **Error** | Number of equipment with issues (red) |
 
 #### Checking Equipment Status
 
 1. Click **Monitoring** in the left menu.
-2. The list of on-site equipment and their statuses is displayed.
+2. The equipment summary dashboard is displayed at the top, and the on-site equipment list with statuses is displayed below.
 
 | Status | Display | Description |
 |--------|---------|-------------|
@@ -930,29 +959,55 @@ These are common functions available to both drivers and managers.
 
 ### 5.1 My Page
 
-On My Page (`/mypage`), you can view personal information and change your password.
+On My Page (`/mypage`), you can view and edit your profile information, change your password, and configure notification preferences.
 
-#### 5.1.1 Viewing Personal Information
+#### 5.1.1 Viewing Profile Information
 
 1. Web: Click the **User icon** in the upper right, then select **My Page**
    Mobile: Select the **My** tab from the bottom navigation
-2. Your personal information is displayed.
+2. Your profile information is displayed.
 
    | Item | Description |
    |------|-------------|
    | User ID | Login ID (cannot be changed) |
    | Name | User name |
-   | Role | Administrator, Manager, Driver |
-   | Affiliation | Affiliated company or department |
-   | Contact | Registered phone number |
+   | Phone Number | Registered phone number |
    | Email | Registered email address |
+   | Affiliation | Affiliated company or department |
+   | Role | Administrator, Manager, Driver |
 
-#### 5.1.2 Notification Settings
+#### 5.1.2 Editing Profile Information
 
-You can configure notification preferences on My Page.
+You can edit personal information such as name, phone number, and email on My Page.
+
+1. Click (tap) the **Edit Profile** button on the My Page screen.
+2. Modify the values of the fields that need changing.
+
+   | Item | Editable | Description |
+   |------|----------|-------------|
+   | User ID | No | Login ID cannot be changed |
+   | Name | Yes | Edit your user name |
+   | Phone Number | Yes | Change your contact number |
+   | Email | Yes | Change your email address |
+   | Affiliation | No | Contact the administrator to request affiliation changes |
+   | Role | No | Contact the administrator to request role changes |
+
+3. After reviewing the changes, click (tap) the **Save** button.
+4. When the message "Profile has been updated." appears, the change is complete.
+
+#### 5.1.3 Notification Settings
+
+You can configure notification reception preferences and methods on My Page.
 
 1. Check the **Notification Settings** section on the My Page screen.
-2. You can configure reception for each notification type:
+2. Toggle on or off for each notification delivery method:
+
+   | Delivery Method | Description |
+   |-----------------|-------------|
+   | **Push Notifications** | Receive real-time push notifications on the mobile app and browser |
+   | **Email Notifications** | Receive notification emails at your registered email address |
+
+3. Additionally, you can individually configure reception for each notification type:
 
    | Notification Type | Description |
    |-------------------|-------------|
@@ -962,12 +1017,14 @@ You can configure notification preferences on My Page.
    | Announcement | Receive notifications when a new announcement is posted |
    | System Notification | Receive notifications for account-related and system maintenance notices |
 
-3. Toggle the switch on or off for the desired notification types.
-4. Changes are saved immediately.
+4. Toggle the switch on or off for the desired notification types.
+5. Changes are saved immediately.
 
 > **Note**: To receive push notifications on the mobile app, notification permissions for the app must be enabled in your smartphone settings. The push notification token is automatically registered when the app is first launched.
+>
+> **Note**: To receive email notifications, a valid email address must be registered on My Page.
 
-#### 5.1.3 Changing Password
+#### 5.1.4 Changing Password
 
 1. Click (tap) the **Change Password** button on the My Page screen.
 2. Enter the following information:
@@ -1017,21 +1074,137 @@ In Announcements (`/notice`), you can check system-related notices, maintenance 
 
 1. Web: Click **Announcements** in the left menu
    Mobile: Access via the **Announcements** banner or menu on the main screen
-2. The announcement list is displayed in chronological order. **Pinned (📌) announcements** are always shown at the top of the list.
+2. The announcement list is displayed in chronological order. **Important announcements** are always **pinned at the top** of the list.
 3. Use **category filters** to view only specific types of announcements.
-4. Enter keywords in the **search bar** at the top to search announcements.
+
+   | Category | Description |
+   |----------|-------------|
+   | **System** | System-related notices (outages, recovery, policy changes, etc.) |
+   | **Maintenance** | Scheduled and emergency maintenance schedule notices |
+   | **Updates** | System feature updates and improvements |
+   | **General** | Other general announcements |
+
+4. Enter keywords in the **search bar** at the top to search announcements by title.
 5. Click (tap) an announcement to view its details.
 6. Attachments can be downloaded if available.
 
 ### 5.4 Help/FAQ
 
-In Help (`/help`), you can find frequently asked questions and answers about system usage.
+In Help (`/help`), you can find frequently asked questions and answers about system usage, organized by category.
+
+#### How to Use
 
 1. Web: Click **Help** in the left menu
    Mobile: **Help** tab in My Page
 2. The FAQ list is categorized and displayed.
-3. Click (tap) a question to expand the answer.
-4. Enter keywords in the search bar at the top to search for related questions.
+
+   | Category | Main Topics |
+   |----------|-------------|
+   | **Weighing** | Automatic weighing, OTP weighing, manual weighing, re-weighing, net weight calculation, etc. |
+   | **Dispatch** | Dispatch inquiry, dispatch registration, status changes, dispatch history, etc. |
+   | **Account** | Login, password change/recovery, account lock release, etc. |
+   | **System** | Equipment status, web/app errors, notification settings, data inquiry, etc. |
+   | **Other** | Electronic weighing slips, gate passes, statistics download, etc. |
+
+3. Select a category to display the list of questions in that category.
+4. Click (tap) a question to expand the answer.
+5. Enter keywords in the search bar at the top to search for related questions across all categories.
+
+### 5.5 Inquiries/Support
+
+The Inquiries function (`/inquiry`) allows you to submit inquiries about weighing issues, dispatch problems, system errors, and more, and to track the processing status.
+
+#### 5.5.1 Submitting an Inquiry
+
+1. Web: Click **Inquiries** in the left menu
+   Mobile: Tap **Make Inquiry** on the main screen or My Page
+2. Click (tap) the **Submit Inquiry** button.
+3. Enter the following information:
+
+   | Input Field | Required | Description |
+   |-------------|----------|-------------|
+   | Inquiry Type | Required | Select from: Weighing Issue, Dispatch Issue, System Error, Other |
+   | Title | Required | Enter the inquiry title |
+   | Content | Required | Write the detailed inquiry content |
+
+4. Click (tap) the **Submit** button.
+5. When the message "Inquiry has been submitted." appears, the submission is complete.
+
+#### 5.5.2 Viewing My Inquiries
+
+1. Check the **My Inquiries** list on the inquiries screen.
+2. You can view the processing status and responses for your submitted inquiries.
+
+> **Note**: In urgent situations (equipment failure, safety issues, etc.), call the logistics control room directly instead of submitting an inquiry.
+
+### 5.6 Favorites (Web)
+
+In the web system, you can register frequently used menus as favorites for quick access.
+
+#### Adding/Removing Favorites
+
+1. Navigate to the page you want to add to favorites.
+2. Click the **star icon** (☆) in the top header.
+3. When the icon changes to a filled star (★), the page has been added to favorites.
+4. Click the same icon again to remove from favorites.
+
+#### Viewing and Reordering the Favorites List
+
+1. View the list of registered menus in the favorites area of the top header.
+2. Click a favorites item to navigate directly to that page.
+3. **Drag** items in the favorites list to rearrange them in your preferred order.
+
+| Item | Description |
+|------|-------------|
+| **Maximum Favorites** | Up to 20 favorites can be registered |
+| **Reorder** | Drag and drop to arrange in desired order |
+| **Add/Remove** | Click the star icon in the top header for instant toggle |
+
+> **Note**: Favorites settings are automatically saved per account, so they remain the same when accessing from a different PC.
+
+### 5.7 Dark/Light Theme Toggle
+
+The web system supports dark mode and light mode. Choose the theme that suits your working environment.
+
+#### How to Switch Themes
+
+1. Click the **theme toggle button** in the top header.
+2. If currently in light mode, it switches to dark mode; if in dark mode, it switches to light mode.
+3. The theme setting is **automatically saved** and will persist on your next visit.
+
+| Theme | Description |
+|-------|-------------|
+| **Light Mode** | Bright background with dark text. Suitable for typical office environments |
+| **Dark Mode** | Dark background with light text. Reduces eye strain in nighttime or dark environments |
+
+> **Note**: The CS program (on-site weighing application) also supports dark/light theme switching by clicking the theme toggle icon in the top header bar.
+
+### 5.8 Keyboard Shortcuts and Tab Management (Web)
+
+Using keyboard shortcuts and tab right-click menus in the web system allows you to work more efficiently.
+
+#### Keyboard Shortcuts
+
+| Shortcut | Function |
+|----------|----------|
+| `Ctrl + N` | New Registration |
+| `Ctrl + F` | Focus Search |
+| `Ctrl + W` | Close Current Tab |
+| `Ctrl + Tab` | Move to Next Tab |
+| `Escape` | Close Modal/Popup |
+
+#### Tab Right-Click Menu
+
+Right-click on an open tab to display the following menu:
+
+| Menu Item | Description |
+|-----------|-------------|
+| **Close Current** | Closes the right-clicked tab |
+| **Close Other Tabs** | Closes all tabs except the right-clicked tab |
+| **Close Tabs to the Right** | Closes all tabs to the right of the right-clicked tab |
+| **Close All** | Closes all tabs except pinned tabs |
+
+> **Note**: Pinned tabs (e.g., Weighing Station Control) are not affected by the close menu actions.
 
 ---
 
@@ -1229,6 +1402,7 @@ This section lists the key terms used in this system in alphabetical order.
 | 1.0 | 2026-01-29 | System Management Team | Initial version |
 | 1.1 | 2026-01-29 | System Management Team | Added favorites function, reflected phone call record method for inquiries, added weighing history inquiry, added My Page notification settings, added company statistics to dashboard, added weighing station real-time status page, reflected announcement category/search/pinning features, added dark/light theme support guide |
 | 1.2 | 2026-01-29 | System Management Team | Reflected new features: onboarding guide, keyboard shortcuts, weighing station control screen details, equipment monitoring, weighing inquiry page, statistics/reports page, help page, mobile offline cache |
+| 1.3 | 2026-01-30 | System Management Team | Reflected new features: web favorites (header star icon, drag reorder, up to 20 items), Help/FAQ categories, equipment monitoring summary dashboard, My Page profile editing and push/email notification settings, announcement category filters (System/Maintenance/Updates/General), statistics carrier/item type filtering, inquiry/support submission, dark/light theme toggle detailed guide, keyboard shortcuts (Ctrl+W/Ctrl+Tab) and tab right-click menu |
 
 ---
 
@@ -1244,15 +1418,19 @@ An **onboarding guide** is automatically displayed when you first access the sys
 | **Content** | Sidebar menu, tab navigation, search, and favorites usage |
 | **Skip** | Can be exited at any time with the "Skip" button |
 
-### B.2 Keyboard Shortcuts
+### B.2 Keyboard Shortcuts and Tab Management
 
-The web system supports keyboard shortcuts.
+The web system supports keyboard shortcuts and tab right-click menus. For detailed instructions, see [5.8 Keyboard Shortcuts and Tab Management (Web)](#58-keyboard-shortcuts-and-tab-management-web).
 
 | Shortcut | Function |
 |----------|----------|
 | `Ctrl + N` | New Registration |
 | `Ctrl + F` | Focus Search |
+| `Ctrl + W` | Close Current Tab |
+| `Ctrl + Tab` | Move to Next Tab |
 | `Escape` | Close Modal/Popup |
+
+Tab right-click menu: Close Current, Close Other Tabs, Close Tabs to the Right, Close All.
 
 ### B.3 Weighing Inquiry Page
 
@@ -1281,7 +1459,7 @@ The **Statistics** menu allows you to view various charts and reports.
 
 ### B.5 Equipment Monitoring Page
 
-The **Equipment Monitoring** menu allows you to monitor the real-time status of equipment connected to the weighbridge.
+The **Equipment Monitoring** menu allows you to monitor the real-time status of equipment connected to the weighbridge. An **Equipment Summary Dashboard** at the top of the screen shows the total equipment count and status breakdown (online/offline/error). For detailed instructions, see [4.9 Monitoring (Equipment Control)](#49-monitoring-equipment-control).
 
 | Equipment | Displayed Information |
 |-----------|----------------------|

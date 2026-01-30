@@ -23,7 +23,11 @@ src/
 ├── components/
 │   ├── MasterCrudPage.tsx     # CRUD 공통 컴포넌트 (테이블+모달+검색)
 │   ├── SortableTable.tsx      # @dnd-kit 드래그 정렬 테이블
+│   ├── TablePageLayout.tsx    # 테이블 페이지 공통 레이아웃 (고정 헤더+스크롤)
 │   ├── AnimatedNumber.tsx     # 숫자 애니메이션
+│   ├── EmptyState.tsx         # 데이터 없음 상태 UI
+│   ├── FavoriteButton.tsx     # 즐겨찾기 토글 버튼
+│   ├── FavoritesList.tsx      # 즐겨찾기 목록 패널
 │   ├── OnboardingTour.tsx     # Ant Design Tour
 │   ├── dashboard/             # OverviewTab, RealtimeTab, AnalysisTab
 │   └── weighing-station/      # 10개 하위 컴포넌트
@@ -33,10 +37,12 @@ src/
 ├── hooks/
 │   ├── useApiCall.ts          # API 호출 래퍼 (로딩/에러 자동관리)
 │   ├── useCrudState.ts        # CRUD 상태 관리
+│   ├── useKeyboardShortcuts.ts# 키보드 단축키 등록/해제
+│   ├── useTabVisible.ts       # 브라우저 탭 활성화/비활성화 감지
 │   ├── useWebSocket.ts        # STOMP WebSocket 관리
 │   ├── useWeighingStation.ts  # 계량소 비즈니스 로직
 │   └── useWeighingStationSocket.ts
-├── pages/                     # 17개 페이지 (admin/, master/ 하위 포함)
+├── pages/                     # 20개 페이지 (admin/, master/ 하위 포함)
 ├── theme/themeConfig.ts       # Ant Design 5 테마 토큰
 ├── types/index.ts             # 공통 TypeScript 인터페이스
 ├── types/weighingStation.ts   # 계량소 전용 타입

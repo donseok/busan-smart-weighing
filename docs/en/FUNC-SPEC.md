@@ -1,8 +1,8 @@
 # Busan Smart Weighing System - Functional Specification
 
-**Version**: 1.1
+**Version**: 1.2
 **Created**: 2026-01-27
-**Last Modified**: 2026-01-29
+**Last Modified**: 2026-01-30
 **Base Documents**: PRD-20260127-154446, TRD-20260127-155235, WBS-20260127-160043
 **Status**: Updated
 
@@ -28,7 +28,7 @@
 This document defines the detailed behavior of each function based on the PRD, TRD, and WBS of the Busan Smart Weighing System. It serves as the reference document for development, testing, and acceptance.
 
 ### 1.2 Scope
-All functional requirements from PRD FR-001 through FR-008 are categorized into 7 modules and specified in detail.
+All functional requirements from PRD FR-001 through FR-008 are categorized into 7 modules and specified in detail. In v1.2, features for favorites, help guide/FAQ, device monitoring, my page, notices, system settings, inquiry/support, statistics/reports, and frontend layout improvements have been added.
 
 ### 1.3 Terminology
 | Term | Definition |
@@ -39,6 +39,10 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 | Indicator | Device that displays weight values on the weighbridge |
 | Electronic Weighing Slip | Digital weighing certificate provided via mobile APP |
 | Dispatch | Vehicle transport schedule assignment |
+| FCM | Firebase Cloud Messaging - Mobile push notification service |
+| Health Check | Periodic equipment connection status verification process |
+| Favorites | Feature for registering frequently used menus/items for quick access |
+| FAQ | Frequently Asked Questions |
 
 ---
 
@@ -726,6 +730,601 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 
 ---
 
+### FUNC-031: Favorites
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-031 |
+| **Function Name** | Favorites |
+| **PRD Mapping** | FR-004 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | MEDIUM |
+
+**Function Description**: Allows users to register frequently used menus, dispatches, vehicles, transport companies, and weighbridges as favorites for quick access.
+
+**Preconditions**:
+- User login completed
+
+**Postconditions**:
+- Favorite item saved/deleted
+- Favorite order changes reflected
+
+**Input Data**:
+
+| Field Name | Type | Required | Validation Rules |
+|------------|------|----------|-----------------|
+| target_type | varchar(20) | Y | MENU / DISPATCH / VEHICLE / COMPANY / SCALE |
+| target_id | bigint | N | Target item ID (path string for menus) |
+| sort_order | int | N | Sort order |
+
+**Output Data**:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| favorite_id | bigint | Favorite item ID |
+| favorite_list | array | Complete favorites list |
+
+**Business Rules**:
+- BR-031-1: Maximum 20 favorites per user
+- BR-031-2: Prevent duplicate registration of the same item (based on target_type + target_id)
+- BR-031-3: Toggle behavior (click registered item to remove, click unregistered item to add)
+- BR-031-4: Drag and drop to reorder favorites (@dnd-kit based)
+- BR-031-5: Toggle current page as favorite via header favorites button
+
+**Main Flow**:
+1. User clicks the favorites button (star icon) in the header to toggle current page as favorite
+2. Or clicks the favorites button on individual items in list views to toggle
+3. View favorites list in Popover panel
+4. Click favorite item to navigate directly to corresponding page/item
+5. Drag and drop to reorder
+
+**Alternative Flow**:
+- AF-031-1: When exceeding 20 favorites → "Maximum registration limit exceeded" notification
+
+**UI/UX Requirements**:
+- Favorites toggle button in header (FavoriteButton component)
+- Favorites list display in Popover panel (FavoritesList component)
+- @dnd-kit based drag and drop sorting
+
+**Related Functions**: FUNC-005 (Dispatch Management), FUNC-008 (Master Data Management)
+
+---
+
+### FUNC-032: Help Guide/FAQ
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-032 |
+| **Function Name** | Help Guide/FAQ |
+| **PRD Mapping** | FR-004 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | LOW |
+
+**Function Description**: Provides system usage guides and frequently asked questions (FAQ) by category to support user self-resolution.
+
+**Preconditions**:
+- User login completed
+- FAQ management: ADMIN role
+
+**Postconditions**:
+- View count auto-incremented on FAQ view
+- FAQ creation/modification/deletion reflected in data
+
+**Input Data**:
+
+| Field Name | Type | Required | Validation Rules |
+|------------|------|----------|-----------------|
+| category | varchar(20) | Y | WEIGHING / DISPATCH / ACCOUNT / SYSTEM / ETC |
+| question | varchar(200) | Y | Question title (max 200 characters) |
+| answer | text | Y | Answer content |
+| is_published | boolean | Y | Published status |
+| sort_order | int | N | Sort order |
+
+**Output Data**:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| faq_id | bigint | FAQ ID |
+| category | string | Category |
+| question | string | Question |
+| answer | string | Answer |
+| view_count | int | View count |
+| is_published | boolean | Published status |
+
+**Business Rules**:
+- BR-032-1: FAQ categories: Weighing (WEIGHING), Dispatch (DISPATCH), Account (ACCOUNT), System (SYSTEM), Other (ETC)
+- BR-032-2: View count (view_count) auto-incremented by 1 on FAQ detail view
+- BR-032-3: Only administrators (ADMIN) can create/modify/delete FAQ entries
+- BR-032-4: Only published (is_published=true) FAQ entries are shown to general users
+- BR-032-5: Sort order within categories configurable via sort_order
+
+**Main Flow**:
+1. User enters the help guide (/help) screen
+2. Select category tab (Weighing/Dispatch/Account/System/Other)
+3. Display FAQ list (question title + view count)
+4. Click FAQ to display answer + increment view count
+
+**Alternative Flow**:
+- AF-032-1: ADMIN users → FAQ management functions (create/modify/delete/publish toggle)
+
+**UI/UX Requirements**:
+- Category-based tab or filter UI
+- Ant Design Collapse/Accordion pattern for question-answer display
+
+**Related Functions**: FUNC-023 (Notices/Inquiry Calls)
+
+---
+
+### FUNC-033: Device Monitoring
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-033 |
+| **Function Name** | Device Monitoring |
+| **PRD Mapping** | FR-004, FR-005 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | HIGH |
+
+**Function Description**: Monitors the connection status of all system-connected devices (weighbridges, LPR cameras, indicators, barriers) in real-time and sends automatic alerts on status anomalies.
+
+**Preconditions**:
+- User login completed
+- Device master data registered
+- WebSocket connection established
+
+**Postconditions**:
+- Device status change recorded
+- Alert sent on anomaly detection
+
+**Input Data**:
+
+| Field Name | Type | Required | Validation Rules |
+|------------|------|----------|-----------------|
+| device_type | varchar(20) | Y | SCALE / LPR_CAMERA / INDICATOR / BARRIER_GATE |
+| device_id | bigint | Y | Device identifier |
+| heartbeat | timestamptz | Y | Last response time |
+
+**Output Data**:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| device_id | bigint | Device ID |
+| device_type | string | Device type |
+| connection_status | string | ONLINE / OFFLINE / ERROR |
+| last_heartbeat | timestamptz | Last response time |
+| summary | object | Device summary (total count, count by status) |
+
+**Business Rules**:
+- BR-033-1: Device types: Weighbridge (SCALE), LPR Camera (LPR_CAMERA), Indicator (INDICATOR), Barrier Gate (BARRIER_GATE)
+- BR-033-2: Connection statuses: Online (ONLINE), Offline (OFFLINE), Error (ERROR)
+- BR-033-3: Automatically transition to OFFLINE status after 5 minutes (300 seconds) of no health check response
+- BR-033-4: Broadcast real-time alerts via WebSocket (/topic/equipment-status) on device status changes
+- BR-033-5: Provide device summary information: total device count, online/offline/error counts, counts by type and status
+
+**Main Flow**:
+1. User enters the device monitoring (/monitoring) screen
+2. Establish WebSocket subscription (/topic/equipment-status)
+3. Display all device list and status (grouped by type)
+4. Display device summary dashboard (online/offline/error counts)
+5. Real-time refresh on device status changes
+
+**Alternative Flow**:
+- AF-033-1: WebSocket connection failure → REST API polling (10-second interval)
+- AF-033-2: Device error detected → Send administrator Push notification
+
+**Exception Flow**:
+- EF-033-1: Network failure causing all devices to transition to OFFLINE → Display system warning
+
+**UI/UX Requirements**:
+- Card/list display by device type
+- Color coding by status (Online=green, Offline=gray, Error=red)
+- Device summary KPI cards
+
+**Related Functions**: FUNC-010 (Indicator Weight Value Reception), FUNC-040 (LPR Camera Integration), FUNC-042 (Vehicle Detector Integration)
+
+**Non-Functional Requirements Mapping**:
+- NFR-001 Performance: Device status change WebSocket real-time delivery within 500ms
+- NFR-004 Availability: Automatic health check detection, failure alerts
+
+---
+
+### FUNC-034: My Page
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-034 |
+| **Function Name** | My Page |
+| **PRD Mapping** | FR-004 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | MEDIUM |
+
+**Function Description**: Allows logged-in users to view/edit their profile information, change passwords, and manage notification settings.
+
+**Preconditions**:
+- User login completed
+
+**Postconditions**:
+- User information updated
+- Session maintained on password change (re-login not required)
+
+**Input Data**:
+
+| Field Name | Type | Required | Validation Rules |
+|------------|------|----------|-----------------|
+| name | varchar(50) | Y | Name (max 50 characters) |
+| phone_number | varchar(20) | N | Phone number format |
+| email | varchar(100) | N | Email format validation |
+| current_password | varchar(255) | Y* | Required for password change |
+| new_password | varchar(255) | Y* | Minimum 8 characters |
+| push_enabled | boolean | N | Push notification enabled status |
+| email_notification_enabled | boolean | N | Email notification enabled status |
+
+**Output Data**:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| user_id | bigint | User ID |
+| name | string | Name |
+| login_id | string | Login ID |
+| phone_number | string | Phone number |
+| email | string | Email |
+| role | string | Role (ADMIN/MANAGER/DRIVER) |
+| company_name | string | Affiliated transport company name |
+| created_at | timestamptz | Registration date |
+| last_login_at | timestamptz | Last login datetime |
+| push_enabled | boolean | Push notification setting |
+| email_notification_enabled | boolean | Email notification setting |
+
+**Business Rules**:
+- BR-034-1: Profile view displays user information, affiliated transport company, role, registration date, last login datetime
+- BR-034-2: Editable profile fields: name, phone number, email (login_id and role are not editable)
+- BR-034-3: Current password verification required for password change (bcrypt verification)
+- BR-034-4: New password must be at least 8 characters
+- BR-034-5: Notification settings: Push notification (FCM) enable/disable, email notification enable/disable toggles
+
+**Main Flow**:
+1. User enters My Page (/mypage)
+2. Display profile information (GET /api/v1/users/me)
+3. Edit profile → PUT /api/v1/users/me
+4. Change password → PUT /api/v1/users/me/password
+5. Change notification settings → PUT /api/v1/users/me/notification-settings
+
+**Exception Flow**:
+- EF-034-1: Current password mismatch → "Current password is incorrect" error
+- EF-034-2: New password less than 8 characters → "Password must be at least 8 characters" error
+
+**UI/UX Requirements**:
+- Fixed header + scroll layout (TablePageLayout applied)
+- Profile/password/notification settings section separation
+- Ant Design Form + validation rules applied
+
+**Related Functions**: FUNC-025-API (User/Authentication API), FUNC-024 (Push Notification Reception)
+
+---
+
+### FUNC-035: Notices
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-035 |
+| **Function Name** | Notices |
+| **PRD Mapping** | FR-004 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | MEDIUM |
+
+**Function Description**: Provides functionality for system administrators to register/manage notices and for users to view them.
+
+**Preconditions**:
+- User login completed
+- Notice management: ADMIN role
+
+**Postconditions**:
+- Notice record created/modified/deleted
+- View count auto-incremented
+
+**Input Data**:
+
+| Field Name | Type | Required | Validation Rules |
+|------------|------|----------|-----------------|
+| title | varchar(200) | Y | Title (max 200 characters) |
+| content | text | Y | Content |
+| category | varchar(20) | Y | SYSTEM / MAINTENANCE / UPDATE / GENERAL |
+| is_pinned | boolean | N | Pin to top (default false) |
+| is_published | boolean | N | Published status (default false) |
+
+**Output Data**:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| notice_id | bigint | Notice ID |
+| title | string | Title |
+| content | string | Content |
+| category | string | Category |
+| is_pinned | boolean | Pinned to top status |
+| is_published | boolean | Published status |
+| view_count | int | View count |
+| created_at | timestamptz | Creation datetime |
+
+**Business Rules**:
+- BR-035-1: Categories: System (SYSTEM), Maintenance (MAINTENANCE), Update (UPDATE), General (GENERAL)
+- BR-035-2: Pin feature: Notices with is_pinned=true are pinned to the top of the list
+- BR-035-3: Publish feature: Only notices with is_published=true are shown to general users
+- BR-035-4: Title-based keyword search supported
+- BR-035-5: View count (view_count) auto-incremented by 1 on detail view
+- BR-035-6: Only administrators (ADMIN) can create/modify/delete/toggle pin/toggle publish
+- BR-035-7: Pagination supported (default 10 items/page)
+
+**Main Flow**:
+1. User enters the notices (/notices) screen
+2. Pinned notices displayed at top, followed by newest first
+3. Filter notices by category filter or keyword search
+4. Click notice to display detail content + increment view count
+
+**Alternative Flow**:
+- AF-035-1: ADMIN users → Notice create/modify/delete, pin/publish toggle available
+
+**UI/UX Requirements**:
+- Category-based tag/badge display
+- Pinned notice icon distinction
+- Pagination + search bar
+
+**Related Functions**: FUNC-024 (Push Notification Reception)
+
+---
+
+### FUNC-036: System Settings
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-036 |
+| **Function Name** | System Settings |
+| **PRD Mapping** | FR-004 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | MEDIUM |
+
+**Function Description**: Provides functionality for administrators (ADMIN) to view and modify system operation configuration values.
+
+**Preconditions**:
+- ADMIN role login
+
+**Postconditions**:
+- System settings values updated
+- Changed settings applied immediately (Redis cache refreshed if necessary)
+
+**Input Data**:
+
+| Field Name | Type | Required | Validation Rules |
+|------------|------|----------|-----------------|
+| setting_key | varchar(100) | Y | Setting key (UNIQUE) |
+| setting_value | text | Y | Setting value |
+| value_type | varchar(20) | Y | STRING / NUMBER / BOOLEAN / JSON |
+| category | varchar(20) | Y | GENERAL / WEIGHING / NOTIFICATION / SECURITY |
+| is_editable | boolean | Y | Editable status |
+
+**Output Data**:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| setting_id | bigint | Setting ID |
+| setting_key | string | Setting key |
+| setting_value | string | Setting value |
+| value_type | string | Value type |
+| category | string | Setting category |
+| is_editable | boolean | Editable status |
+| description | string | Setting description |
+
+**Business Rules**:
+- BR-036-1: Administrator (ADMIN) exclusive feature (MANAGER, DRIVER access denied)
+- BR-036-2: Setting value types: String (STRING), Number (NUMBER), Boolean (BOOLEAN), JSON
+- BR-036-3: Setting categories: General (GENERAL), Weighing (WEIGHING), Notification (NOTIFICATION), Security (SECURITY)
+- BR-036-4: Individual setting modification (PUT /api/v1/admin/settings/{key}) and batch modification (PUT /api/v1/admin/settings/batch) supported
+- BR-036-5: Settings with is_editable=false cannot be modified (read-only)
+- BR-036-6: Input value validation based on value_type (e.g., string input not allowed for NUMBER type)
+
+**Main Flow**:
+1. Administrator enters the system settings (/admin/settings) screen
+2. Display settings list by category
+3. Select editable setting → Modify value
+4. Click "Save" → PUT /api/v1/admin/settings/{key}
+5. Setting value validated and saved
+
+**Exception Flow**:
+- EF-036-1: Attempt to modify non-editable setting → "This setting cannot be modified" error
+- EF-036-2: Value type mismatch → "Please enter a value in the correct format" error
+
+**UI/UX Requirements**:
+- Category-based group display
+- Input UI based on value type (text/number/toggle/JSON editor)
+- Non-editable settings displayed as disabled
+
+**Related Functions**: FUNC-008 (Master Data Management)
+
+---
+
+### FUNC-037: Inquiry/Support
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-037 |
+| **Function Name** | Inquiry/Support |
+| **PRD Mapping** | FR-004, FR-007 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | MEDIUM |
+
+**Function Description**: Allows users to register inquiries and support requests through the system, and enables administrators/managers to manage received inquiries.
+
+**Preconditions**:
+- User login completed
+
+**Postconditions**:
+- Inquiry record created
+- Notification sent to administrators/managers
+
+**Input Data**:
+
+| Field Name | Type | Required | Validation Rules |
+|------------|------|----------|-----------------|
+| inquiry_type | varchar(20) | Y | WEIGHING_ISSUE / DISPATCH_ISSUE / SYSTEM_ERROR / GENERAL / COMPLAINT / ETC |
+| title | varchar(200) | Y | Inquiry title (max 200 characters) |
+| content | text | Y | Inquiry content |
+| related_dispatch_id | bigint | N | Related dispatch ID |
+| related_weighing_id | bigint | N | Related weighing ID |
+
+**Output Data**:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| inquiry_id | bigint | Inquiry ID |
+| inquiry_type | string | Inquiry type |
+| title | string | Title |
+| content | string | Content |
+| user_name | string | Inquirer name (auto-linked) |
+| user_phone | string | Inquirer phone number (auto-linked) |
+| status | string | Received/In Progress/Completed |
+| created_at | timestamptz | Registration datetime |
+
+**Business Rules**:
+- BR-037-1: Inquiry types: Weighing Issue (WEIGHING_ISSUE), Dispatch Issue (DISPATCH_ISSUE), System Error (SYSTEM_ERROR), General Inquiry (GENERAL), Complaint (COMPLAINT), Other (ETC)
+- BR-037-2: User information (name, phone number) auto-linked on inquiry registration (based on logged-in user)
+- BR-037-3: Optional linking of related dispatch ID (related_dispatch_id) or related weighing ID (related_weighing_id)
+- BR-037-4: Administrators (ADMIN) and managers (MANAGER) can view all inquiry list
+- BR-037-5: General users (DRIVER) can only view inquiries they registered
+
+**Main Flow**:
+1. User enters the inquiry screen
+2. Click "Register Inquiry" button
+3. Select inquiry type + enter title/content
+4. (Optional) Link related dispatch/weighing ID
+5. Click "Submit" → POST /api/v1/inquiries
+6. Server auto-links user information and saves
+7. Notify administrators/managers of new inquiry
+
+**Alternative Flow**:
+- AF-037-1: ADMIN/MANAGER → View all inquiry list + change status (Received/In Progress/Completed)
+
+**Related Functions**: FUNC-023 (Notices/Inquiry Calls), FUNC-025 (Landline Call Dual-Routing)
+
+---
+
+### FUNC-038: Statistics/Reports
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-038 |
+| **Function Name** | Statistics/Reports |
+| **PRD Mapping** | FR-004 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | MEDIUM |
+
+**Function Description**: Provides various statistics (daily, monthly, summary) on weighing records and supports Excel file export functionality.
+
+**Preconditions**:
+- User login completed
+- Weighing record data exists
+
+**Postconditions**:
+- Statistics data query results returned
+- Excel file downloaded (on export)
+
+**Input Data**:
+
+| Field Name | Type | Required | Validation Rules |
+|------------|------|----------|-----------------|
+| date_from | date | N | Query start date |
+| date_to | date | N | Query end date |
+| company_id | bigint | N | Transport company filter |
+| item_type | varchar(20) | N | Item type filter |
+
+**Output Data**:
+
+| Field Name | Type | Description |
+|------------|------|-------------|
+| daily_statistics | array | Daily statistics (count, total weight kg/ton by date/company/item) |
+| monthly_statistics | array | Monthly statistics (count, total weight kg/ton by year/month/company/item) |
+| summary | object | Summary statistics (total count, total weight, distribution by item/company) |
+| excel_file | binary | Excel file (xlsx) |
+
+**Business Rules**:
+- BR-038-1: Daily statistics: Aggregation by date/transport company/item (count, total weight in kg and ton units)
+- BR-038-2: Monthly statistics: Aggregation by year/month/transport company/item
+- BR-038-3: Summary statistics: Total count, total weight, distribution by item, distribution by company
+- BR-038-4: Excel export: Generate xlsx file using Apache POI (daily/monthly/full sheet structure)
+- BR-038-5: Filter conditions: Combinable by period (date_from~date_to), company (company_id), item (item_type)
+
+**Main Flow**:
+1. User enters the statistics/reports (/statistics) screen
+2. Set filter conditions (period, company, item)
+3. Click "Query" → GET /api/v1/statistics/daily or /monthly
+4. Display statistics tables and charts (ECharts)
+5. Click "Excel Download" → GET /api/v1/statistics/export/excel
+
+**Alternative Flow**:
+- AF-038-1: When no filters set, display current month's full data
+- AF-038-2: When summary tab selected, display pie charts by item/company
+
+**UI/UX Requirements**:
+- Daily/monthly/summary tab structure
+- ECharts-based charts (daily trend line chart, item/company pie charts)
+- Excel download button
+
+**Related Functions**: FUNC-006 (Weighing Status Management), FUNC-007 (Weighing Record Processing)
+
+**Non-Functional Requirements Mapping**:
+- NFR-001 Performance: Statistics query within 3 seconds (index and aggregation query optimization)
+- NFR-005 Usability: ECharts visualization, Excel export
+
+---
+
+### FUNC-039: Frontend Layout Improvements
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-039 |
+| **Function Name** | Frontend Layout Improvements |
+| **PRD Mapping** | FR-004 |
+| **Module** | Smart Weighing Web Management System |
+| **Priority** | MEDIUM |
+
+**Function Description**: Improves the overall UI layout of the web management system to enhance usability and aesthetics.
+
+**Improvement Items**:
+
+**1. TablePageLayout Component**:
+- Composed of a fixed area (FixedArea) and scroll area (ScrollArea)
+- Fixed area contains page title, search/filter, action buttons
+- Scroll area displays data tables
+- Consistent layout applied across all table pages
+
+**2. Global Scrollbar Hiding**:
+- Global scrollbar visually hidden via CSS (aesthetic improvement)
+- Mouse wheel and touch-based scrolling functionality preserved
+
+**3. SortableTable fill-height**:
+- CSS flex layout applied so tables fill 100% of available space
+- Table area extends to the bottom of the screen regardless of data volume
+
+**4. MainLayout Header Improvements**:
+- backdrop-filter: blur effect applied (translucent glass effect)
+- Favorites button, theme toggle (dark/light), user menu placement
+- Fixed header always visible during scrolling
+
+**5. Multi-Tab Navigation Improvements**:
+- Right-click context menu support (close tab, close other tabs, close all)
+- Keyboard shortcuts: Ctrl+W (close current tab), Ctrl+Tab (next tab)
+- Maximum 10 tabs displayed simultaneously, pinned tab support (weighing station control)
+
+**Business Rules**:
+- BR-039-1: Consistent UX through TablePageLayout applied to all table pages
+- BR-039-2: Scrollbar hiding is visual only and does not affect scroll functionality
+- BR-039-3: Layout elements immediately reflect dark/light theme switching
+
+**Related Functions**: FUNC-005 (Dispatch Management), FUNC-006 (Weighing Status), FUNC-008 (Master Data Management), FUNC-030 (Gate Pass Management)
+
+**Non-Functional Requirements Mapping**:
+- NFR-005 Usability: Consistent layout, keyboard shortcuts, intuitive tab management
+
+---
+
 ## 4. Module 3: Weighing CS Program
 
 ### FUNC-010: Indicator Weight Value Reception
@@ -1371,6 +1970,161 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 
 ---
 
+### FUNC-029-API: Favorites API
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-029-API |
+| **Function Name** | Favorites API |
+| **PRD Mapping** | FR-008 |
+| **Module** | Mobile API |
+| **Priority** | MEDIUM |
+
+**API Endpoints**:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/v1/favorites | Favorites list query |
+| POST | /api/v1/favorites | Register favorite |
+| DELETE | /api/v1/favorites/{id} | Delete favorite |
+| PUT | /api/v1/favorites/reorder | Reorder favorites |
+
+---
+
+### FUNC-030-API: Notices/FAQ API
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-030-API |
+| **Function Name** | Notices/FAQ API |
+| **PRD Mapping** | FR-008 |
+| **Module** | Mobile API |
+| **Priority** | MEDIUM |
+
+**API Endpoints**:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/v1/notices | Notice list |
+| GET | /api/v1/notices/{id} | Notice detail |
+| POST | /api/v1/notices | Create notice (ADMIN) |
+| PUT | /api/v1/notices/{id} | Modify notice (ADMIN) |
+| DELETE | /api/v1/notices/{id} | Delete notice (ADMIN) |
+| PUT | /api/v1/notices/{id}/pin | Toggle notice pin (ADMIN) |
+| PUT | /api/v1/notices/{id}/publish | Toggle notice publish (ADMIN) |
+| GET | /api/v1/faqs | FAQ list (by category) |
+| GET | /api/v1/faqs/{id} | FAQ detail |
+| POST | /api/v1/faqs | Create FAQ (ADMIN) |
+| PUT | /api/v1/faqs/{id} | Modify FAQ (ADMIN) |
+| DELETE | /api/v1/faqs/{id} | Delete FAQ (ADMIN) |
+
+---
+
+### FUNC-031-API: Device Monitoring API
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-031-API |
+| **Function Name** | Device Monitoring API |
+| **PRD Mapping** | FR-008 |
+| **Module** | Mobile API |
+| **Priority** | HIGH |
+
+**API Endpoints**:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/v1/devices | Device list query |
+| GET | /api/v1/devices/{id} | Device detail query |
+| GET | /api/v1/devices/summary | Device summary (count by status) |
+| PUT | /api/v1/devices/{id}/heartbeat | Device health check update |
+
+---
+
+### FUNC-032-API: My Page/Profile API
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-032-API |
+| **Function Name** | My Page/Profile API |
+| **PRD Mapping** | FR-008 |
+| **Module** | Mobile API |
+| **Priority** | MEDIUM |
+
+**API Endpoints**:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/v1/users/me | My profile query |
+| PUT | /api/v1/users/me | Profile modification |
+| PUT | /api/v1/users/me/password | Password change |
+| PUT | /api/v1/users/me/notification-settings | Notification settings change |
+
+---
+
+### FUNC-033-API: Inquiry/Support API
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-033-API |
+| **Function Name** | Inquiry/Support API |
+| **PRD Mapping** | FR-008 |
+| **Module** | Mobile API |
+| **Priority** | MEDIUM |
+
+**API Endpoints**:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/v1/inquiries | Inquiry list query |
+| GET | /api/v1/inquiries/{id} | Inquiry detail query |
+| POST | /api/v1/inquiries | Register inquiry |
+| PUT | /api/v1/inquiries/{id}/status | Change inquiry status (ADMIN/MANAGER) |
+
+---
+
+### FUNC-034-API: Statistics/Reports API
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-034-API |
+| **Function Name** | Statistics/Reports API |
+| **PRD Mapping** | FR-008 |
+| **Module** | Mobile API |
+| **Priority** | MEDIUM |
+
+**API Endpoints**:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/v1/statistics/daily | Daily statistics query |
+| GET | /api/v1/statistics/monthly | Monthly statistics query |
+| GET | /api/v1/statistics/summary | Summary statistics query |
+| GET | /api/v1/statistics/export/excel | Excel export (xlsx) |
+
+---
+
+### FUNC-035-API: System Settings API
+
+| Item | Details |
+|------|---------|
+| **Function ID** | FUNC-035-API |
+| **Function Name** | System Settings API |
+| **PRD Mapping** | FR-008 |
+| **Module** | Mobile API |
+| **Priority** | MEDIUM |
+
+**API Endpoints**:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/v1/admin/settings | All settings query (ADMIN) |
+| GET | /api/v1/admin/settings/{key} | Individual setting query (ADMIN) |
+| PUT | /api/v1/admin/settings/{key} | Individual setting modification (ADMIN) |
+| PUT | /api/v1/admin/settings/batch | Batch settings modification (ADMIN) |
+
+---
+
 ## 7. Module 6: H/W Infrastructure Integration
 
 ### FUNC-040: LPR Camera Integration
@@ -1526,6 +2280,15 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 | FR-004 | Weighing Web Management System | FUNC-006 | Weighing Status Management | M2: Web |
 | FR-004 | Weighing Web Management System | FUNC-008 | Master Data Management | M2: Web |
 | FR-004 | Weighing Web Management System | FUNC-030 | Gate Pass Management | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-031 | Favorites | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-032 | Help Guide/FAQ | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-033 | Device Monitoring | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-034 | My Page | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-035 | Notices | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-036 | System Settings | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-037 | Inquiry/Support | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-038 | Statistics/Reports | M2: Web |
+| FR-004 | Weighing Web Management System | FUNC-039 | Frontend Layout Improvements | M2: Web |
 | FR-005 | Weighbridge CS Program | FUNC-010 | Indicator Weight Value Reception | M3: CS |
 | FR-005 | Weighbridge CS Program | FUNC-011 | LPR Automatic Weighing Process | M3: CS |
 | FR-005 | Weighbridge CS Program | FUNC-013 | Automatic Barrier Control | M3: CS |
@@ -1542,6 +2305,13 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 | FR-008 | Mobile API | FUNC-026-API | Dispatch Information API | M5: API |
 | FR-008 | Mobile API | FUNC-027-API | Weighing Processing API | M5: API |
 | FR-008 | Mobile API | FUNC-028-API | Push Notification API | M5: API |
+| FR-008 | Mobile API | FUNC-029-API | Favorites API | M5: API |
+| FR-008 | Mobile API | FUNC-030-API | Notices/FAQ API | M5: API |
+| FR-008 | Mobile API | FUNC-031-API | Device Monitoring API | M5: API |
+| FR-008 | Mobile API | FUNC-032-API | My Page/Profile API | M5: API |
+| FR-008 | Mobile API | FUNC-033-API | Inquiry/Support API | M5: API |
+| FR-008 | Mobile API | FUNC-034-API | Statistics/Reports API | M5: API |
+| FR-008 | Mobile API | FUNC-035-API | System Settings API | M5: API |
 
 ### 9.2 Mapping Verification Results
 
@@ -1550,30 +2320,30 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 | FR-001 | 5 | 100% | COVERED |
 | FR-002 | 3 | 100% | COVERED |
 | FR-003 | 7 | 100% | COVERED |
-| FR-004 | 4 | 100% | COVERED |
+| FR-004 | 13 | 100% | COVERED |
 | FR-005 | 7 | 100% | COVERED |
 | FR-006 | 2 | 100% | COVERED |
 | FR-007 | 3 | 100% | COVERED |
-| FR-008 | 4 | 100% | COVERED |
+| FR-008 | 11 | 100% | COVERED |
 
-**A total of 35 functional specifications cover all 8 PRD functional requirements at 100%.**
+**A total of 51 functional specifications cover all 8 PRD functional requirements at 100%.**
 
 ### 9.3 NFR Mapping Verification
 
 | NFR-ID | NFR Name | Related FUNC | Reflection Status |
 |--------|----------|-------------|------------------|
-| NFR-001 | Performance | FUNC-001,002,003,004,006,007,010,024 | COVERED |
-| NFR-002 | Security | FUNC-004,009,017,025-API | COVERED |
+| NFR-001 | Performance | FUNC-001,002,003,004,006,007,010,024,033,038 | COVERED |
+| NFR-002 | Security | FUNC-004,009,017,025-API,034,036 | COVERED |
 | NFR-003 | Scalability | FUNC-003,008 | COVERED |
-| NFR-004 | Availability | FUNC-001,007,010,011,016 | COVERED |
-| NFR-005 | Usability | FUNC-005,006,017 | COVERED |
+| NFR-004 | Availability | FUNC-001,007,010,011,016,033 | COVERED |
+| NFR-005 | Usability | FUNC-005,006,017,031,038,039 | COVERED |
 
 ### 9.4 TRD Technical Constraints Reflection Verification
 
 | Constraint | Reflected FUNC | Confirmed |
 |------------|---------------|-----------|
-| Spring Boot 3.2 Backend | FUNC-025~028-API, FUNC-005~009 | OK |
-| React 18 + Ant Design Web | FUNC-005,006,008,009,030 | OK |
+| Spring Boot 3.2 Backend | FUNC-025~035-API, FUNC-005~009, FUNC-031~038 | OK |
+| React 18 + Ant Design Web | FUNC-005,006,008,009,030~039 | OK |
 | Flutter 3.x Mobile | FUNC-017~024 | OK |
 | C# .NET WinForms CS | FUNC-010~016 | OK |
 | PostgreSQL 16 DB | All data CRUD functions | OK |
@@ -1581,7 +2351,7 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 | RS-232C Indicator | FUNC-010 | OK |
 | TCP/UDP LPR/Sensor | FUNC-040,041,042 | OK |
 | JWT Authentication | FUNC-017,025-API | OK |
-| WebSocket Real-time | FUNC-006 | OK |
+| WebSocket Real-time | FUNC-006,033 | OK |
 | FCM Push Notification | FUNC-024,028-API | OK |
 | KakaoTalk/SMS Integration | FUNC-009,021 | OK |
 
@@ -1591,7 +2361,7 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 
 ## 10. Implementation Status
 
-> **Last Updated**: 2026-01-29
+> **Last Updated**: 2026-01-30
 
 ### 10.1 Web Frontend Screen Implementation Status
 
@@ -1604,18 +2374,18 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 | `/inquiry` | Weighing Query | FUNC-006 | ✅ Complete | Advanced search, Excel export |
 | `/gate-pass` | Gate Pass Management | FUNC-030 | ✅ Complete | Approval/rejection process |
 | `/slips` | Electronic Weighing Slip | FUNC-009 | ✅ Complete | Query/share/print |
-| `/statistics` | Statistics/Reports | FUNC-006 | ✅ Complete | Period/condition-based analysis charts |
+| `/statistics` | Statistics/Reports | FUNC-038 | ✅ Complete | Daily/monthly statistics, Excel export |
 | `/weighing-station` | Weighing Station Control | FUNC-011 | ✅ Complete | Fixed tab, real-time equipment integration |
-| `/monitoring` | Equipment Monitoring | FUNC-010 | ✅ Complete | Equipment status monitoring |
+| `/monitoring` | Equipment Monitoring | FUNC-033 | ✅ Complete | Equipment status monitoring, health check, WebSocket |
 | `/master/companies` | Transport Company Management | FUNC-008 | ✅ Complete | MasterCrudPage pattern |
 | `/master/vehicles` | Vehicle Management | FUNC-008 | ✅ Complete | MasterCrudPage pattern |
 | `/master/scales` | Weighbridge Management | FUNC-008 | ✅ Complete | MasterCrudPage pattern |
 | `/master/codes` | Common Code Management | FUNC-008 | ✅ Complete | MasterCrudPage pattern |
-| `/notices` | Notices | - | ✅ Complete | Category filter, pinned notices |
-| `/help` | Help Guide | - | ✅ Complete | Help/FAQ |
-| `/mypage` | My Page | - | ✅ Complete | Profile, password change |
+| `/notices` | Notices | FUNC-035 | ✅ Complete | Category filter, pin/publish management, view count |
+| `/help` | Help Guide | FUNC-032 | ✅ Complete | FAQ by category, view count, ADMIN management |
+| `/mypage` | My Page | FUNC-034 | ✅ Complete | Profile/password/notification settings |
 | `/admin/users` | User Management | FUNC-008 | ✅ Complete | ADMIN only |
-| `/admin/settings` | System Settings | - | ✅ Complete | ADMIN only |
+| `/admin/settings` | System Settings | FUNC-036 | ✅ Complete | ADMIN only, category/type-based settings |
 | `/admin/audit-logs` | Audit Logs | - | ✅ Complete | ADMIN only |
 
 ### 10.2 Mobile App Screen Implementation Status
@@ -1667,6 +2437,13 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 | notification | FUNC-024, 028-API | ✅ Complete | FCM + in-app notification |
 | websocket | FUNC-006 | ✅ Complete | Real-time weighing/equipment status transmission |
 | dashboard | FUNC-006 | ✅ Complete | Statistics API |
+| favorite | FUNC-031 | ✅ Complete | Favorites register/delete/reorder |
+| faq | FUNC-032 | ✅ Complete | FAQ CRUD by category |
+| device | FUNC-033 | ✅ Complete | Device monitoring + health check |
+| notice | FUNC-035 | ✅ Complete | Notices CRUD + pin/publish |
+| settings | FUNC-036 | ✅ Complete | System settings management |
+| inquiry | FUNC-037 | ✅ Complete | Inquiry/support registration/management |
+| statistics | FUNC-038 | ✅ Complete | Statistics query + Excel export |
 | audit | - | ✅ Complete | Audit logs |
 
 ### 10.5 Additional Implemented Features (Beyond Specification)
@@ -1674,18 +2451,16 @@ All functional requirements from PRD FR-001 through FR-008 are categorized into 
 | Feature | Description | Implementation Location |
 |---------|-------------|------------------------|
 | Onboarding Tour | New user guide | `OnboardingTour.tsx` |
-| Keyboard Shortcuts | Page-specific shortcut support | `useKeyboardShortcuts.ts` |
 | Tab Activation Detection | Data refresh on browser tab switch | `useTabVisible.ts` |
 | Number Animation | Dashboard KPI card animation | `AnimatedNumber.tsx` |
-| Drag Sort | Table row drag reordering | `SortableTable.tsx` (@dnd-kit) |
 | Empty State UI | Guidance screen when no data | `EmptyState.tsx` |
-| Favorites | Dispatch/company favorites | `FavoriteButton.tsx`, `FavoritesList.tsx` |
-| Dark/Light Theme | Theme switching support | `ThemeContext.tsx`, `themeConfig.ts` |
-| Multi-Tab Navigation | Up to 10 tabs, pinned tab support | `TabContext.tsx`, `pageRegistry.ts` |
+| Dark/Light Theme | Theme switching support | Web: `ThemeContext.tsx`, `themeConfig.ts` / CS: `Theme.cs` (HeaderBar toggle, theme.dat storage) |
 | Offline Cache (Mobile) | SharedPreferences-based | `offline_cache_service.dart` |
 | Hardware Simulator | Equipment simulation for development | `Simulators/*.cs` |
+
+> **Note**: In v1.2, the following previously "beyond specification" features have been incorporated into the formal specification: Favorites (FUNC-031), Multi-Tab Navigation/Keyboard Shortcuts/Drag Sort (FUNC-039).
 
 ---
 
 *This document was prepared based on PRD-20260127-154446, TRD-20260127-155235, WBS-20260127-160043.*
-*Implementation status is as of 2026-01-29.*
+*Implementation status is as of 2026-01-30.*

@@ -1,8 +1,8 @@
 # 부산 스마트 계량 시스템 - 기능 명세서 (Functional Specification)
 
-**버전**: 1.1
+**버전**: 1.2
 **작성일**: 2026-01-27
-**최종 수정일**: 2026-01-29
+**최종 수정일**: 2026-01-30
 **기반 문서**: PRD-20260127-154446, TRD-20260127-155235, WBS-20260127-160043
 **상태**: Updated
 
@@ -28,7 +28,7 @@
 본 문서는 부산 스마트 계량 시스템의 PRD, TRD, WBS를 기반으로 각 기능의 상세 동작을 정의한다. 개발, 테스트, 검수의 기준 문서로 사용한다.
 
 ### 1.2 범위
-PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여 상세 명세한다.
+PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여 상세 명세한다. v1.2에서 즐겨찾기, 이용 안내/FAQ, 장비 모니터링, 마이페이지, 공지사항, 시스템 설정, 문의/민원, 통계/보고서, 프론트엔드 레이아웃 개선 기능이 추가되었다.
 
 ### 1.3 용어
 | 용어 | 정의 |
@@ -39,6 +39,10 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | 인디게이터 | 계량대에서 중량값을 표시하는 장치 |
 | 전자 계량표 | 모바일 APP으로 제공되는 디지털 계량 증빙 |
 | 배차 | 차량 운송 스케줄 배정 |
+| FCM | Firebase Cloud Messaging - 모바일 푸시 알림 서비스 |
+| 헬스체크 | 장비 연결 상태를 주기적으로 확인하는 점검 프로세스 |
+| 즐겨찾기 | 사용자가 자주 사용하는 메뉴/항목을 빠르게 접근하기 위해 등록하는 기능 |
+| FAQ | Frequently Asked Questions - 자주 묻는 질문 |
 
 ---
 
@@ -726,6 +730,601 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 
 ---
 
+### FUNC-031: 즐겨찾기 기능
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-031 |
+| **기능명** | 즐겨찾기 기능 |
+| **PRD 매핑** | FR-004 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | MEDIUM |
+
+**기능 설명**: 사용자가 자주 사용하는 메뉴, 배차, 차량, 운송사, 계량대를 즐겨찾기로 등록하여 빠르게 접근할 수 있도록 한다.
+
+**선행 조건 (Preconditions)**:
+- 사용자 로그인 완료
+
+**후행 조건 (Postconditions)**:
+- 즐겨찾기 항목 저장/삭제
+- 즐겨찾기 순서 변경 반영
+
+**입력 데이터**:
+
+| 필드명 | 타입 | 필수 | 검증규칙 |
+|--------|------|------|----------|
+| target_type | varchar(20) | Y | MENU / DISPATCH / VEHICLE / COMPANY / SCALE |
+| target_id | bigint | N | 대상 항목 ID (메뉴의 경우 경로 문자열) |
+| sort_order | int | N | 정렬 순서 |
+
+**출력 데이터**:
+
+| 필드명 | 타입 | 설명 |
+|--------|------|------|
+| favorite_id | bigint | 즐겨찾기 항목 ID |
+| favorite_list | array | 즐겨찾기 전체 목록 |
+
+**비즈니스 규칙**:
+- BR-031-1: 사용자당 최대 20개까지 즐겨찾기 등록 가능
+- BR-031-2: 동일 항목 중복 등록 방지 (target_type + target_id 기준)
+- BR-031-3: 토글 방식으로 동작 (이미 등록된 항목 클릭 시 삭제, 미등록 항목 클릭 시 추가)
+- BR-031-4: 드래그 앤 드롭으로 즐겨찾기 순서 변경 가능 (@dnd-kit 기반)
+- BR-031-5: 헤더의 즐겨찾기 버튼으로 현재 페이지를 즐겨찾기 토글
+
+**정상 흐름 (Main Flow)**:
+1. 사용자가 헤더의 즐겨찾기 버튼(별 아이콘)을 클릭하여 현재 페이지 즐겨찾기 토글
+2. 또는 목록 화면에서 개별 항목의 즐겨찾기 버튼을 클릭하여 토글
+3. Popover 패널에서 즐겨찾기 목록 확인
+4. 즐겨찾기 항목 클릭 시 해당 페이지/항목으로 바로가기
+5. 드래그 앤 드롭으로 순서 변경
+
+**대안 흐름 (Alternative Flow)**:
+- AF-031-1: 즐겨찾기 20개 초과 시 "최대 등록 수를 초과했습니다" 안내
+
+**UI/UX 요구사항**:
+- 헤더에 즐겨찾기 토글 버튼 (FavoriteButton 컴포넌트)
+- Popover 패널에서 즐겨찾기 목록 표시 (FavoritesList 컴포넌트)
+- @dnd-kit 기반 드래그 앤 드롭 정렬
+
+**연관 기능**: FUNC-005 (배차 관리), FUNC-008 (기준정보 관리)
+
+---
+
+### FUNC-032: 이용 안내/FAQ 기능
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-032 |
+| **기능명** | 이용 안내/FAQ |
+| **PRD 매핑** | FR-004 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | LOW |
+
+**기능 설명**: 시스템 이용 안내 및 자주 묻는 질문(FAQ)을 카테고리별로 제공하여 사용자 자가 해결을 지원한다.
+
+**선행 조건 (Preconditions)**:
+- 사용자 로그인 완료
+- FAQ 관리: ADMIN 권한
+
+**후행 조건 (Postconditions)**:
+- FAQ 조회 시 조회수 자동 증가
+- FAQ 생성/수정/삭제 시 데이터 반영
+
+**입력 데이터**:
+
+| 필드명 | 타입 | 필수 | 검증규칙 |
+|--------|------|------|----------|
+| category | varchar(20) | Y | WEIGHING / DISPATCH / ACCOUNT / SYSTEM / ETC |
+| question | varchar(200) | Y | 질문 제목 (최대 200자) |
+| answer | text | Y | 답변 내용 |
+| is_published | boolean | Y | 공개 여부 |
+| sort_order | int | N | 정렬 순서 |
+
+**출력 데이터**:
+
+| 필드명 | 타입 | 설명 |
+|--------|------|------|
+| faq_id | bigint | FAQ ID |
+| category | string | 카테고리 |
+| question | string | 질문 |
+| answer | string | 답변 |
+| view_count | int | 조회수 |
+| is_published | boolean | 공개 상태 |
+
+**비즈니스 규칙**:
+- BR-032-1: FAQ 카테고리: 계량(WEIGHING), 배차(DISPATCH), 계정(ACCOUNT), 시스템(SYSTEM), 기타(ETC)
+- BR-032-2: FAQ 상세 조회 시 조회수(view_count) 자동 1 증가
+- BR-032-3: 관리자(ADMIN)만 FAQ 생성/수정/삭제 가능
+- BR-032-4: 공개(is_published=true) 상태의 FAQ만 일반 사용자에게 표시
+- BR-032-5: sort_order로 카테고리 내 정렬 순서 지정 가능
+
+**정상 흐름 (Main Flow)**:
+1. 사용자가 이용 안내(/help) 화면 진입
+2. 카테고리 탭 선택 (계량/배차/계정/시스템/기타)
+3. FAQ 목록 표시 (질문 제목 + 조회수)
+4. FAQ 클릭 시 답변 표시 + 조회수 증가
+
+**대안 흐름 (Alternative Flow)**:
+- AF-032-1: ADMIN 사용자 → FAQ 관리 기능 (등록/수정/삭제/공개 토글)
+
+**UI/UX 요구사항**:
+- 카테고리별 탭 또는 필터 UI
+- Ant Design Collapse/Accordion 패턴으로 질문-답변 표시
+
+**연관 기능**: FUNC-023 (전달사항/문의통화)
+
+---
+
+### FUNC-033: 장비 모니터링
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-033 |
+| **기능명** | 장비 모니터링 |
+| **PRD 매핑** | FR-004, FR-005 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | HIGH |
+
+**기능 설명**: 시스템에 연결된 모든 장비(계량대, LPR 카메라, 계량 지시기, 차단기)의 연결 상태를 실시간으로 모니터링하고, 상태 이상 시 자동 알림을 발송한다.
+
+**선행 조건 (Preconditions)**:
+- 사용자 로그인 완료
+- 장비 기준정보 등록 완료
+- WebSocket 연결 수립
+
+**후행 조건 (Postconditions)**:
+- 장비 상태 변경 기록
+- 이상 감지 시 알림 발송
+
+**입력 데이터**:
+
+| 필드명 | 타입 | 필수 | 검증규칙 |
+|--------|------|------|----------|
+| device_type | varchar(20) | Y | SCALE / LPR_CAMERA / INDICATOR / BARRIER_GATE |
+| device_id | bigint | Y | 장비 식별자 |
+| heartbeat | timestamptz | Y | 마지막 응답 시각 |
+
+**출력 데이터**:
+
+| 필드명 | 타입 | 설명 |
+|--------|------|------|
+| device_id | bigint | 장비 ID |
+| device_type | string | 장비 유형 |
+| connection_status | string | ONLINE / OFFLINE / ERROR |
+| last_heartbeat | timestamptz | 마지막 응답 시각 |
+| summary | object | 장비 요약 (총 수, 상태별 수) |
+
+**비즈니스 규칙**:
+- BR-033-1: 장비 유형: 계량대(SCALE), LPR 카메라(LPR_CAMERA), 계량 지시기(INDICATOR), 차단기(BARRIER_GATE)
+- BR-033-2: 연결 상태: 온라인(ONLINE), 오프라인(OFFLINE), 오류(ERROR)
+- BR-033-3: 5분(300초) 동안 헬스체크 무응답 시 자동으로 OFFLINE 상태 전환
+- BR-033-4: 장비 상태 변경 시 WebSocket(/topic/equipment-status)으로 실시간 알림 브로드캐스트
+- BR-033-5: 장비 요약 정보 제공: 총 장비 수, 온라인/오프라인/오류 수, 유형별/상태별 카운트
+
+**정상 흐름 (Main Flow)**:
+1. 사용자가 장비 관제(/monitoring) 화면 진입
+2. WebSocket 구독 수립 (/topic/equipment-status)
+3. 전체 장비 목록 및 상태 표시 (유형별 그룹)
+4. 장비 요약 대시보드 표시 (온라인/오프라인/오류 카운트)
+5. 장비 상태 변경 시 실시간 갱신
+
+**대안 흐름 (Alternative Flow)**:
+- AF-033-1: WebSocket 연결 실패 → REST API 폴링 (10초 간격)
+- AF-033-2: 장비 오류 발생 → 관리자 Push 알림 발송
+
+**예외 흐름 (Exception Flow)**:
+- EF-033-1: 네트워크 장애로 전체 장비 OFFLINE 전환 → 시스템 경고 표시
+
+**UI/UX 요구사항**:
+- 장비 유형별 카드/리스트 형태 표시
+- 상태별 색상 구분 (온라인=녹색, 오프라인=회색, 오류=적색)
+- 장비 요약 KPI 카드
+
+**연관 기능**: FUNC-010 (인디게이터 중량값 수신), FUNC-040 (LPR 카메라 연동), FUNC-042 (차량검지기 연동)
+
+**비기능 요구사항 매핑**:
+- NFR-001 성능: 장비 상태 변경 WebSocket 실시간 전달 500ms 이내
+- NFR-004 가용성: 헬스체크 자동 감지, 장애 알림
+
+---
+
+### FUNC-034: 마이페이지
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-034 |
+| **기능명** | 마이페이지 |
+| **PRD 매핑** | FR-004 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | MEDIUM |
+
+**기능 설명**: 로그인 사용자가 자신의 프로필 정보를 조회/수정하고, 비밀번호를 변경하며, 알림 설정을 관리한다.
+
+**선행 조건 (Preconditions)**:
+- 사용자 로그인 완료
+
+**후행 조건 (Postconditions)**:
+- 사용자 정보 업데이트
+- 비밀번호 변경 시 기존 세션 유지 (재로그인 불필요)
+
+**입력 데이터**:
+
+| 필드명 | 타입 | 필수 | 검증규칙 |
+|--------|------|------|----------|
+| name | varchar(50) | Y | 이름 (최대 50자) |
+| phone_number | varchar(20) | N | 전화번호 형식 |
+| email | varchar(100) | N | 이메일 형식 검증 |
+| current_password | varchar(255) | Y* | 비밀번호 변경 시 필수 |
+| new_password | varchar(255) | Y* | 최소 8자 이상 |
+| push_enabled | boolean | N | 푸시 알림 활성화 여부 |
+| email_notification_enabled | boolean | N | 이메일 알림 활성화 여부 |
+
+**출력 데이터**:
+
+| 필드명 | 타입 | 설명 |
+|--------|------|------|
+| user_id | bigint | 사용자 ID |
+| name | string | 이름 |
+| login_id | string | 로그인 ID |
+| phone_number | string | 전화번호 |
+| email | string | 이메일 |
+| role | string | 역할 (ADMIN/MANAGER/DRIVER) |
+| company_name | string | 소속 운송사명 |
+| created_at | timestamptz | 가입일 |
+| last_login_at | timestamptz | 마지막 로그인 일시 |
+| push_enabled | boolean | 푸시 알림 설정 |
+| email_notification_enabled | boolean | 이메일 알림 설정 |
+
+**비즈니스 규칙**:
+- BR-034-1: 프로필 조회 시 사용자 정보, 소속 운송사, 역할, 가입일, 마지막 로그인 일시 표시
+- BR-034-2: 프로필 수정 가능 항목: 이름, 전화번호, 이메일 (login_id, role은 수정 불가)
+- BR-034-3: 비밀번호 변경 시 현재 비밀번호 확인 필수 (bcrypt 검증)
+- BR-034-4: 새 비밀번호는 최소 8자 이상
+- BR-034-5: 알림 설정: 푸시 알림(FCM) 활성화/비활성화, 이메일 알림 활성화/비활성화 토글
+
+**정상 흐름 (Main Flow)**:
+1. 사용자가 마이페이지(/mypage) 진입
+2. 프로필 정보 표시 (GET /api/v1/users/me)
+3. 프로필 수정 → PUT /api/v1/users/me
+4. 비밀번호 변경 → PUT /api/v1/users/me/password
+5. 알림 설정 변경 → PUT /api/v1/users/me/notification-settings
+
+**예외 흐름 (Exception Flow)**:
+- EF-034-1: 현재 비밀번호 불일치 → "현재 비밀번호가 올바르지 않습니다" 오류
+- EF-034-2: 새 비밀번호 8자 미만 → "비밀번호는 최소 8자 이상이어야 합니다" 오류
+
+**UI/UX 요구사항**:
+- 고정 헤더 + 스크롤 레이아웃 (TablePageLayout 적용)
+- 프로필/비밀번호/알림설정 섹션 구분
+- Ant Design Form + 검증 규칙 적용
+
+**연관 기능**: FUNC-025-API (사용자/인증 API), FUNC-024 (Push 알림 수신)
+
+---
+
+### FUNC-035: 공지사항
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-035 |
+| **기능명** | 공지사항 |
+| **PRD 매핑** | FR-004 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | MEDIUM |
+
+**기능 설명**: 시스템 관리자가 공지사항을 등록/관리하고, 사용자가 공지를 확인할 수 있는 기능을 제공한다.
+
+**선행 조건 (Preconditions)**:
+- 사용자 로그인 완료
+- 공지사항 관리: ADMIN 권한
+
+**후행 조건 (Postconditions)**:
+- 공지사항 레코드 생성/수정/삭제
+- 조회수 자동 증가
+
+**입력 데이터**:
+
+| 필드명 | 타입 | 필수 | 검증규칙 |
+|--------|------|------|----------|
+| title | varchar(200) | Y | 제목 (최대 200자) |
+| content | text | Y | 내용 |
+| category | varchar(20) | Y | SYSTEM / MAINTENANCE / UPDATE / GENERAL |
+| is_pinned | boolean | N | 상단 고정 여부 (기본 false) |
+| is_published | boolean | N | 발행 여부 (기본 false) |
+
+**출력 데이터**:
+
+| 필드명 | 타입 | 설명 |
+|--------|------|------|
+| notice_id | bigint | 공지사항 ID |
+| title | string | 제목 |
+| content | string | 내용 |
+| category | string | 카테고리 |
+| is_pinned | boolean | 상단 고정 여부 |
+| is_published | boolean | 발행 상태 |
+| view_count | int | 조회수 |
+| created_at | timestamptz | 작성일시 |
+
+**비즈니스 규칙**:
+- BR-035-1: 카테고리: 시스템(SYSTEM), 점검(MAINTENANCE), 업데이트(UPDATE), 일반(GENERAL)
+- BR-035-2: 고정(Pin) 기능: is_pinned=true인 공지를 목록 상단에 고정 표시
+- BR-035-3: 발행(Publish) 기능: is_published=true인 공지만 일반 사용자에게 표시
+- BR-035-4: 제목 기반 키워드 검색 지원
+- BR-035-5: 상세 조회 시 조회수(view_count) 자동 1 증가
+- BR-035-6: 관리자(ADMIN)만 생성/수정/삭제/고정 토글/발행 토글 가능
+- BR-035-7: 페이지네이션 지원 (기본 10건/페이지)
+
+**정상 흐름 (Main Flow)**:
+1. 사용자가 공지사항(/notices) 화면 진입
+2. 고정 공지가 상단에 표시, 이후 최신순 정렬
+3. 카테고리 필터 또는 키워드 검색으로 공지 필터링
+4. 공지 클릭 시 상세 내용 표시 + 조회수 증가
+
+**대안 흐름 (Alternative Flow)**:
+- AF-035-1: ADMIN 사용자 → 공지 등록/수정/삭제, 고정/발행 토글 가능
+
+**UI/UX 요구사항**:
+- 카테고리별 태그/배지 표시
+- 고정 공지 아이콘 구분
+- 페이지네이션 + 검색바
+
+**연관 기능**: FUNC-024 (Push 알림 수신)
+
+---
+
+### FUNC-036: 시스템 설정
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-036 |
+| **기능명** | 시스템 설정 |
+| **PRD 매핑** | FR-004 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | MEDIUM |
+
+**기능 설명**: 관리자(ADMIN)가 시스템 운영에 필요한 설정값을 조회하고 수정할 수 있는 기능을 제공한다.
+
+**선행 조건 (Preconditions)**:
+- ADMIN 권한 로그인
+
+**후행 조건 (Postconditions)**:
+- 시스템 설정값 업데이트
+- 변경된 설정 즉시 적용 (필요 시 Redis 캐시 갱신)
+
+**입력 데이터**:
+
+| 필드명 | 타입 | 필수 | 검증규칙 |
+|--------|------|------|----------|
+| setting_key | varchar(100) | Y | 설정 키 (UNIQUE) |
+| setting_value | text | Y | 설정값 |
+| value_type | varchar(20) | Y | STRING / NUMBER / BOOLEAN / JSON |
+| category | varchar(20) | Y | GENERAL / WEIGHING / NOTIFICATION / SECURITY |
+| is_editable | boolean | Y | 편집 가능 여부 |
+
+**출력 데이터**:
+
+| 필드명 | 타입 | 설명 |
+|--------|------|------|
+| setting_id | bigint | 설정 ID |
+| setting_key | string | 설정 키 |
+| setting_value | string | 설정값 |
+| value_type | string | 값 유형 |
+| category | string | 설정 카테고리 |
+| is_editable | boolean | 편집 가능 여부 |
+| description | string | 설정 설명 |
+
+**비즈니스 규칙**:
+- BR-036-1: 관리자(ADMIN) 전용 기능 (MANAGER, DRIVER 접근 불가)
+- BR-036-2: 설정값 유형: 문자열(STRING), 숫자(NUMBER), 참/거짓(BOOLEAN), JSON
+- BR-036-3: 설정 카테고리: 일반(GENERAL), 계량(WEIGHING), 알림(NOTIFICATION), 보안(SECURITY)
+- BR-036-4: 개별 설정 수정 (PUT /api/v1/admin/settings/{key}) 및 일괄 수정 (PUT /api/v1/admin/settings/batch) 지원
+- BR-036-5: is_editable=false인 설정은 수정 불가 (읽기 전용)
+- BR-036-6: value_type에 따른 입력값 검증 (NUMBER 타입에 문자열 입력 불가 등)
+
+**정상 흐름 (Main Flow)**:
+1. 관리자가 시스템 설정(/admin/settings) 화면 진입
+2. 카테고리별 설정 목록 표시
+3. 편집 가능 설정 선택 → 값 수정
+4. "저장" 클릭 → PUT /api/v1/admin/settings/{key}
+5. 설정값 검증 후 저장
+
+**예외 흐름 (Exception Flow)**:
+- EF-036-1: 편집 불가 설정 수정 시도 → "수정할 수 없는 설정입니다" 오류
+- EF-036-2: 값 유형 불일치 → "올바른 형식의 값을 입력하세요" 오류
+
+**UI/UX 요구사항**:
+- 카테고리별 그룹 표시
+- 값 유형에 따른 입력 UI (텍스트/숫자/토글/JSON 에디터)
+- 편집 불가 설정은 비활성화 표시
+
+**연관 기능**: FUNC-008 (기준정보 관리)
+
+---
+
+### FUNC-037: 문의/민원
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-037 |
+| **기능명** | 문의/민원 |
+| **PRD 매핑** | FR-004, FR-007 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | MEDIUM |
+
+**기능 설명**: 사용자가 시스템을 통해 문의 및 민원을 등록하고, 관리자/매니저가 접수된 문의를 관리한다.
+
+**선행 조건 (Preconditions)**:
+- 사용자 로그인 완료
+
+**후행 조건 (Postconditions)**:
+- 문의 레코드 생성
+- 관리자/매니저에게 알림 발송
+
+**입력 데이터**:
+
+| 필드명 | 타입 | 필수 | 검증규칙 |
+|--------|------|------|----------|
+| inquiry_type | varchar(20) | Y | WEIGHING_ISSUE / DISPATCH_ISSUE / SYSTEM_ERROR / GENERAL / COMPLAINT / ETC |
+| title | varchar(200) | Y | 문의 제목 (최대 200자) |
+| content | text | Y | 문의 내용 |
+| related_dispatch_id | bigint | N | 관련 배차 ID |
+| related_weighing_id | bigint | N | 관련 계량 ID |
+
+**출력 데이터**:
+
+| 필드명 | 타입 | 설명 |
+|--------|------|------|
+| inquiry_id | bigint | 문의 ID |
+| inquiry_type | string | 문의 유형 |
+| title | string | 제목 |
+| content | string | 내용 |
+| user_name | string | 문의자 이름 (자동 연결) |
+| user_phone | string | 문의자 전화번호 (자동 연결) |
+| status | string | 접수/처리중/완료 |
+| created_at | timestamptz | 등록 일시 |
+
+**비즈니스 규칙**:
+- BR-037-1: 문의 유형: 계량 문제(WEIGHING_ISSUE), 배차 문제(DISPATCH_ISSUE), 시스템 오류(SYSTEM_ERROR), 일반 문의(GENERAL), 민원(COMPLAINT), 기타(ETC)
+- BR-037-2: 문의 등록 시 사용자 정보(이름, 전화번호) 자동 연결 (로그인 사용자 기반)
+- BR-037-3: 관련 배차 ID(related_dispatch_id) 또는 관련 계량 ID(related_weighing_id) 선택 연결 가능
+- BR-037-4: 관리자(ADMIN) 및 매니저(MANAGER)는 전체 문의 목록 조회 가능
+- BR-037-5: 일반 사용자(DRIVER)는 자신이 등록한 문의만 조회 가능
+
+**정상 흐름 (Main Flow)**:
+1. 사용자가 문의 화면 진입
+2. "문의 등록" 버튼 클릭
+3. 문의 유형 선택 + 제목/내용 입력
+4. (선택) 관련 배차/계량 ID 연결
+5. "제출" 클릭 → POST /api/v1/inquiries
+6. 서버가 사용자 정보 자동 연결 후 저장
+7. 관리자/매니저에게 신규 문의 알림
+
+**대안 흐름 (Alternative Flow)**:
+- AF-037-1: ADMIN/MANAGER → 전체 문의 목록 조회 + 상태 변경 (접수/처리중/완료)
+
+**연관 기능**: FUNC-023 (전달사항/문의통화), FUNC-025 (유선통화 이원화)
+
+---
+
+### FUNC-038: 통계/보고서
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-038 |
+| **기능명** | 통계/보고서 |
+| **PRD 매핑** | FR-004 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | MEDIUM |
+
+**기능 설명**: 계량 실적에 대한 다양한 통계(일별, 월별, 요약)를 제공하고, 엑셀 파일로 내보내기 기능을 지원한다.
+
+**선행 조건 (Preconditions)**:
+- 사용자 로그인 완료
+- 계량 실적 데이터 존재
+
+**후행 조건 (Postconditions)**:
+- 통계 데이터 조회 결과 반환
+- 엑셀 파일 다운로드 (내보내기 시)
+
+**입력 데이터**:
+
+| 필드명 | 타입 | 필수 | 검증규칙 |
+|--------|------|------|----------|
+| date_from | date | N | 조회 시작일 |
+| date_to | date | N | 조회 종료일 |
+| company_id | bigint | N | 운송사 필터 |
+| item_type | varchar(20) | N | 품목 유형 필터 |
+
+**출력 데이터**:
+
+| 필드명 | 타입 | 설명 |
+|--------|------|------|
+| daily_statistics | array | 일별 통계 (날짜/운송사/품목별 건수, 총 중량 kg/ton) |
+| monthly_statistics | array | 월별 통계 (연/월/운송사/품목별 건수, 총 중량 kg/ton) |
+| summary | object | 요약 통계 (총 건수, 총 중량, 품목별/운송사별 분포) |
+| excel_file | binary | 엑셀 파일 (xlsx) |
+
+**비즈니스 규칙**:
+- BR-038-1: 일별 통계: 날짜/운송사/품목별 집계 (건수, 총 중량 kg 및 ton 단위 표시)
+- BR-038-2: 월별 통계: 연/월/운송사/품목별 집계
+- BR-038-3: 요약 통계: 총 건수, 총 중량, 품목별 분포, 운송사별 분포
+- BR-038-4: 엑셀 내보내기: Apache POI로 xlsx 파일 생성 (일별/월별/전체 시트 구성)
+- BR-038-5: 필터 조건: 기간(date_from~date_to), 운송사(company_id), 품목(item_type) 조합 가능
+
+**정상 흐름 (Main Flow)**:
+1. 사용자가 통계/보고서(/statistics) 화면 진입
+2. 필터 조건 설정 (기간, 운송사, 품목)
+3. "조회" 클릭 → GET /api/v1/statistics/daily 또는 /monthly
+4. 통계 테이블 및 차트 표시 (ECharts)
+5. "엑셀 다운로드" 클릭 → GET /api/v1/statistics/export/excel
+
+**대안 흐름 (Alternative Flow)**:
+- AF-038-1: 필터 미설정 시 당월 전체 데이터 표시
+- AF-038-2: 요약 탭 선택 시 품목별/운송사별 파이 차트 표시
+
+**UI/UX 요구사항**:
+- 일별/월별/요약 탭 구성
+- ECharts 기반 차트 (일별 추이 라인 차트, 품목/운송사별 파이 차트)
+- 엑셀 다운로드 버튼
+
+**연관 기능**: FUNC-006 (계량 현황 관리), FUNC-007 (계량 실적 처리)
+
+**비기능 요구사항 매핑**:
+- NFR-001 성능: 통계 쿼리 3초 이내 (인덱스 및 집계 쿼리 최적화)
+- NFR-005 사용성: ECharts 시각화, 엑셀 내보내기
+
+---
+
+### FUNC-039: 프론트엔드 레이아웃 개선
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-039 |
+| **기능명** | 프론트엔드 레이아웃 개선 |
+| **PRD 매핑** | FR-004 |
+| **모듈** | 스마트 계량 웹 관리 시스템 |
+| **우선순위** | MEDIUM |
+
+**기능 설명**: 웹 관리 시스템의 전반적인 UI 레이아웃을 개선하여 사용성과 심미성을 향상시킨다.
+
+**개선 항목**:
+
+**1. TablePageLayout 컴포넌트**:
+- 고정 헤더 영역(FixedArea)과 스크롤 영역(ScrollArea)으로 구성
+- 고정 헤더에는 페이지 제목, 검색/필터, 액션 버튼 배치
+- 스크롤 영역에 데이터 테이블 표시
+- 전체 테이블 페이지에 일관된 레이아웃 적용
+
+**2. 전역 스크롤바 숨김**:
+- CSS로 전역 스크롤바를 시각적으로 숨김 (심미적 개선)
+- 마우스 휠 및 터치 기반 스크롤 기능은 유지
+
+**3. SortableTable fill-height**:
+- 테이블이 가용 공간을 100% 채우도록 CSS flex 레이아웃 적용
+- 데이터 양에 관계없이 테이블 영역이 화면 하단까지 확장
+
+**4. MainLayout 헤더 개선**:
+- backdrop-filter: blur 효과 적용 (반투명 유리 효과)
+- 즐겨찾기 버튼, 테마 토글(다크/라이트), 사용자 메뉴 배치
+- 고정 헤더로 스크롤 시에도 항상 노출
+
+**5. 다중 탭 네비게이션 개선**:
+- 우클릭 컨텍스트 메뉴 지원 (탭 닫기, 다른 탭 닫기, 모두 닫기)
+- 키보드 단축키: Ctrl+W (현재 탭 닫기), Ctrl+Tab (다음 탭 이동)
+- 최대 10개 탭 동시 표시, 고정 탭 지원 (계량소 관제)
+
+**비즈니스 규칙**:
+- BR-039-1: 모든 테이블 페이지에 TablePageLayout 적용으로 일관된 UX 제공
+- BR-039-2: 스크롤바 숨김은 시각적 효과만이며 스크롤 기능 미영향
+- BR-039-3: 다크/라이트 테마 전환 시 레이아웃 요소 즉시 반영
+
+**연관 기능**: FUNC-005 (배차 관리), FUNC-006 (계량 현황), FUNC-008 (기준정보 관리), FUNC-030 (출문 관리)
+
+**비기능 요구사항 매핑**:
+- NFR-005 사용성: 일관된 레이아웃, 키보드 단축키, 직관적 탭 관리
+
+---
+
 ## 4. 모듈 3: 계량 CS 프로그램
 
 ### FUNC-010: 인디게이터 중량값 수신
@@ -1371,6 +1970,161 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 
 ---
 
+### FUNC-029-API: 즐겨찾기 API
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-029-API |
+| **기능명** | 즐겨찾기 API |
+| **PRD 매핑** | FR-008 |
+| **모듈** | 모바일 API |
+| **우선순위** | MEDIUM |
+
+**API 엔드포인트**:
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | /api/v1/favorites | 즐겨찾기 목록 조회 |
+| POST | /api/v1/favorites | 즐겨찾기 등록 |
+| DELETE | /api/v1/favorites/{id} | 즐겨찾기 삭제 |
+| PUT | /api/v1/favorites/reorder | 즐겨찾기 순서 변경 |
+
+---
+
+### FUNC-030-API: 공지사항/FAQ API
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-030-API |
+| **기능명** | 공지사항/FAQ API |
+| **PRD 매핑** | FR-008 |
+| **모듈** | 모바일 API |
+| **우선순위** | MEDIUM |
+
+**API 엔드포인트**:
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | /api/v1/notices | 공지사항 목록 |
+| GET | /api/v1/notices/{id} | 공지사항 상세 |
+| POST | /api/v1/notices | 공지사항 등록 (ADMIN) |
+| PUT | /api/v1/notices/{id} | 공지사항 수정 (ADMIN) |
+| DELETE | /api/v1/notices/{id} | 공지사항 삭제 (ADMIN) |
+| PUT | /api/v1/notices/{id}/pin | 공지 고정 토글 (ADMIN) |
+| PUT | /api/v1/notices/{id}/publish | 공지 발행 토글 (ADMIN) |
+| GET | /api/v1/faqs | FAQ 목록 (카테고리별) |
+| GET | /api/v1/faqs/{id} | FAQ 상세 |
+| POST | /api/v1/faqs | FAQ 등록 (ADMIN) |
+| PUT | /api/v1/faqs/{id} | FAQ 수정 (ADMIN) |
+| DELETE | /api/v1/faqs/{id} | FAQ 삭제 (ADMIN) |
+
+---
+
+### FUNC-031-API: 장비 모니터링 API
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-031-API |
+| **기능명** | 장비 모니터링 API |
+| **PRD 매핑** | FR-008 |
+| **모듈** | 모바일 API |
+| **우선순위** | HIGH |
+
+**API 엔드포인트**:
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | /api/v1/devices | 장비 목록 조회 |
+| GET | /api/v1/devices/{id} | 장비 상세 조회 |
+| GET | /api/v1/devices/summary | 장비 요약 (상태별 카운트) |
+| PUT | /api/v1/devices/{id}/heartbeat | 장비 헬스체크 갱신 |
+
+---
+
+### FUNC-032-API: 마이페이지/프로필 API
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-032-API |
+| **기능명** | 마이페이지/프로필 API |
+| **PRD 매핑** | FR-008 |
+| **모듈** | 모바일 API |
+| **우선순위** | MEDIUM |
+
+**API 엔드포인트**:
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | /api/v1/users/me | 내 프로필 조회 |
+| PUT | /api/v1/users/me | 프로필 수정 |
+| PUT | /api/v1/users/me/password | 비밀번호 변경 |
+| PUT | /api/v1/users/me/notification-settings | 알림 설정 변경 |
+
+---
+
+### FUNC-033-API: 문의/민원 API
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-033-API |
+| **기능명** | 문의/민원 API |
+| **PRD 매핑** | FR-008 |
+| **모듈** | 모바일 API |
+| **우선순위** | MEDIUM |
+
+**API 엔드포인트**:
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | /api/v1/inquiries | 문의 목록 조회 |
+| GET | /api/v1/inquiries/{id} | 문의 상세 조회 |
+| POST | /api/v1/inquiries | 문의 등록 |
+| PUT | /api/v1/inquiries/{id}/status | 문의 상태 변경 (ADMIN/MANAGER) |
+
+---
+
+### FUNC-034-API: 통계/보고서 API
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-034-API |
+| **기능명** | 통계/보고서 API |
+| **PRD 매핑** | FR-008 |
+| **모듈** | 모바일 API |
+| **우선순위** | MEDIUM |
+
+**API 엔드포인트**:
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | /api/v1/statistics/daily | 일별 통계 조회 |
+| GET | /api/v1/statistics/monthly | 월별 통계 조회 |
+| GET | /api/v1/statistics/summary | 요약 통계 조회 |
+| GET | /api/v1/statistics/export/excel | 엑셀 내보내기 (xlsx) |
+
+---
+
+### FUNC-035-API: 시스템 설정 API
+
+| 항목 | 내용 |
+|------|------|
+| **기능 ID** | FUNC-035-API |
+| **기능명** | 시스템 설정 API |
+| **PRD 매핑** | FR-008 |
+| **모듈** | 모바일 API |
+| **우선순위** | MEDIUM |
+
+**API 엔드포인트**:
+
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | /api/v1/admin/settings | 전체 설정 조회 (ADMIN) |
+| GET | /api/v1/admin/settings/{key} | 개별 설정 조회 (ADMIN) |
+| PUT | /api/v1/admin/settings/{key} | 개별 설정 수정 (ADMIN) |
+| PUT | /api/v1/admin/settings/batch | 일괄 설정 수정 (ADMIN) |
+
+---
+
 ## 7. 모듈 6: H/W 인프라 연동
 
 ### FUNC-040: LPR 카메라 연동
@@ -1526,6 +2280,15 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | FR-004 | 계량 웹 관리 시스템 | FUNC-006 | 계량 현황 관리 | M2: 웹 |
 | FR-004 | 계량 웹 관리 시스템 | FUNC-008 | 기준정보 관리 | M2: 웹 |
 | FR-004 | 계량 웹 관리 시스템 | FUNC-030 | 출문 관리 | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-031 | 즐겨찾기 기능 | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-032 | 이용 안내/FAQ | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-033 | 장비 모니터링 | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-034 | 마이페이지 | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-035 | 공지사항 | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-036 | 시스템 설정 | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-037 | 문의/민원 | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-038 | 통계/보고서 | M2: 웹 |
+| FR-004 | 계량 웹 관리 시스템 | FUNC-039 | 프론트엔드 레이아웃 개선 | M2: 웹 |
 | FR-005 | 계량대 CS 프로그램 | FUNC-010 | 인디게이터 중량값 수신 | M3: CS |
 | FR-005 | 계량대 CS 프로그램 | FUNC-011 | LPR 자동 계량 프로세스 | M3: CS |
 | FR-005 | 계량대 CS 프로그램 | FUNC-013 | 자동 차단기 제어 | M3: CS |
@@ -1542,6 +2305,13 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | FR-008 | 모바일 API | FUNC-026-API | 배차 정보 API | M5: API |
 | FR-008 | 모바일 API | FUNC-027-API | 계량 처리 API | M5: API |
 | FR-008 | 모바일 API | FUNC-028-API | Push 알림 API | M5: API |
+| FR-008 | 모바일 API | FUNC-029-API | 즐겨찾기 API | M5: API |
+| FR-008 | 모바일 API | FUNC-030-API | 공지사항/FAQ API | M5: API |
+| FR-008 | 모바일 API | FUNC-031-API | 장비 모니터링 API | M5: API |
+| FR-008 | 모바일 API | FUNC-032-API | 마이페이지/프로필 API | M5: API |
+| FR-008 | 모바일 API | FUNC-033-API | 문의/민원 API | M5: API |
+| FR-008 | 모바일 API | FUNC-034-API | 통계/보고서 API | M5: API |
+| FR-008 | 모바일 API | FUNC-035-API | 시스템 설정 API | M5: API |
 
 ### 9.2 매핑 검증 결과
 
@@ -1550,30 +2320,30 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | FR-001 | 5개 | 100% | COVERED |
 | FR-002 | 3개 | 100% | COVERED |
 | FR-003 | 7개 | 100% | COVERED |
-| FR-004 | 4개 | 100% | COVERED |
+| FR-004 | 13개 | 100% | COVERED |
 | FR-005 | 7개 | 100% | COVERED |
 | FR-006 | 2개 | 100% | COVERED |
 | FR-007 | 3개 | 100% | COVERED |
-| FR-008 | 4개 | 100% | COVERED |
+| FR-008 | 11개 | 100% | COVERED |
 
-**총 35개 기능 명세가 8개 PRD 기능 요구사항을 100% 커버합니다.**
+**총 51개 기능 명세가 8개 PRD 기능 요구사항을 100% 커버합니다.**
 
 ### 9.3 NFR 매핑 검증
 
 | NFR-ID | NFR 명칭 | 관련 FUNC | 반영 상태 |
 |--------|----------|-----------|----------|
-| NFR-001 | 성능 | FUNC-001,002,003,004,006,007,010,024 | COVERED |
-| NFR-002 | 보안 | FUNC-004,009,017,025-API | COVERED |
+| NFR-001 | 성능 | FUNC-001,002,003,004,006,007,010,024,033,038 | COVERED |
+| NFR-002 | 보안 | FUNC-004,009,017,025-API,034,036 | COVERED |
 | NFR-003 | 확장성 | FUNC-003,008 | COVERED |
-| NFR-004 | 가용성 | FUNC-001,007,010,011,016 | COVERED |
-| NFR-005 | 사용성 | FUNC-005,006,017 | COVERED |
+| NFR-004 | 가용성 | FUNC-001,007,010,011,016,033 | COVERED |
+| NFR-005 | 사용성 | FUNC-005,006,017,031,038,039 | COVERED |
 
 ### 9.4 TRD 기술 제약사항 반영 확인
 
 | 제약사항 | 반영 FUNC | 확인 |
 |----------|-----------|------|
-| Spring Boot 3.2 백엔드 | FUNC-025~028-API, FUNC-005~009 | OK |
-| React 18 + Ant Design 웹 | FUNC-005,006,008,009,030 | OK |
+| Spring Boot 3.2 백엔드 | FUNC-025~035-API, FUNC-005~009, FUNC-031~038 | OK |
+| React 18 + Ant Design 웹 | FUNC-005,006,008,009,030~039 | OK |
 | Flutter 3.x 모바일 | FUNC-017~024 | OK |
 | C# .NET WinForms CS | FUNC-010~016 | OK |
 | PostgreSQL 16 DB | 전체 데이터 CRUD 기능 | OK |
@@ -1581,7 +2351,7 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | RS-232C 인디게이터 | FUNC-010 | OK |
 | TCP/UDP LPR/센서 | FUNC-040,041,042 | OK |
 | JWT 인증 | FUNC-017,025-API | OK |
-| WebSocket 실시간 | FUNC-006 | OK |
+| WebSocket 실시간 | FUNC-006,033 | OK |
 | FCM Push 알림 | FUNC-024,028-API | OK |
 | 카카오/SMS 연동 | FUNC-009,021 | OK |
 
@@ -1591,7 +2361,7 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 
 ## 10. 구현 현황 (Implementation Status)
 
-> **최종 업데이트**: 2026-01-29
+> **최종 업데이트**: 2026-01-30
 
 ### 10.1 웹 프론트엔드 화면 구현 현황
 
@@ -1604,18 +2374,18 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | `/inquiry` | 계량 조회 | FUNC-006 | ✅ 완료 | 상세 검색, 엑셀 내보내기 |
 | `/gate-pass` | 출문 관리 | FUNC-030 | ✅ 완료 | 승인/반려 프로세스 |
 | `/slips` | 전자 계량표 | FUNC-009 | ✅ 완료 | 조회/공유/인쇄 |
-| `/statistics` | 통계/보고서 | FUNC-006 | ✅ 완료 | 기간별/조건별 분석 차트 |
+| `/statistics` | 통계/보고서 | FUNC-038 | ✅ 완료 | 일별/월별 통계, 엑셀 내보내기 |
 | `/weighing-station` | 계량소 관제 | FUNC-011 | ✅ 완료 | 고정 탭, 실시간 장비 연동 |
-| `/monitoring` | 장비 관제 | FUNC-010 | ✅ 완료 | 장비 상태 모니터링 |
+| `/monitoring` | 장비 관제 | FUNC-033 | ✅ 완료 | 장비 상태 모니터링, 헬스체크, WebSocket |
 | `/master/companies` | 운송사 관리 | FUNC-008 | ✅ 완료 | MasterCrudPage 패턴 |
 | `/master/vehicles` | 차량 관리 | FUNC-008 | ✅ 완료 | MasterCrudPage 패턴 |
 | `/master/scales` | 계량대 관리 | FUNC-008 | ✅ 완료 | MasterCrudPage 패턴 |
 | `/master/codes` | 공통코드 관리 | FUNC-008 | ✅ 완료 | MasterCrudPage 패턴 |
-| `/notices` | 공지사항 | - | ✅ 완료 | 카테고리 필터, 고정 공지 |
-| `/help` | 이용 안내 | - | ✅ 완료 | 도움말/FAQ |
-| `/mypage` | 마이페이지 | - | ✅ 완료 | 프로필, 비밀번호 변경 |
+| `/notices` | 공지사항 | FUNC-035 | ✅ 완료 | 카테고리 필터, 고정/발행 관리, 조회수 |
+| `/help` | 이용 안내 | FUNC-032 | ✅ 완료 | FAQ 카테고리별, 조회수, ADMIN 관리 |
+| `/mypage` | 마이페이지 | FUNC-034 | ✅ 완료 | 프로필/비밀번호/알림 설정 |
 | `/admin/users` | 사용자 관리 | FUNC-008 | ✅ 완료 | ADMIN 전용 |
-| `/admin/settings` | 시스템 설정 | - | ✅ 완료 | ADMIN 전용 |
+| `/admin/settings` | 시스템 설정 | FUNC-036 | ✅ 완료 | ADMIN 전용, 카테고리별/유형별 설정 |
 | `/admin/audit-logs` | 감사 로그 | - | ✅ 완료 | ADMIN 전용 |
 
 ### 10.2 모바일 앱 화면 구현 현황
@@ -1667,6 +2437,13 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | notification | FUNC-024, 028-API | ✅ 완료 | FCM + 인앱 알림 |
 | websocket | FUNC-006 | ✅ 완료 | 계량/장비 상태 실시간 전송 |
 | dashboard | FUNC-006 | ✅ 완료 | 통계 API |
+| favorite | FUNC-031 | ✅ 완료 | 즐겨찾기 등록/삭제/순서변경 |
+| faq | FUNC-032 | ✅ 완료 | FAQ 카테고리별 CRUD |
+| device | FUNC-033 | ✅ 완료 | 장비 모니터링 + 헬스체크 |
+| notice | FUNC-035 | ✅ 완료 | 공지사항 CRUD + 고정/발행 |
+| settings | FUNC-036 | ✅ 완료 | 시스템 설정 관리 |
+| inquiry | FUNC-037 | ✅ 완료 | 문의/민원 등록/관리 |
+| statistics | FUNC-038 | ✅ 완료 | 통계 조회 + 엑셀 내보내기 |
 | audit | - | ✅ 완료 | 감사 로그 |
 
 ### 10.5 추가 구현 기능 (명세서 외)
@@ -1674,18 +2451,16 @@ PRD FR-001 ~ FR-008의 모든 기능 요구사항을 7개 모듈로 분류하여
 | 기능 | 설명 | 구현 위치 |
 |------|------|----------|
 | 온보딩 투어 | 신규 사용자 가이드 | `OnboardingTour.tsx` |
-| 키보드 단축키 | 페이지별 단축키 지원 | `useKeyboardShortcuts.ts` |
 | 탭 활성화 감지 | 브라우저 탭 전환 시 데이터 갱신 | `useTabVisible.ts` |
 | 숫자 애니메이션 | 대시보드 KPI 카드 애니메이션 | `AnimatedNumber.tsx` |
-| 드래그 정렬 | 테이블 행 드래그 재정렬 | `SortableTable.tsx` (@dnd-kit) |
 | 빈 상태 UI | 데이터 없을 때 안내 화면 | `EmptyState.tsx` |
-| 즐겨찾기 | 배차/업체 즐겨찾기 | `FavoriteButton.tsx`, `FavoritesList.tsx` |
 | 다크/라이트 테마 | 테마 전환 지원 | 웹: `ThemeContext.tsx`, `themeConfig.ts` / CS: `Theme.cs` (HeaderBar 토글, theme.dat 저장) |
-| 다중 탭 네비게이션 | 최대 10탭, 고정탭 지원 | `TabContext.tsx`, `pageRegistry.ts` |
 | 오프라인 캐시 (모바일) | SharedPreferences 기반 | `offline_cache_service.dart` |
 | 하드웨어 시뮬레이터 | 개발용 장비 시뮬레이션 | `Simulators/*.cs` |
+
+> **참고**: v1.2에서 기존 "명세서 외" 기능 중 즐겨찾기(FUNC-031), 다중 탭 네비게이션/키보드 단축키/드래그 정렬(FUNC-039)이 정식 명세에 포함되었다.
 
 ---
 
 *이 문서는 PRD-20260127-154446, TRD-20260127-155235, WBS-20260127-160043 기반으로 작성되었습니다.*
-*구현 현황은 2026-01-29 기준입니다.*
+*구현 현황은 2026-01-30 기준입니다.*

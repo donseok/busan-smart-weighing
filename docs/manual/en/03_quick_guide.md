@@ -1,6 +1,6 @@
 # Busan Smart Weighing System - Quick User Guide
 
-**Document No.**: BSW-MAN-003 | **Version**: 1.2 | **Last Updated**: 2026-01-29
+**Document No.**: BSW-MAN-003 | **Version**: 1.3 | **Last Updated**: 2026-01-30
 
 ---
 
@@ -64,11 +64,16 @@
 
 | Feature | Procedure |
 |---------|-----------|
-| **Notification Settings** | My Page → **Notification Settings** → Toggle ON/OFF by notification type |
+| **Favorites** | Click ☆ icon in the top header → Register/unregister frequently used menus (up to 20, accessible directly from header) |
+| **My Page** | Top-right user menu → Edit profile, change password, notification settings |
 | **Change Password** | My Page → **Change Password** → Enter current/new password → **Change** |
-| **Change Theme** | (Web) Top-right user menu → Switch Dark/Light mode |
-| **Contact Support** | My Page → **Contact Us** → Select Logistics Control / Materials Warehouse → **Call** |
-| **Check Notices** | Notices → Category filter/search → View details (📌 Pinned notices at top) |
+| **Notification Settings** | My Page → **Notification Settings** → Toggle ON/OFF by notification type |
+| **Notices** | Notices → Category filter/search → View details (📌 Pinned notices displayed at top) |
+| **Help / FAQ** | Help → Browse FAQ by category → Select topic of interest |
+| **Equipment Monitoring** | Equipment Monitoring → Real-time equipment connection status per scale (Normal/Error indicators) |
+| **Statistics / Reports** | Statistics/Reports → Select daily/monthly period → View charts → **Download Excel** |
+| **Inquiries / Complaints** | My Page → **Contact Us** → Select inquiry type → Write details → **Submit** |
+| **Change Theme** | (Web) Click theme button in the header to toggle Dark/Light / (CS) Click 🌙/☀ icon in the top header |
 
 ---
 
@@ -95,7 +100,7 @@
 
 ---
 
-## 7. New Features Quick Guide (v1.2)
+## 7. New Features Quick Guide (v1.3)
 
 ### Web Keyboard Shortcuts
 
@@ -103,6 +108,8 @@
 |----------|----------|
 | `Ctrl+N` | New Registration |
 | `Ctrl+F` | Focus Search |
+| `Ctrl+W` | Close Current Tab |
+| `Ctrl+Tab` | Switch to Next Tab |
 | `Esc` | Close Modal |
 
 ### Weighing Search & Statistics
@@ -110,8 +117,8 @@
 | Task | Path & Procedure |
 |------|-----------------|
 | **Weighing Search** | Weighing Search → Enter period/vehicle/item conditions → **Search** → **Download Excel** |
-| **View Statistics** | Statistics/Reports → Select period/conditions → View charts → **Download Excel** |
-| **Equipment Monitoring** | Equipment Monitoring → Real-time equipment connection status per scale |
+| **View Statistics** | Statistics/Reports → Select daily/monthly period → View charts → **Download Excel** |
+| **Equipment Monitoring** | Equipment Monitoring → Real-time equipment connection status per scale (Normal/Error indicators) |
 
 ### 📱 Mobile Offline Support
 

@@ -19,6 +19,11 @@
 10. [Thiết lập Môi trường Phát triển](#10-thiết-lập-môi-trường-phát-triển)
 11. [Quy ước Code và Mẫu thiết kế](#11-quy-ước-code-và-mẫu-thiết-kế)
 12. [Các lỗi thường gặp và Lưu ý](#12-các-lỗi-thường-gặp-và-lưu-ý)
+13. [Các Mẫu Frontend Mới Thêm Gần đây](#13-các-mẫu-frontend-mới-thêm-gần-đây)
+14. [Các Mẫu Mobile Mới Thêm Gần đây](#14-các-mẫu-mobile-mới-thêm-gần-đây)
+15. [Các Mẫu Desktop Mới Thêm Gần đây](#15-các-mẫu-desktop-mới-thêm-gần-đây)
+16. [Các Module Backend Mới Thêm Gần đây](#16-các-module-backend-mới-thêm-gần-đây)
+17. [Các Component Frontend Mới Thêm Gần đây](#17-các-component-frontend-mới-thêm-gần-đây)
 
 ---
 
@@ -60,6 +65,14 @@ busan-smart-weighing/
 │   │   ├── weighing/           # Logic Cân cốt lõi
 │   │   ├── gatepass/           # Quản lý Giấy xuất cổng
 │   │   ├── slip/               # Quản lý Phiếu cân
+│   │   ├── favorite/           # Quản lý Yêu thích
+│   │   ├── help/               # Hướng dẫn Sử dụng (FAQ)
+│   │   ├── monitoring/         # Giám sát Thiết bị
+│   │   ├── mypage/             # Trang Cá nhân
+│   │   ├── notice/             # Thông báo / Tin tức
+│   │   ├── setting/            # Cài đặt Hệ thống
+│   │   ├── inquiry/            # Quản lý Yêu cầu Hỗ trợ
+│   │   ├── statistics/         # Thống kê / Báo cáo
 │   │   ├── notification/       # Thông báo đẩy (FCM)
 │   │   ├── dashboard/          # Thống kê Dashboard
 │   │   ├── audit/              # Nhật ký Kiểm toán
@@ -1392,6 +1405,136 @@ var response = await httpClient.PostAsync(
 }
 ```
 
+### 6.4 Hệ thống UI Hiện đại (GDI+ Custom Control)
+
+Chương trình desktop áp dụng toàn diện **custom control dựa trên GDI+** để đạt chất lượng hình ảnh ngang tầm ứng dụng web. Thay vì dùng control WinForms gốc, chương trình render trực tiếp trong `OnPaint` để triển khai dark theme, bo tròn góc, hiệu ứng glow, v.v.
+
+#### 6.4.1 Hệ thống Design Token Theme
+
+`Controls/Theme.cs` quản lý tập trung tất cả thuộc tính trực quan. Dựa trên bảng màu Tailwind CSS Slate, định nghĩa 5 tầng nền, màu ngữ nghĩa, typography và hằng số khoảng cách.
+
+```csharp
+// Tầng nền (từ tối đến sáng)
+BgDarkest  #060D1B  → Header/Footer
+BgBase     #0B1120  → Nền chính
+BgElevated #0F172A  → Trường nhập liệu
+BgSurface  #1E293B  → Thẻ (Card)
+BgHover    #283548  → Trạng thái hover
+
+// Hệ số tỉ lệ
+FontScale  = 1.5f   // Tỉ lệ kích thước font
+LayoutScale = 1.25f // Tỉ lệ layout/khoảng cách
+
+// Font (cache tĩnh, KHÔNG Dispose!)
+Theme.FontBody      → 9.5pt x FontScale = 14.25pt Segoe UI
+Theme.FontBodyBold  → 9.5pt x FontScale = 14.25pt Segoe UI Bold
+Theme.FontMono      → 10pt x FontScale = 15pt Consolas
+
+// Tiện ích màu sắc
+Theme.WithAlpha(color, alpha)  → Độ trong suốt alpha
+Theme.Lighten(color, factor)   → Làm sáng
+Theme.Darken(color, factor)    → Làm tối
+```
+
+> **Luu y**: Thuoc tinh `Theme.FontXxx` la instance chia se duoc cache tinh. Neu su dung nhu `using var font = Theme.FontBody`, sau khi Dispose font se **bi vo hieu hoa toan cuc** va tat ca control se gap ngoai le "Parameter is not valid". Phai su dung `var font = Theme.FontBody` chi de tham chieu.
+>
+> **An toan chuyen doi theme**: `InvalidateFontCache()` khong `Dispose()` instance font cu ma chi dat tham chieu ve `null`. Ly do la `OnPaint` cua control co the duoc goi truoc khi handler `ThemeChanged` gan lai font moi, gay ra crash do race condition neu Dispose. Font cu se duoc GC thu hoi.
+
+#### 6.4.2 Cấu hình Custom Control
+
+| Control | Mô tả | Phương thức Triển khai |
+|---------|-------|----------------------|
+| `HeaderBar` | Header trên cùng (logo, tiêu đề, LED kết nối, toggle theme, đồng hồ) | Kế thừa Control, Timer |
+| `StatusFooter` | Thanh trạng thái dưới cùng (trạm cân, chế độ, đồng bộ, thời gian) | Kế thừa Control, Timer |
+| `WeightDisplayPanel` | Hiển thị trọng lượng lớn (glow, badge ổn định) | Kế thừa Control |
+| `CardPanel` | Container thẻ (hiệu ứng kính, bóng đổ, thanh accent) | Kế thừa Panel |
+| `ModernButton` | Nút (3 loại Primary/Secondary/Danger) | Kế thừa Control |
+| `ModernToggle` | Toggle trượt (chuyển đổi tự động/thủ công, hoạt ảnh) | Kế thừa Control, Timer |
+| `ModernTextBox` | Nhập text (viền glow, placeholder) | Kế thừa Control + ủy quyền TextBox |
+| `ModernComboBox` | Dropdown (render item tùy chỉnh) | Kế thừa Control + ủy quyền ComboBox |
+| `ModernCheckBox` | Checkbox (render tùy chỉnh, dấu check) | Kế thừa Control |
+| `ModernListView` | ListView (hàng xen kẽ màu, màu trạng thái, cột cuối tự động fill) | Kế thừa ListView (OwnerDraw) |
+| `ProcessStepBar` | Hiển thị 4 bước quy trình (indicator hình tròn) | Kế thừa Control |
+| `TerminalLogPanel` | Bảng log kiểu terminal | Kế thừa Control |
+| `ModernProgressBar` | Thanh tiến trình (cho splash screen) | Kế thừa Control |
+
+#### 6.4.3 Cấu trúc Layout
+
+Main form sử dụng layout 3 phần:
+
+```
+┌─────────────────────────────────────────────────┐
+│  HeaderBar (Dock.Top, 56px)                     │
+│  [DK Logo] Busan Smart Weighing System ● Scale ... HH:mm│
+├────────────────────┬──┬─────────────────────────┤
+│  panelLeftCol      │÷ │  panelRightCol          │
+│  (Dock.Left,420px) │1p│  (Dock.Fill)            │
+│                    │x │                          │
+│  WeightDisplay     │  │  ModeToggle             │
+│  (220px)           │  │  ProcessStepBar (64px)  │
+│                    │  │  CardManual (185px)      │
+│  CardVehicle       │  │  CardActions (88px)     │
+│  (190px)           │  │  CardSimulator (90px)   │
+│                    │  │                          │
+│  CardHistory       │  │  TerminalLog            │
+│  (Fill)            │  │  (Fill)                 │
+├────────────────────┴──┴─────────────────────────┤
+│  StatusFooter (Dock.Bottom, 32px)               │
+│  Scale#1 · COM1  ● Auto Mode          v1.0.0 HH:mm:ss│
+└─────────────────────────────────────────────────┘
+```
+
+#### 6.4.4 Mẫu Rendering
+
+Tất cả custom control tuân theo mẫu sau:
+
+```csharp
+public class CustomControl : Control
+{
+    public CustomControl()
+    {
+        // Double buffering bắt buộc
+        SetStyle(
+            ControlStyles.AllPaintingInWmPaint |
+            ControlStyles.UserPaint |
+            ControlStyles.OptimizedDoubleBuffer |
+            ControlStyles.ResizeRedraw, true);
+    }
+
+    // Ngăn nhấp nháy nền
+    protected override void OnPaintBackground(PaintEventArgs e) { }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        if (Width < 10 || Height < 10) return; // Bảo vệ kích thước zero
+
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+
+        // Tạo hình chữ nhật bo tròn bằng RoundedRectHelper
+        using var path = RoundedRectHelper.Create(bounds, Theme.RadiusMedium);
+        // ... GDI+ rendering
+    }
+}
+```
+
+**Mẫu Wrapper** (ModernTextBox, ModernComboBox): Bao bọc control gốc bên trong nhưng chỉ tùy chỉnh render viền ngoài và hiệu ứng focus.
+
+```csharp
+public class ModernTextBox : Control
+{
+    private readonly TextBox _inner;  // Control gốc bên trong
+
+    // Ủy quyền thuộc tính Text, Font, v.v. cho _inner
+    public override string Text
+    {
+        get => _inner.Text;
+        set => _inner.Text = value ?? "";
+    }
+}
+```
+
 ---
 
 ## 7. Xác thực và Bảo mật (JWT + Spring Security)
@@ -1968,28 +2111,6 @@ setItems(prev => prev.map(item =>
 
 ---
 
-## Phụ lục: Từ điển Thuật ngữ Chính
-
-| Thuật ngữ | Mô tả |
-|-----------|-------|
-| **REST API** | Phương pháp thiết kế API thao tác tài nguyên bằng HTTP method (GET/POST/PUT/DELETE) |
-| **SPA** | Single Page Application. Ứng dụng web thay đổi component mà không chuyển trang |
-| **ORM** | Object-Relational Mapping. Công nghệ ánh xạ object với bảng DB (JPA) |
-| **DTO** | Data Transfer Object. Cấu trúc dữ liệu dùng cho API request/response |
-| **DI** | Dependency Injection. Mẫu nhận object từ bên ngoài thay vì tạo trực tiếp |
-| **JWT** | JSON Web Token. Token xác thực do server cấp |
-| **STOMP** | Giao thức nhắn tin trên WebSocket (mẫu Pub/Sub) |
-| **HMR** | Hot Module Replacement. Phản ánh thay đổi code mà không cần refresh trình duyệt |
-| **CORS** | Cross-Origin Resource Sharing. Cấu hình cho phép gọi API từ domain khác |
-| **HikariCP** | Thư viện connection pool JDBC (cải thiện hiệu suất bằng cách tái sử dụng kết nối DB) |
-| **FCM** | Firebase Cloud Messaging. Dịch vụ thông báo đẩy của Google |
-| **Dirty Checking** | Tính năng JPA tự động phát hiện thay đổi Entity và tạo UPDATE query |
-| **Bean** | Object được Spring quản lý (Controller, Service, Repository, v.v.) |
-| **Profile** | Tính năng phân tách cấu hình theo môi trường của Spring (dev, prod, test) |
-| **Interceptor** | Middleware chặn request/response để xử lý chung (dùng trong cả Axios và Spring) |
-
----
-
 ## 13. Các Mẫu Frontend Mới Thêm Gần đây
 
 ### 13.1 Page Registry (pageRegistry.ts)
@@ -2288,6 +2409,514 @@ dotnet test      # Chạy test xUnit
 
 ---
 
+## 16. Các Module Backend Mới Thêm Gần đây
+
+Khi dự án mở rộng, các module backend sau đã được bổ sung. Mỗi module tuân theo cùng cấu trúc phân tầng (Controller → Service → Repository → Entity) như các module hiện có.
+
+### 16.1 Yêu thích (favorite)
+
+Module quản lý việc đăng ký và quản lý yêu thích cho menu, điều phối, xe, công ty vận tải và trạm cân theo từng người dùng. Tích hợp với component `FavoriteButton`/`FavoritesList` ở frontend.
+
+**Cấu trúc Package:**
+
+```
+favorite/
+├── controller/   FavoriteController
+├── domain/       Favorite (Entity), FavoriteType (Enum), FavoriteRepository
+├── dto/          FavoriteCreateRequest, FavoriteCheckRequest, FavoriteReorderRequest, FavoriteResponse
+└── service/      FavoriteService
+```
+
+**Các trường chính Entity:**
+
+```java
+@Entity
+@Table(name = "favorites")
+public class Favorite extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long favoriteId;
+
+    private Long userId;
+    @Enumerated(EnumType.STRING)
+    private FavoriteType favoriteType;  // MENU, DISPATCH, VEHICLE, COMPANY, SCALE
+    private String targetId;
+    private String targetPath;
+    private String displayName;
+    private String icon;
+    private Integer sortOrder;
+    private LocalDateTime createdAt;
+}
+```
+
+**API Endpoint:**
+
+| HTTP | Đường dẫn | Mô tả | Quyền |
+|------|-----------|-------|-------|
+| `GET` | `/api/v1/favorites` | Danh sách toàn bộ yêu thích | Tất cả |
+| `GET` | `/api/v1/favorites/type/{type}` | Danh sách yêu thích theo loại | Tất cả |
+| `POST` | `/api/v1/favorites` | Đăng ký yêu thích | Tất cả |
+| `DELETE` | `/api/v1/favorites/{favoriteId}` | Xóa yêu thích | Tất cả |
+| `POST` | `/api/v1/favorites/toggle` | Toggle đăng ký/hủy yêu thích | Tất cả |
+| `POST` | `/api/v1/favorites/check` | Kiểm tra đã đăng ký yêu thích chưa | Tất cả |
+| `PUT` | `/api/v1/favorites/reorder` | Thay đổi thứ tự yêu thích (kéo thả) | Tất cả |
+
+**Quy tắc Nghiệp vụ:**
+- Mỗi người dùng có thể đăng ký tối đa 20 mục yêu thích
+- Ngăn đăng ký trùng lặp cùng đối tượng
+- Khi thay đổi thứ tự bằng kéo thả, `sortOrder` được cập nhật hàng loạt
+
+### 16.2 Hướng dẫn Sử dụng / FAQ (help)
+
+Module quản lý FAQ. Người dùng có thể xem FAQ theo danh mục, quản trị viên có thể tạo/sửa/xóa FAQ.
+
+**Cấu trúc Package:**
+
+```
+help/
+├── controller/   HelpController
+├── domain/       Faq (Entity), FaqCategory (Enum), FaqRepository
+├── dto/          FaqCreateRequest, FaqUpdateRequest, FaqResponse
+└── service/      HelpService
+```
+
+**Các trường chính Entity:**
+
+```java
+@Entity
+@Table(name = "faqs")
+public class Faq extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long faqId;
+
+    private String question;
+    @Column(columnDefinition = "TEXT")
+    private String answer;
+    @Enumerated(EnumType.STRING)
+    private FaqCategory category;  // WEIGHING, DISPATCH, ACCOUNT, SYSTEM, OTHER
+    private Integer sortOrder;
+    private Boolean isPublished;
+    private Long viewCount;
+}
+```
+
+**API Endpoint:**
+
+| HTTP | Đường dẫn | Mô tả | Quyền |
+|------|-----------|-------|-------|
+| `GET` | `/api/v1/help/faqs` | Toàn bộ danh sách FAQ công khai | Tất cả |
+| `GET` | `/api/v1/help/faqs/category/{category}` | FAQ theo danh mục | Tất cả |
+| `GET` | `/api/v1/help/faqs/{faqId}` | Chi tiết FAQ (tăng lượt xem) | Tất cả |
+| `GET` | `/api/v1/help/faqs/admin` | Danh sách FAQ cho quản trị viên (bao gồm chưa công khai) | ADMIN |
+| `POST` | `/api/v1/help/faqs` | Tạo FAQ | ADMIN |
+| `PUT` | `/api/v1/help/faqs/{faqId}` | Sửa FAQ | ADMIN |
+| `DELETE` | `/api/v1/help/faqs/{faqId}` | Xóa FAQ | ADMIN |
+
+### 16.3 Giám sát Thiết bị (monitoring)
+
+Module giám sát trạng thái thời gian thực của thiết bị phần cứng tại trạm cân (trạm cân, camera LPR, indicator, thanh chắn). Gửi thông báo thời gian thực đến frontend qua WebSocket khi trạng thái thiết bị thay đổi.
+
+**Cấu trúc Package:**
+
+```
+monitoring/
+├── controller/   DeviceMonitoringController
+├── domain/       DeviceStatus (Entity), DeviceType (Enum), ConnectionStatus (Enum), DeviceStatusRepository
+├── dto/          DeviceStatusResponse, DeviceStatusUpdateRequest, DeviceSummaryResponse
+└── service/      DeviceMonitoringService
+```
+
+**Các trường chính Entity:**
+
+```java
+@Entity
+@Table(name = "device_statuses")
+public class DeviceStatus extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long deviceId;
+
+    private String deviceCode;
+    private String deviceName;
+    @Enumerated(EnumType.STRING)
+    private DeviceType deviceType;        // SCALE, LPR_CAMERA, INDICATOR, BARRIER_GATE
+    private String location;
+    @Enumerated(EnumType.STRING)
+    private ConnectionStatus connectionStatus;  // ONLINE, OFFLINE, ERROR
+    private LocalDateTime lastConnectedAt;
+    private String ipAddress;
+    private String errorMessage;
+    private Boolean isActive;
+}
+```
+
+**API Endpoint:**
+
+| HTTP | Đường dẫn | Mô tả | Quyền |
+|------|-----------|-------|-------|
+| `GET` | `/api/v1/monitoring/devices` | Danh sách toàn bộ thiết bị | Tất cả |
+| `GET` | `/api/v1/monitoring/devices/type/{deviceType}` | Thiết bị theo loại | Tất cả |
+| `GET` | `/api/v1/monitoring/devices/{deviceId}` | Chi tiết thiết bị | Tất cả |
+| `PUT` | `/api/v1/monitoring/devices/{deviceId}/status` | Cập nhật trạng thái thiết bị | Tất cả |
+| `GET` | `/api/v1/monitoring/summary` | Thống kê tóm tắt trạng thái thiết bị | Tất cả |
+| `POST` | `/api/v1/monitoring/health-check` | Chạy kiểm tra health toàn bộ thiết bị | ADMIN, MANAGER |
+
+**Quy tắc Nghiệp vụ:**
+- Nếu thiết bị không phản hồi trong 5 phút, tự động chuyển sang trạng thái `OFFLINE`
+- Khi trạng thái thiết bị thay đổi, broadcast thời gian thực qua WebSocket topic `/topic/equipment-status`
+- Trực quan hóa trạng thái tại `MonitoringPage` ở frontend và `ConnectionStatusPanel` ở desktop
+
+### 16.4 Trang Cá nhân (mypage)
+
+Module quản lý xem/sửa hồ sơ cá nhân, đổi mật khẩu và cài đặt thông báo của người dùng.
+
+**Cấu trúc Package:**
+
+```
+mypage/
+├── controller/   MyPageController
+├── dto/          MyPageResponse, ProfileUpdateRequest, PasswordChangeRequest, NotificationSettingsRequest
+└── service/      MyPageService
+```
+
+**API Endpoint:**
+
+| HTTP | Đường dẫn | Mô tả | Quyền |
+|------|-----------|-------|-------|
+| `GET` | `/api/v1/mypage` | Xem hồ sơ cá nhân | Tất cả |
+| `PUT` | `/api/v1/mypage/profile` | Sửa hồ sơ (tên, số điện thoại, v.v.) | Tất cả |
+| `PUT` | `/api/v1/mypage/password` | Đổi mật khẩu | Tất cả |
+| `PUT` | `/api/v1/mypage/notifications` | Thay đổi cài đặt nhận thông báo | Tất cả |
+
+**Quy tắc Đổi Mật khẩu:**
+- Bắt buộc xác minh mật khẩu hiện tại
+- Xác minh mật khẩu mới và xác nhận mật khẩu trùng khớp
+- Tối thiểu 8 ký tự (Bean Validation: `@Size(min = 8)`)
+- Hash bằng BCrypt trước khi lưu
+
+### 16.5 Thông báo / Tin tức (notice)
+
+Module quản lý thông báo hệ thống, hướng dẫn bảo trì, thông báo cập nhật, v.v. Hỗ trợ tính năng ghim lên đầu (pin) và tìm kiếm.
+
+**Cấu trúc Package:**
+
+```
+notice/
+├── controller/   NoticeController
+├── domain/       Notice (Entity), NoticeCategory (Enum), NoticeRepository
+├── dto/          NoticeCreateRequest, NoticeUpdateRequest, NoticeResponse
+└── service/      NoticeService
+```
+
+**Các trường chính Entity:**
+
+```java
+@Entity
+@Table(name = "notices")
+public class Notice extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long noticeId;
+
+    private String title;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    @Enumerated(EnumType.STRING)
+    private NoticeCategory category;  // SYSTEM, MAINTENANCE, UPDATE, GENERAL
+    private Long authorId;
+    private String authorName;
+    private Boolean isPublished;
+    private Boolean isPinned;
+    private LocalDateTime publishedAt;
+    private Long viewCount;
+}
+```
+
+**API Endpoint:**
+
+| HTTP | Đường dẫn | Mô tả | Quyền |
+|------|-----------|-------|-------|
+| `GET` | `/api/v1/notices` | Danh sách thông báo công khai (phân trang) | Tất cả |
+| `GET` | `/api/v1/notices/category/{category}` | Theo danh mục | Tất cả |
+| `GET` | `/api/v1/notices/pinned` | Thông báo ghim đầu trang | Tất cả |
+| `GET` | `/api/v1/notices/search?keyword=` | Tìm kiếm theo từ khóa | Tất cả |
+| `GET` | `/api/v1/notices/{noticeId}` | Chi tiết thông báo (tăng lượt xem) | Tất cả |
+| `GET` | `/api/v1/notices/admin` | Danh sách cho quản trị viên (bao gồm chưa công khai) | ADMIN |
+| `POST` | `/api/v1/notices` | Tạo thông báo | ADMIN |
+| `PUT` | `/api/v1/notices/{noticeId}` | Sửa thông báo | ADMIN |
+| `DELETE` | `/api/v1/notices/{noticeId}` | Xóa thông báo | ADMIN |
+| `PATCH` | `/api/v1/notices/{noticeId}/publish` | Chuyển đổi công khai/ẩn | ADMIN |
+| `PATCH` | `/api/v1/notices/{noticeId}/pin` | Chuyển đổi ghim/bỏ ghim | ADMIN |
+
+**Quy tắc Nghiệp vụ:**
+- Khi truy vấn danh sách, thông báo ghim (`isPinned = true`) luôn hiển thị trên cùng
+- Hỗ trợ phân trang (Spring Data Pageable)
+- Chức năng quản lý (tạo/sửa/xóa/công khai/ghim) chỉ dành cho ADMIN
+
+### 16.6 Cài đặt Hệ thống (setting)
+
+Module quản lý các giá trị cài đặt toàn hệ thống. Tất cả endpoint chỉ dành cho ADMIN.
+
+**Cấu trúc Package:**
+
+```
+setting/
+├── controller/   SystemSettingController
+├── domain/       SystemSetting (Entity), SettingType (Enum), SettingCategory (Enum), SystemSettingRepository
+├── dto/          SystemSettingResponse, SystemSettingUpdateRequest, BulkUpdateRequest
+└── service/      SystemSettingService
+```
+
+**Các trường chính Entity:**
+
+```java
+@Entity
+@Table(name = "system_settings")
+public class SystemSetting extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long settingId;
+
+    @Column(unique = true)
+    private String settingKey;
+    private String settingValue;
+    @Enumerated(EnumType.STRING)
+    private SettingType settingType;        // STRING, NUMBER, BOOLEAN, JSON
+    @Enumerated(EnumType.STRING)
+    private SettingCategory category;       // GENERAL, WEIGHING, NOTIFICATION, SECURITY
+    private String description;
+    private Boolean isEditable;
+}
+```
+
+**API Endpoint:**
+
+| HTTP | Đường dẫn | Mô tả | Quyền |
+|------|-----------|-------|-------|
+| `GET` | `/api/v1/admin/settings` | Danh sách toàn bộ cài đặt | ADMIN |
+| `GET` | `/api/v1/admin/settings/category/{category}` | Cài đặt theo danh mục | ADMIN |
+| `PUT` | `/api/v1/admin/settings/{settingId}` | Sửa cài đặt riêng lẻ | ADMIN |
+| `PUT` | `/api/v1/admin/settings/bulk` | Sửa cài đặt hàng loạt | ADMIN |
+
+**Quy tắc Nghiệp vụ:**
+- Cài đặt có `isEditable = false` sẽ ném `BusinessException` khi cố sửa
+- Khi sửa cài đặt, xác thực định dạng giá trị theo `settingType` (NUMBER -> parse số, BOOLEAN -> true/false, JSON -> JSON hợp lệ)
+- API sửa hàng loạt cho phép thay đổi nhiều cài đặt trong một transaction
+
+### 16.7 Yêu cầu Hỗ trợ / Khiếu nại (inquiry)
+
+Module quản lý ghi nhận cuộc gọi hỗ trợ. Tiếp nhận và ghi nhận kết quả xử lý các yêu cầu liên quan đến cân/điều phối từ tài xế hoặc công ty vận tải.
+
+**Cấu trúc Package:**
+
+```
+inquiry/
+├── controller/   InquiryCallController
+├── domain/       InquiryCall (Entity), InquiryType (Enum), InquiryCallRepository
+├── dto/          InquiryCallCreateRequest, InquiryCallResponse
+└── service/      InquiryCallService
+```
+
+**Các trường chính Entity:**
+
+```java
+@Entity
+@Table(name = "inquiry_calls")
+public class InquiryCall extends BaseEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long inquiryCallId;
+
+    private Long callerId;
+    private String callerName;
+    private String callerPhone;
+    @Enumerated(EnumType.STRING)
+    private InquiryType inquiryType;  // WEIGHING_ISSUE, DISPATCH_ISSUE, SYSTEM_ERROR,
+                                       // GENERAL_INQUIRY, COMPLAINT, OTHER
+    private String subject;
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    private Long dispatchId;    // Điều phối liên quan (tùy chọn)
+    private Long weighingId;    // Lượt cân liên quan (tùy chọn)
+    private Long handlerId;     // Người xử lý
+    @Column(columnDefinition = "TEXT")
+    private String handlerNote; // Ghi chú xử lý
+}
+```
+
+**API Endpoint:**
+
+| HTTP | Đường dẫn | Mô tả | Quyền |
+|------|-----------|-------|-------|
+| `POST` | `/api/v1/inquiries/call-log` | Ghi nhận cuộc gọi hỗ trợ | Tất cả |
+| `GET` | `/api/v1/inquiries/call-log` | Toàn bộ danh sách yêu cầu hỗ trợ | ADMIN, MANAGER |
+| `GET` | `/api/v1/inquiries/call-log/my` | Yêu cầu hỗ trợ do tôi đăng ký | Tất cả |
+
+### 16.8 Thống kê / Báo cáo (statistics)
+
+Module cung cấp thống kê cân theo ngày/tháng và xuất Excel. Sử dụng thư viện Apache POI.
+
+**Cấu trúc Package:**
+
+```
+statistics/
+├── controller/   StatisticsController
+├── dto/          DailyStatisticsResponse, MonthlyStatisticsResponse, StatisticsSummaryResponse
+└── service/      StatisticsService
+```
+
+**API Endpoint:**
+
+| HTTP | Đường dẫn | Mô tả | Quyền |
+|------|-----------|-------|-------|
+| `GET` | `/api/v1/statistics/daily` | Thống kê theo ngày | Tất cả |
+| `GET` | `/api/v1/statistics/monthly` | Thống kê theo tháng | Tất cả |
+| `GET` | `/api/v1/statistics/summary` | Tóm tắt thống kê (KPI) | Tất cả |
+| `GET` | `/api/v1/statistics/export` | Xuất file Excel | ADMIN, MANAGER |
+
+**Tham số Query chung:**
+
+| Tham số | Kiểu | Mô tả |
+|---------|------|-------|
+| `date_from` | LocalDate | Ngày bắt đầu truy vấn |
+| `date_to` | LocalDate | Ngày kết thúc truy vấn |
+| `company_id` | Long | Bộ lọc công ty vận tải (tùy chọn) |
+| `item_type` | String | Bộ lọc loại hàng hóa (tùy chọn) |
+
+**Xuất Excel:**
+- Sử dụng thư viện Apache POI (`poi-ooxml`)
+- Content-Type: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+- Tên file: `statistics_YYYYMMDD.xlsx`
+- Dữ liệu thống kê được tổ chức theo từng sheet
+
+### 16.9 Tóm tắt API Endpoint Các Module Bổ sung
+
+Các mục bổ sung vào bảng tóm tắt API endpoint hiện có:
+
+| Domain | Đường dẫn Gốc | Endpoint Chính |
+|--------|---------------|----------------|
+| Yêu thích | `/api/v1/favorites` | Danh sách, theo loại, đăng ký, xóa, toggle, thay đổi thứ tự |
+| FAQ | `/api/v1/help` | Danh sách FAQ, theo danh mục, chi tiết, CRUD (ADMIN) |
+| Giám sát Thiết bị | `/api/v1/monitoring` | Danh sách thiết bị, theo loại, cập nhật trạng thái, tóm tắt, health check |
+| Trang Cá nhân | `/api/v1/mypage` | Xem/sửa hồ sơ, đổi mật khẩu, cài đặt thông báo |
+| Thông báo | `/api/v1/notices` | Danh sách, tìm kiếm, chi tiết, ghim, CRUD (ADMIN) |
+| Cài đặt Hệ thống | `/api/v1/admin/settings` | Toàn bộ/theo danh mục, sửa riêng lẻ/hàng loạt (ADMIN) |
+| Yêu cầu Hỗ trợ | `/api/v1/inquiries` | Đăng ký yêu cầu, toàn bộ/của tôi |
+| Thống kê | `/api/v1/statistics` | Thống kê ngày/tháng/tóm tắt, xuất Excel |
+
+---
+
+## 17. Các Component Frontend Mới Thêm Gần đây
+
+### 17.1 Layout Trang Bảng (TablePageLayout.tsx)
+
+Component layout tiêu chuẩn cho các trang có bảng dữ liệu. Cấu trúc layout 3 phần Flex gồm khu vực tìm kiếm, khu vực bảng và khu vực phân trang, đảm bảo bảng lấp đầy chính xác không gian còn lại.
+
+```tsx
+// components/TablePageLayout.tsx
+<TablePageLayout>
+    {/* FixedArea: Tìm kiếm/Bộ lọc (chiều cao cố định) */}
+    <TablePageLayout.FixedArea>
+        <SearchForm ... />
+    </TablePageLayout.FixedArea>
+
+    {/* ScrollArea: Bảng (lấp đầy không gian còn lại, cuộn) */}
+    <TablePageLayout.ScrollArea>
+        <SortableTable ... />
+    </TablePageLayout.ScrollArea>
+
+    {/* FixedArea: Phân trang (chiều cao cố định) */}
+    <TablePageLayout.FixedArea>
+        <Pagination ... />
+    </TablePageLayout.FixedArea>
+</TablePageLayout>
+```
+
+**Thuộc tính CSS Chính:**
+- Cấp cao nhất: `height: 100%`, `display: flex`, `flexDirection: column`
+- ScrollArea: `flex: 1`, `minHeight: 0` (thuộc tính then chốt ngăn phần tử con Flex tràn phần tử cha)
+- FixedArea: Giữ chiều cao tự nhiên (flex-shrink: 0)
+
+**Lý do Sử dụng:**
+- Để đặt `scroll.y` của Ant Design Table thành `100%` thay vì giá trị px cố định, layout cha phải có chiều cao chính xác
+- Trước đây cần hardcode như `calc(100vh - XXXpx)`, component này tự động tính toán
+
+### 17.2 Style Cuộn Bảng (tableScroll.css)
+
+File CSS toàn cục triển khai header cố định + body cuộn cho bảng.
+
+```css
+/* Ẩn thanh cuộn (Firefox) */
+.st-fill-height .ant-table-body {
+    scrollbar-width: none;
+}
+
+/* Ẩn thanh cuộn (Chrome, Safari, Edge) */
+.st-fill-height .ant-table-body::-webkit-scrollbar {
+    display: none;
+}
+```
+
+**Class `.st-fill-height`:**
+- Tự động áp dụng khi component `SortableTable` có `scroll.y` được thiết lập
+- Cấu hình để cố định header bảng và chỉ cuộn body
+- Ẩn thanh cuộn để giữ UI gọn gàng (cuộn bằng chuột/cảm ứng vẫn hoạt động bình thường)
+
+### 17.3 Cải tiến MainLayout
+
+Các tính năng sau đã được thêm vào `layouts/MainLayout.tsx`:
+
+**Sidebar:**
+- Chiều rộng 240px, có thể thu gọn/mở rộng
+- Lọc từ `PAGE_REGISTRY` và chỉ hiển thị menu phù hợp với vai trò người dùng hiện tại
+- Tích hợp nút yêu thích (`FavoriteButton`)
+
+**Header:**
+- Áp dụng `backdrop-filter: blur(12px)` cho hiệu ứng kính trong suốt
+- Bố trí nút yêu thích, toggle theme (dark/light), menu người dùng
+
+**Menu Ngữ cảnh Đa tab:**
+- Click chuột phải vào tab hiển thị menu ngữ cảnh:
+  - Đóng: Đóng tab đó
+  - Đóng tất cả tab khác: Chỉ giữ tab đã chọn và tab ghim
+  - Đóng tất cả tab bên phải: Đóng tất cả tab bên phải tab đã chọn
+  - Đóng tất cả tab: Chỉ giữ tab ghim
+
+**Phím tắt:**
+- `Ctrl+W`: Đóng tab hiện tại
+- `Ctrl+Tab`: Chuyển sang tab tiếp theo
+
+**Lọc Menu theo Vai trò:**
+- Tự động ẩn menu mà người dùng hiện tại không có quyền truy cập dựa trên cài đặt `roles` trong `PAGE_REGISTRY`
+- Ví dụ: Vai trò DRIVER sẽ không thấy menu quản trị (`/admin/*`, `/master/*`) trong sidebar
+
+### 17.4 Cải tiến SortableTable
+
+Các tính năng sau đã được thêm vào `components/SortableTable.tsx`:
+
+**Lưu Thứ tự Cột (localStorage):**
+- Tự động lưu thứ tự cột mà người dùng thay đổi bằng kéo thả vào `localStorage`
+- Key lưu trữ: `table-column-order-{tableKey}` (tableKey là định danh duy nhất theo trang)
+- Tự động khôi phục thứ tự đã lưu khi truy cập lần sau
+
+```tsx
+<SortableTable
+    tableKey="dispatch-table"   // Key lưu trong localStorage
+    columns={columns}
+    dataSource={data}
+    scroll={{ y: '100%' }}
+/>
+```
+
+**Loading Skeleton:**
+- Hiển thị placeholder dạng hàng bằng component Ant Design Skeleton khi đang tải dữ liệu
+- Cung cấp trải nghiệm loading tự nhiên hơn so với Spin loading truyền thống
+
+**Nút Reset Thứ tự Cột:**
+- Hiển thị nút reset thứ tự cột ở đầu bảng
+- Click để xóa giá trị lưu trong localStorage và khôi phục thứ tự cột ban đầu
+
+**CSS Class fill-height:**
+- Khi giá trị `scroll.y` được thiết lập, tự động áp dụng CSS class `st-fill-height` cho bảng
+- Liên kết với `tableScroll.css` để triển khai header cố định + body cuộn
+
+---
+
 ## Phụ lục: Từ điển Thuật ngữ Chính
 
 | Thuật ngữ | Mô tả |
@@ -2315,6 +2944,8 @@ dotnet test      # Chạy test xUnit
 | **Tree-shaking** | Kỹ thuật tối ưu tự động loại bỏ code không sử dụng khi build |
 | **Code Splitting** | Kỹ thuật tách JS bundle theo trang sử dụng React.lazy |
 | **@dnd-kit** | Thư viện kéo thả React (dùng cho sắp xếp hàng bảng) |
+| **Apache POI** | Thư viện Apache để tạo/chỉnh sửa file Excel trong Java |
+| **fill-height** | Mẫu CSS giúp bảng lấp đầy chiều cao phần tử cha và triển khai header cố định + body cuộn |
 
 ---
 

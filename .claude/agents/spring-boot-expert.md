@@ -15,26 +15,34 @@ Spring Boot 3.2.5 / Java 17 기반의 REST API, JPA, Security, WebSocket, Redis 
 
 ## 프로젝트 컨텍스트
 
-### 패키지 구조
+### 패키지 구조 (22개 도메인)
 ```
 com.dongkuk.weighing/
-├── auth/        # JWT 인증, 로그인, 토큰 갱신, OTP 로그인
-├── user/        # 사용자 관리 (ADMIN, MANAGER, DRIVER)
-├── master/      # 기준정보 (Company, Vehicle, Scale, CommonCode)
-├── dispatch/    # 배차 관리 (DispatchStatus: REGISTERED/IN_PROGRESS/COMPLETED/CANCELLED)
-├── weighing/    # 계량 핵심 (WeighingRecord, WeighingStep, WeighingMode, WeighingStatus)
-├── gatepass/    # 출문 관리 (GatePassStatus)
-├── slip/        # 전표 관리 (WeighingSlip)
-├── lpr/         # 차량번호 인식 (LprCapture, VerificationStatus)
-├── notification/# FCM 푸시 알림 (FcmToken, Notification)
-├── otp/         # OTP 인증 (Redis 기반, OtpSession)
-├── dashboard/   # 대시보드 통계
-├── audit/       # 감사 로그
-├── websocket/   # STOMP 실시간 (WeighingUpdateMessage, ScaleStatusMessage)
+├── auth/         # JWT 인증, 로그인, 토큰 갱신, OTP 로그인
+├── user/         # 사용자 관리 (ADMIN, MANAGER, DRIVER)
+├── master/       # 기준정보 (Company, Vehicle, Scale, CommonCode)
+├── dispatch/     # 배차 관리 (DispatchStatus: REGISTERED/IN_PROGRESS/COMPLETED/CANCELLED)
+├── weighing/     # 계량 핵심 (WeighingRecord, WeighingStep, WeighingMode, WeighingStatus)
+├── gatepass/     # 출문 관리 (GatePassStatus)
+├── slip/         # 전표 관리 (WeighingSlip)
+├── lpr/          # 차량번호 인식 (LprCapture, VerificationStatus)
+├── notification/ # FCM 푸시 알림 (FcmToken, Notification)
+├── otp/          # OTP 인증 (Redis 기반, OtpSession)
+├── dashboard/    # 대시보드 통계
+├── audit/        # 감사 로그
+├── websocket/    # STOMP 실시간 (WeighingUpdateMessage, ScaleStatusMessage)
+├── favorite/     # 즐겨찾기 관리
+├── help/         # 이용 안내
+├── inquiry/      # 계량 조회
+├── monitoring/   # 장비 관제
+├── mypage/       # 마이페이지 (프로필, 비밀번호 변경)
+├── notice/       # 공지사항
+├── setting/      # 시스템 설정
+├── statistics/   # 통계/보고서
 └── global/
-    ├── config/  # SecurityConfig, CorsConfig, RedisConfig, WebSocketConfig
-    ├── common/  # ApiResponse<T>, BusinessException, ErrorCode, GlobalExceptionHandler
-    └── audit/   # BaseEntity (createdAt, updatedAt)
+    ├── config/   # SecurityConfig, CorsConfig, RedisConfig, WebSocketConfig, JpaAuditingConfig, DevEmbeddedRedisConfig, DevDataLoader
+    ├── common/   # ApiResponse<T>, BusinessException, ErrorCode, GlobalExceptionHandler
+    └── audit/    # BaseEntity (createdAt, updatedAt)
 ```
 
 ### 필수 규칙
