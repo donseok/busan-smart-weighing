@@ -4,6 +4,7 @@ import com.dongkuk.weighing.auth.config.JwtProperties;
 import com.dongkuk.weighing.auth.dto.*;
 import com.dongkuk.weighing.global.common.exception.BusinessException;
 import com.dongkuk.weighing.global.common.exception.ErrorCode;
+import com.dongkuk.weighing.master.domain.CompanyRepository;
 import com.dongkuk.weighing.user.domain.User;
 import com.dongkuk.weighing.user.domain.UserRepository;
 import com.dongkuk.weighing.user.domain.UserRole;
@@ -35,6 +36,8 @@ class AuthServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private CompanyRepository companyRepository;
     @Mock
     private JwtTokenProvider jwtTokenProvider;
     @Mock

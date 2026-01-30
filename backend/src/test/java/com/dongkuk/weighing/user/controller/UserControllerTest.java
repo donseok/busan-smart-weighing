@@ -48,7 +48,7 @@ class UserControllerTest {
                 "newuser01", "Password1!", "김철수",
                 "010-5555-6666", UserRole.DRIVER, 1L);
         UserResponse response = new UserResponse(
-                2L, "김철수", "010-****-6666", "DRIVER", null, true, LocalDateTime.now());
+                2L, "newuser01", "김철수", "010-****-6666", "DRIVER", null, true, 0, null, LocalDateTime.now());
 
         given(userService.createUser(any(UserCreateRequest.class))).willReturn(response);
 
@@ -64,7 +64,7 @@ class UserControllerTest {
     @DisplayName("GET /api/v1/users/{id} - 사용자 조회")
     void getUserSuccess() throws Exception {
         UserResponse response = new UserResponse(
-                1L, "홍길동", "010-****-5678", "ADMIN", null, true, LocalDateTime.now());
+                1L, "admin01", "홍길동", "010-****-5678", "ADMIN", null, true, 0, null, LocalDateTime.now());
 
         given(userService.getUser(1L)).willReturn(response);
 
