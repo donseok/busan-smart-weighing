@@ -1,8 +1,8 @@
 # Hệ thống Cân thông minh Busan - Hướng dẫn Vận hành
 
 **Mã tài liệu**: MAN-OPS-002
-**Phiên bản**: 1.1
-**Ngày lập**: 2026-01-29
+**Phiên bản**: 1.3
+**Ngày lập**: 2026-01-30
 **Đối tượng**: Quản trị viên hệ thống / Người vận hành (ADMIN)
 **Tài liệu tham chiếu**: TRD-20260127-155235, PRD-20260127-154446, FUNC-SPEC v1.0
 **Trạng thái**: Draft
@@ -18,6 +18,17 @@
 5. [Giám sát hệ thống](#5-giám-sát-hệ-thống)
 6. [Quản lý cơ sở dữ liệu](#6-quản-lý-cơ-sở-dữ-liệu)
 7. [Quản lý dữ liệu danh mục](#7-quản-lý-dữ-liệu-danh-mục)
+   - 7.1 Quản lý công ty vận tải
+   - 7.2 Quản lý xe (Khớp LPR)
+   - 7.3 Quản lý trạm cân
+   - 7.4 Quản lý mã chung
+   - 7.5 Quản lý cài đặt hệ thống
+   - 7.6 Quản lý thông báo
+   - 7.7 Quản lý FAQ
+   - 7.8 Quản lý giám sát thiết bị
+   - 7.9 Quản lý hỏi đáp/khiếu nại
+   - 7.10 Quản lý thống kê/báo cáo
+   - 7.11 Quản lý yêu thích
 8. [Quản lý thiết bị](#8-quản-lý-thiết-bị)
 9. [Xử lý sự cố](#9-xử-lý-sự-cố)
 10. [Sao lưu và Phục hồi](#10-sao-lưu-và-phục-hồi)
@@ -1890,13 +1901,52 @@ Quản lý cài đặt hệ thống (`/admin/settings`) cho phép điều chỉn
 3. Thay đổi giá trị cài đặt và nhấp nút **[Lưu]**.
 4. Có thể sử dụng chức năng sửa từng mục hoặc **sửa hàng loạt**.
 
+#### Danh mục cài đặt
+
+Cài đặt hệ thống được phân loại thành 4 danh mục:
+
+| Danh mục | Mô tả | Ví dụ cài đặt |
+|----------|-------|----------------|
+| Chung (GENERAL) | Tham số vận hành cơ bản hệ thống | Tên hệ thống, ngôn ngữ mặc định, múi giờ |
+| Cân (WEIGHING) | Cài đặt liên quan quy trình cân | Thời gian chờ ổn định, số lần tái cân tối đa, tỷ lệ cảnh báo quá tải |
+| Thông báo (NOTIFICATION) | Cài đặt liên quan gửi thông báo | Bật/tắt FCM, thời gian lưu thông báo, bật/tắt gửi SMS |
+| Bảo mật (SECURITY) | Cài đặt liên quan bảo mật và xác thực | Timeout phiên, số ngày hết hạn mật khẩu, số lần đăng nhập thất bại tối đa |
+
+#### Loại giá trị cài đặt
+
+Mỗi mục cài đặt có một trong các loại dữ liệu sau:
+
+| Loại | Mô tả | Hình thức nhập |
+|------|-------|----------------|
+| Chuỗi ký tự (STRING) | Giá trị văn bản | Ô nhập văn bản |
+| Số (NUMBER) | Giá trị số nguyên hoặc thập phân | Ô nhập số |
+| Đúng/Sai (BOOLEAN) | Giá trị bật/tắt | Công tắc toggle |
+| JSON | Dữ liệu cấu trúc phức hợp | Trình soạn thảo JSON |
+
+#### Sửa cài đặt từng mục
+
+1. Tìm mục cần thay đổi trong danh sách cài đặt (có thể lọc bằng tab danh mục).
+2. Nhấp nút **[Sửa]** của mục đó.
+3. Nhập giá trị cài đặt mới.
+4. Nhấp nút **[Lưu]** để thay đổi được áp dụng ngay lập tức.
+
+> **Lưu ý**: Một số cài đặt được chỉ định là **không thể sửa (chỉ đọc)**. Các cài đặt này chỉ có thể thay đổi qua biến môi trường hoặc file cấu hình máy chủ, nút sửa trên màn hình bị vô hiệu hóa.
+
+#### Sửa cài đặt hàng loạt
+
+Khi cần thay đổi nhiều cài đặt cùng lúc, sử dụng chức năng sửa hàng loạt:
+
+1. Nhấp nút **[Sửa hàng loạt]** ở phía trên màn hình cài đặt.
+2. Thay đổi giá trị các mục cài đặt cần sửa.
+3. Nhấp nút **[Lưu hàng loạt]** để tất cả thay đổi được áp dụng cùng lúc.
+
 > **Chú ý**: Thay đổi cài đặt hệ thống được áp dụng ngay lập tức. Ghi lại giá trị hiện tại trước khi thay đổi, và xác nhận hoạt động bình thường sau khi thay đổi. Lịch sử thay đổi cài đặt được tự động ghi vào nhật ký kiểm toán.
 
 ### 7.6 Quản lý thông báo
 
-Quản trị viên có thể đăng ký, sửa đổi, xóa thông báo trên hệ thống web.
+Quản trị viên (ADMIN) có thể tạo, sửa, xóa thông báo trên hệ thống web và quản lý trạng thái đăng. Chức năng quản lý thông báo chỉ được cung cấp cho vai trò ADMIN.
 
-#### Đăng ký thông báo
+#### Tạo thông báo
 
 1. Nhấp **[Thông báo]** từ menu bên trái, sau đó nhấp nút **[Đăng ký mới]**.
 2. Nhập các mục sau:
@@ -1904,27 +1954,57 @@ Quản trị viên có thể đăng ký, sửa đổi, xóa thông báo trên h�
    | Mục nhập | Bắt buộc | Mô tả |
    |----------|:--------:|-------|
    | Tiêu đề | O | Tiêu đề thông báo |
-   | Danh mục | O | Phân loại thông báo (Hệ thống, Vận hành, Bảo trì, Khác, v.v.) |
-   | Nội dung | O | Nội dung thông báo (Hỗ trợ markdown) |
-   | File đính kèm | X | Đính kèm file liên quan |
+   | Danh mục | O | Chọn: Hệ thống / Bảo trì / Cập nhật / Chung |
+   | Nội dung | O | Nội dung thông báo |
 
-3. Nhấp nút **[Lưu]**. Sau khi lưu, mặc định ở trạng thái **chưa đăng**.
+3. Nhấp nút **[Lưu]**. Sau khi lưu, mặc định ở trạng thái **chưa đăng (không công khai)**.
 
-#### Đăng/Hủy đăng thông báo
+#### Danh mục thông báo
 
-- Nhấp nút **[Đăng]** của thông báo mục tiêu trong danh sách để công khai cho người dùng.
-- Để chuyển thông báo đã đăng thành không công khai, nhấp nút **[Hủy đăng]**.
+| Danh mục | Mô tả | Ví dụ sử dụng |
+|----------|-------|---------------|
+| Hệ thống | Thông báo quan trọng liên quan hệ thống | Di chuyển máy chủ, nâng cấp hệ thống |
+| Bảo trì | Thông báo lịch bảo trì định kỳ/đột xuất | Bảo trì ban đêm, lịch hiệu chuẩn thiết bị |
+| Cập nhật | Thông báo bổ sung và thay đổi tính năng | Ra mắt tính năng mới, thay đổi giao diện |
+| Chung | Thông báo vận hành khác | Thay đổi giờ vận hành, thông báo chung |
 
-#### Ghim/Bỏ ghim thông báo
+#### Sửa/Xóa thông báo
 
-- Thông báo quan trọng có thể được ghim lên đầu danh sách bằng cách nhấp nút **[Ghim(📌)]**.
-- Để bỏ ghim, nhấp nút **[Bỏ ghim]**.
+- **Sửa**: Nhấp nút **[Sửa]** của mục tiêu trong danh sách thông báo để thay đổi tiêu đề, nội dung, danh mục.
+- **Xóa**: Nhấp nút **[Xóa]** của mục tiêu trong danh sách thông báo. Thông báo đã xóa không thể khôi phục, hãy xử lý cẩn thận.
+
+#### Toggle đăng (Publish)
+
+Thông báo có trạng thái **công khai (đã đăng)** hoặc **không công khai (chưa đăng)**.
+
+- Nhấp toggle **[Đăng]** của thông báo mục tiêu trong danh sách để công khai cho người dùng.
+- Khi đăng, **ngày giờ đăng** được tự động ghi lại.
+- Để chuyển thông báo đã đăng thành không công khai, nhấp lại toggle. Sau khi chuyển sang không công khai, bản ghi ngày giờ đăng trước đó vẫn được giữ nguyên.
+
+> **Lưu ý**: Thông báo ở trạng thái không công khai (chưa đăng) không hiển thị cho người dùng thông thường, chỉ có thể xem trong danh sách quản lý dành riêng cho ADMIN.
+
+#### Toggle ghim (Pin)
+
+Có thể ghim thông báo quan trọng lên đầu danh sách.
+
+- Nhấp toggle **[Ghim(📌)]** của thông báo mục tiêu trong danh sách để cố định ở đầu danh sách.
+- Để bỏ ghim, nhấp lại toggle.
+- Có thể ghim nhiều thông báo cùng lúc, các thông báo ghim được sắp xếp giảm dần theo ngày giờ đăng.
+
+#### Danh sách dành riêng cho quản trị viên
+
+ADMIN có thể xem toàn bộ danh sách bao gồm thông báo không công khai trên màn hình **[Quản lý thông báo]**. Trong danh sách dành riêng cho quản trị viên, có thể xem thêm các thông tin sau:
+
+- Hiển thị trạng thái đăng (badge Đã đăng/Chưa đăng)
+- Hiển thị trạng thái ghim
+- Ngày giờ đăng
+- Thông tin tác giả
 
 ### 7.7 Quản lý FAQ
 
-Quản trị viên có thể đăng ký và quản lý các câu hỏi thường gặp (FAQ).
+Quản trị viên (ADMIN) có thể tạo, sửa, xóa FAQ và quản lý trạng thái công khai.
 
-#### Đăng ký FAQ
+#### Tạo FAQ
 
 1. Nhấp **[Trợ giúp]** từ menu bên trái, chọn tab **[Quản lý FAQ]**.
 2. Nhấp nút **[Đăng ký mới]**.
@@ -1932,18 +2012,241 @@ Quản trị viên có thể đăng ký và quản lý các câu hỏi thường
 
    | Mục nhập | Bắt buộc | Mô tả |
    |----------|:--------:|-------|
-   | Danh mục | O | Phân loại câu hỏi (Đăng nhập, Điều xe, Cân, Xuất cổng, Khác, v.v.) |
+   | Danh mục | O | Chọn: Cân / Điều xe / Tài khoản / Hệ thống / Khác |
    | Câu hỏi | O | Nội dung câu hỏi thường gặp |
-   | Trả lời | O | Câu trả lời cho câu hỏi |
+   | Trả lời | O | Câu trả lời chi tiết cho câu hỏi |
+   | Thứ tự sắp xếp | O | Thứ tự hiển thị trong danh sách (số nhỏ hơn hiển thị trước) |
 
-4. Nhấp nút **[Lưu]**.
+4. Nhấp nút **[Lưu]**. Mặc định được lưu ở trạng thái **công khai**.
 
-#### Sửa/Xóa FAQ
+#### Danh mục FAQ
 
-- Nhấp nút **[Sửa]** hoặc **[Xóa]** của mục FAQ mục tiêu trong danh sách.
-- FAQ đã xóa sẽ bị loại khỏi màn hình người dùng ngay lập tức.
+| Danh mục | Mô tả | Ví dụ câu hỏi |
+|----------|-------|---------------|
+| Cân | Câu hỏi liên quan quy trình cân | Làm thế nào để yêu cầu tái cân? |
+| Điều xe | Câu hỏi liên quan quản lý điều xe | Có thể sửa sau khi đăng ký điều xe không? |
+| Tài khoản | Câu hỏi liên quan đăng nhập và tài khoản | Tôi quên mật khẩu. |
+| Hệ thống | Câu hỏi liên quan sử dụng hệ thống | Trình duyệt nào được hỗ trợ? |
+| Khác | Câu hỏi chung khác | Giờ vận hành là khi nào? |
 
-> **Lưu ý**: FAQ không có cài đặt trạng thái đăng, được hiển thị cho người dùng ngay khi đăng ký.
+#### Sửa FAQ
+
+Nhấp nút **[Sửa]** của mục FAQ mục tiêu trong danh sách để thay đổi các mục sau:
+
+- Nội dung câu hỏi
+- Nội dung trả lời
+- Danh mục
+- Thứ tự sắp xếp
+- Trạng thái công khai (toggle Công khai/Không công khai)
+
+FAQ được chuyển sang không công khai sẽ không hiển thị cho người dùng thông thường, chỉ có thể xem trong danh sách dành riêng cho quản trị viên.
+
+#### Xóa FAQ
+
+- Nhấp nút **[Xóa]** của mục FAQ mục tiêu trong danh sách.
+- FAQ đã xóa sẽ bị loại khỏi màn hình người dùng ngay lập tức và không thể khôi phục.
+
+#### Danh sách dành riêng cho quản trị viên
+
+ADMIN có thể xem toàn bộ danh sách bao gồm FAQ không công khai trên màn hình **[Quản lý FAQ]**. Trong danh sách dành riêng cho quản trị viên, có thể xem thêm các thông tin sau:
+
+- Hiển thị trạng thái công khai (badge Công khai/Không công khai)
+- Thống kê lượt xem (số lần FAQ được người dùng xem)
+- Giá trị thứ tự sắp xếp
+- Ngày giờ tạo và ngày giờ sửa
+
+> **Lưu ý**: Sử dụng thống kê lượt xem để nắm bắt các câu hỏi người dùng thường tìm kiếm, và điều chỉnh thứ tự sắp xếp để đưa FAQ quan trọng lên vị trí cao hơn.
+
+### 7.8 Quản lý giám sát thiết bị
+
+Quản lý giám sát thiết bị cho phép kiểm tra và quản lý trạng thái kết nối thời gian thực của tất cả thiết bị lắp đặt tại hiện trường trạm cân.
+
+#### Truy vấn trạng thái thiết bị
+
+Có thể truy vấn trạng thái toàn bộ thiết bị tại **[Quản lý hệ thống] > [Giám sát thiết bị]** trên giao diện quản lý web. Có thể lọc theo các tiêu chí sau:
+
+**Lọc theo loại**:
+
+| Loại thiết bị | Mã | Mô tả |
+|---------------|-----|-------|
+| Trạm cân | SCALE | Thiết bị cân đo khối lượng xe |
+| Camera LPR | LPR_CAMERA | Camera nhận dạng biển số xe |
+| Indicator | INDICATOR | Thiết bị hiển thị/truyền giá trị khối lượng |
+| Barrier | BARRIER | Barrier kiểm soát ra vào xe |
+
+**Lọc theo trạng thái**:
+
+| Trạng thái | Màu hiển thị | Mô tả |
+|------------|-------------|-------|
+| ONLINE (Bình thường) | Xanh lá | Thiết bị đang giao tiếp bình thường |
+| OFFLINE (Ngoại tuyến) | Xám | Mất kết nối giao tiếp |
+| ERROR (Lỗi) | Đỏ | Thiết bị phản hồi nhưng trả về dữ liệu bất thường |
+
+#### Thay đổi trạng thái thiết bị thủ công
+
+Quản trị viên (ADMIN, MANAGER) có thể thay đổi trạng thái kết nối thiết bị thủ công:
+
+1. Chọn thiết bị mục tiêu trong danh sách thiết bị.
+2. Nhấp nút **[Thay đổi trạng thái]**.
+3. Chọn trạng thái kết nối (ONLINE/OFFLINE/ERROR) và nhập thông báo lỗi nếu cần.
+4. Nhấp nút **[Lưu]** để trạng thái được thay đổi ngay lập tức.
+
+> **Lưu ý**: Khi trạng thái thiết bị thay đổi, thông báo được gửi thời gian thực qua WebSocket đến tất cả người dùng đang kết nối. Trạng thái thay đổi được phản ánh ngay trên màn hình giám sát thiết bị và màn hình quản lý trạm cân.
+
+#### Thực hiện Health check
+
+Quản trị viên (ADMIN) có thể thực hiện health check toàn bộ thiết bị thủ công:
+
+1. Nhấp nút **[Thực hiện Health check]** trên màn hình giám sát thiết bị.
+2. Hệ thống kiểm tra trạng thái giao tiếp của tất cả thiết bị đã đăng ký.
+3. Thiết bị **không phản hồi quá 5 phút** sẽ tự động chuyển sang trạng thái OFFLINE.
+4. Kết quả health check được hiển thị trên màn hình.
+
+Thực hiện health check qua API:
+
+```
+POST /api/v1/monitoring/health-check
+Authorization: Bearer {admin_access_token}
+```
+
+#### Bảng tóm tắt thiết bị
+
+Phía trên màn hình giám sát thiết bị hiển thị tóm tắt tình trạng thiết bị dạng thẻ (card):
+
+| Mục tóm tắt | Mô tả |
+|-------------|-------|
+| Tổng số thiết bị | Tổng số thiết bị đã đăng ký trong hệ thống |
+| Trực tuyến | Số thiết bị đang giao tiếp bình thường (xanh lá) |
+| Ngoại tuyến | Số thiết bị mất kết nối (xám) |
+| Lỗi | Số thiết bị ở trạng thái bất thường (đỏ) |
+
+Bảng tóm tắt cho phép xem phân bố theo loại/trạng thái trong một nháy mắt, cũng có thể truy vấn qua API:
+
+```
+GET /api/v1/monitoring/summary
+```
+
+### 7.9 Quản lý hỏi đáp/khiếu nại
+
+Quản trị viên (ADMIN) và người vận hành (MANAGER) có thể xem và xử lý các hỏi đáp và khiếu nại từ người dùng.
+
+#### Xem danh sách hỏi đáp
+
+1. Chọn **[Quản lý hỏi đáp]** từ menu bên trái hoặc **[Hỏi đáp/Khiếu nại]** từ menu quản trị.
+2. Toàn bộ danh sách hỏi đáp được hiển thị dạng phân trang.
+3. Có thể lọc theo loại hỏi đáp, trạng thái xử lý, phạm vi ngày.
+
+#### Loại hỏi đáp
+
+| Loại hỏi đáp | Mã | Mô tả |
+|--------------|-----|-------|
+| Vấn đề cân | WEIGHING_ISSUE | Lỗi cân, yêu cầu tái cân, v.v. |
+| Vấn đề điều xe | DISPATCH_ISSUE | Thiếu điều xe, yêu cầu sửa điều xe, v.v. |
+| Lỗi hệ thống | SYSTEM_ERROR | Lỗi màn hình, chức năng hoạt động không đúng, v.v. |
+| Hỏi đáp chung | GENERAL_INQUIRY | Cách sử dụng hệ thống, câu hỏi liên quan vận hành, v.v. |
+| Khiếu nại | COMPLAINT | Phàn nàn dịch vụ, yêu cầu cải thiện, v.v. |
+| Khác | ETC | Hỏi đáp không thuộc các phân loại trên |
+
+#### Xem thông tin liên quan
+
+Trên màn hình chi tiết hỏi đáp, có thể xem thông tin điều xe và cân liên quan đến hỏi đáp đó:
+
+- **Thông tin điều xe liên quan**: Mã điều xe, biển số xe, trạng thái điều xe liên kết với hỏi đáp
+- **Thông tin cân liên quan**: Bản ghi cân, tổng khối lượng/khối lượng xe không/khối lượng tịnh, trạng thái cân liên kết với hỏi đáp
+
+#### Viết ghi chú xử lý
+
+Quản trị viên hoặc người vận hành có thể ghi lại nội dung xử lý hỏi đáp dưới dạng ghi chú:
+
+1. Tìm khu vực **[Viết ghi chú]** trên màn hình chi tiết hỏi đáp.
+2. Nhập nội dung xử lý, biện pháp thực hiện, nội dung phản hồi, v.v.
+3. Nhấp nút **[Lưu]** để ghi chú được lưu lại, thông tin tác giả và ngày giờ viết được tự động ghi nhận.
+
+> **Lưu ý**: Ghi chú xử lý chỉ dùng cho quản lý nội bộ, không hiển thị cho người dùng đã gửi hỏi đáp.
+
+### 7.10 Quản lý thống kê/báo cáo
+
+Chức năng quản lý thống kê và báo cáo cho phép tổng hợp, truy vấn và xuất dữ liệu thực tích cân theo kỳ và điều kiện ra file Excel.
+
+#### Truy vấn thống kê
+
+Có thể truy vấn thống kê tại menu **[Thống kê/Báo cáo]** trên giao diện quản lý web theo các tiêu chí sau:
+
+**Truy vấn theo kỳ**:
+
+| Loại truy vấn | Mô tả | API Endpoint |
+|--------------|-------|--------------|
+| Thống kê theo ngày | Tổng hợp thực tích cân theo ngày trong kỳ chỉ định | `GET /api/v1/statistics/daily` |
+| Thống kê theo tháng | Tổng hợp thực tích cân theo tháng trong kỳ chỉ định | `GET /api/v1/statistics/monthly` |
+
+**Điều kiện lọc**:
+
+| Mục lọc | Mô tả |
+|---------|-------|
+| Ngày bắt đầu / Ngày kết thúc | Thiết lập kỳ truy vấn |
+| Công ty vận tải | Lọc theo công ty vận tải cụ thể |
+| Hàng hóa | Lọc theo hàng hóa cụ thể (Phụ phẩm/Chất thải/Phụ liệu/Xuất hàng/Chung) |
+
+#### Thống kê tóm tắt
+
+Thống kê tóm tắt (`GET /api/v1/statistics/summary`) cho phép xem các chỉ số cốt lõi trong kỳ truy vấn trong một nháy mắt:
+
+| Mục tóm tắt | Mô tả |
+|-------------|-------|
+| Tổng số lượt | Tổng số lượt cân trong kỳ truy vấn |
+| Tổng khối lượng | Tổng khối lượng tịnh trong kỳ truy vấn |
+| Phân bố theo hàng hóa | Số lượt cân và tỷ lệ khối lượng theo loại hàng hóa |
+| Phân bố theo công ty vận tải | Số lượt cân và tỷ lệ khối lượng theo công ty vận tải |
+
+#### Xuất Excel
+
+Có thể tải xuống dữ liệu thống kê dưới dạng file Excel (xlsx):
+
+1. Thiết lập kỳ và điều kiện lọc mong muốn trên màn hình truy vấn thống kê.
+2. Nhấp nút **[Xuất Excel]**.
+3. File xlsx chứa các sheet sau sẽ được tải xuống:
+
+| Tên sheet | Nội dung |
+|-----------|---------|
+| Thống kê theo ngày | Tổng hợp số lượt cân, tổng khối lượng, khối lượng tịnh theo ngày |
+| Thống kê theo tháng | Tổng hợp số lượt cân, tổng khối lượng, khối lượng tịnh theo tháng |
+| Toàn bộ dữ liệu | Chi tiết toàn bộ bản ghi cân phù hợp điều kiện truy vấn |
+
+> **Lưu ý**: API xuất Excel là `GET /api/v1/statistics/export`, truyền điều kiện truy vấn qua query parameter.
+
+### 7.11 Quản lý yêu thích
+
+Chức năng yêu thích theo từng người dùng cho phép truy vấn nhanh các menu, điều xe, xe, công ty vận tải, trạm cân thường truy cập.
+
+#### Loại yêu thích
+
+| Loại | Mã | Mô tả |
+|------|-----|-------|
+| Menu | MENU | Trang menu thường sử dụng |
+| Điều xe | DISPATCH | Thông tin điều xe thường truy vấn |
+| Xe | VEHICLE | Thông tin xe thường truy vấn |
+| Công ty vận tải | COMPANY | Thông tin công ty vận tải thường truy vấn |
+| Trạm cân | SCALE | Thông tin trạm cân thường truy vấn |
+
+#### Đăng ký/Hủy yêu thích
+
+- Nhấp biểu tượng **ngôi sao** bên cạnh mục trong mỗi màn hình danh sách để thêm vào yêu thích.
+- Nhấp lại biểu tượng ngôi sao của mục đã đăng ký để hủy yêu thích.
+- Có thể xử lý thêm/hủy cùng lúc qua API toggle yêu thích (`POST /api/v1/favorites/toggle`).
+
+#### Giới hạn yêu thích
+
+- Mỗi người dùng có thể đăng ký tối đa **20** mục yêu thích.
+- Khi cố thêm quá 20 mục, thông báo hướng dẫn sẽ hiển thị, cần hủy mục hiện có trước rồi mới thêm được.
+
+#### Thay đổi thứ tự yêu thích
+
+Có thể thay đổi thứ tự hiển thị danh sách yêu thích:
+
+1. Kéo mục trong bảng yêu thích đến vị trí mong muốn.
+2. Thứ tự đã thay đổi được tự động lưu.
+
+> **Lưu ý**: Yêu thích được quản lý độc lập theo từng người dùng, không ảnh hưởng đến yêu thích của người dùng khác.
 
 ---
 
@@ -3090,6 +3393,7 @@ tb_notification (Thông báo)     tb_inquiry_call (Hỏi đáp)
 | 1.0 | 2026-01-29 | Đội quản trị hệ thống | Bản đầu tiên |
 | 1.1 | 2026-01-29 | Đội quản trị hệ thống | Bổ sung API quản lý người dùng (Thay đổi vai trò, Đặt lại mật khẩu, Xóa), Thêm quản lý cài đặt hệ thống, Thêm quản lý bản tin ADMIN (Đăng ký/Sửa/Xóa/Đăng/Ghim), Thêm quản lý FAQ ADMIN, Bổ sung API giám sát thiết bị (Tóm tắt/Health check), Thêm API Trang cá nhân/Yêu thích/Bản tin/Thống kê/Bảng điều khiển/Xuất cổng/LPR, Cập nhật ma trận quyền truy cập theo vai trò |
 | 1.2 | 2026-01-29 | Đội quản trị hệ thống | Phản ánh tính năng mới web frontend (Hướng dẫn onboarding, Phím tắt, Giao diện trạng thái trống, Hoạt ảnh số, Phát hiện tab hoạt động), Phản ánh cache offline di động, Phản ánh SplashForm desktop/Trừu tượng hóa giao diện phần cứng/Kiểm thử xUnit, Phản ánh quản lý routing tập trung dựa trên page registry, Thêm tham chiếu tài liệu thiết kế chi tiết theo module |
+| 1.3 | 2026-01-30 | Đội quản trị hệ thống | Mở rộng chức năng quản trị: Chi tiết hóa quản lý thông báo (danh mục/toggle đăng/toggle ghim/danh sách ADMIN), Chi tiết hóa quản lý FAQ (danh mục/thứ tự sắp xếp/trạng thái công khai/lượt xem/danh sách ADMIN), Chi tiết hóa quản lý cài đặt hệ thống (truy vấn theo danh mục/loại giá trị/sửa từng mục/sửa hàng loạt/quyền chỉnh sửa), Thêm mới quản lý giám sát thiết bị (lọc theo loại/trạng thái/thay đổi trạng thái thủ công/health check/bảng tóm tắt/thông báo WebSocket), Thêm mới quản lý hỏi đáp/khiếu nại (loại hỏi đáp/xem thông tin liên quan/ghi chú xử lý), Thêm mới quản lý thống kê/báo cáo (thống kê ngày/tháng/điều kiện lọc/thống kê tóm tắt/xuất Excel), Thêm mới quản lý yêu thích (loại/giới hạn/thay đổi thứ tự), Thêm API quản lý hỏi đáp/khiếu nại |
 
 ---
 

@@ -1079,19 +1079,135 @@ Thong bao chung (`/notice`) cho phep xem cac thong tin lien quan he thong, lich 
    Di dong: Truy cap tu banner **Thong bao** tren man hinh chinh hoac menu
 2. Danh sach thong bao hien thi theo thu tu ngay. Thong bao **ghim (📌)** luon hien thi o dau danh sach.
 3. Su dung bo loc **theo danh muc** de xem chi loai thong bao mong muon.
+
+   | Danh muc | Mo ta |
+   |----------|------|
+   | **He thong** | Thong bao lien quan he thong (su co, phuc hoi, thay doi chinh sach...) |
+   | **Bao tri** | Thong bao lich bao tri dinh ky/khan cap |
+   | **Cap nhat** | Thong bao cap nhat va cai tien tinh nang he thong |
+   | **Chung** | Cac thong bao chung khac |
+
 4. Nhap tu khoa vao **o tim kiem** o phia tren de tim thong bao.
 5. Nhan vao thong bao de hien thi noi dung chi tiet.
 6. Neu co file dinh kem, ban co the tai xuong.
 
 ### 5.4 Tro giup/FAQ
 
-Tro giup (`/help`) cho phep xem cac cau hoi thuong gap va tra loi ve cach su dung he thong.
+Tro giup (`/help`) cho phep xem cac cau hoi thuong gap va tra loi ve cach su dung he thong theo tung danh muc.
+
+#### Cach su dung
 
 1. Web: Nhan **Tro giup** o menu ben trai
    Di dong: Tab **Tro giup** tai trang ca nhan
 2. Danh sach FAQ duoc phan loai theo danh muc.
-3. Nhan vao cau hoi de mo rong cau tra loi.
-4. Nhap tu khoa vao o tim kiem o phia tren de tim cau hoi lien quan.
+
+   | Danh muc | Noi dung chinh |
+   |----------|----------------|
+   | **Can** | Can tu dong, can OTP, can thu cong, tai can, tinh trong luong tinh... |
+   | **Dieu phoi** | Tra cuu dieu phoi, dang ky dieu phoi, thay doi trang thai, lich su dieu phoi... |
+   | **Tai khoan** | Dang nhap, thay doi/quen mat khau, mo khoa tai khoan... |
+   | **He thong** | Trang thai thiet bi, loi web/ung dung, cai dat thong bao, truy van du lieu... |
+   | **Khac** | Phieu can dien tu, xuat cong, tai xuong thong ke... |
+
+3. Chon danh muc mong muon de hien thi danh sach cau hoi tuong ung.
+4. Nhan vao cau hoi de mo rong cau tra loi.
+5. Nhap tu khoa vao o tim kiem o phia tren de tim cau hoi lien quan trong tat ca danh muc.
+
+### 5.5 Hoi dap/Khieu nai
+
+Chuc nang hoi dap (`/inquiry`) cho phep dang ky cac cau hoi ve van de can, dieu phoi, loi he thong... va kiem tra trang thai xu ly.
+
+#### 5.5.1 Dang ky hoi dap
+
+1. Web: Nhan **Hoi dap** o menu ben trai
+   Di dong: Nhan **Hoi dap** tu man hinh chinh hoac trang ca nhan
+2. Nhan nut **Dang ky hoi dap**.
+3. Nhap cac thong tin sau:
+
+   | Muc nhap | Bat buoc | Mo ta |
+   |-----------|----------|------|
+   | Loai hoi dap | Bat buoc | Chon: Van de can, Van de dieu phoi, Loi he thong, Khac |
+   | Tieu de | Bat buoc | Nhap tieu de hoi dap |
+   | Noi dung | Bat buoc | Viet noi dung chi tiet |
+
+4. Nhan nut **Dang ky**.
+5. Khi hien thi thong bao "Hoi dap da duoc dang ky.", viec dang ky hoan tat.
+
+#### 5.5.2 Xem hoi dap cua toi
+
+1. Kiem tra **danh sach hoi dap cua toi** tren man hinh hoi dap.
+2. Kiem tra trang thai xu ly va cau tra loi cua cac hoi dap da dang ky.
+
+> **Luu y**: Trong truong hop khan cap (hong thiet bi, van de an toan...), vui long goi dien truc tiep cho phong dieu do thay vi dang ky hoi dap.
+
+### 5.6 Yeu thich (Web)
+
+He thong web cho phep dang ky cac menu thuong dung vao yeu thich de truy cap nhanh.
+
+#### Dang ky/Huy yeu thich
+
+1. Di den trang ban muon them vao yeu thich.
+2. Nhan vao **bieu tuong ngoi sao**(☆) tren thanh tieu de.
+3. Khi bieu tuong chuyen thanh ngoi sao day (★), trang da duoc dang ky vao yeu thich.
+4. Nhan lai bieu tuong do de huy yeu thich.
+
+#### Xem va thay doi thu tu danh sach yeu thich
+
+1. Kiem tra danh sach menu da dang ky trong vung yeu thich tren thanh tieu de.
+2. Nhan vao muc yeu thich de chuyen truc tiep den trang tuong ung.
+3. Keo tha (**drag**) cac muc trong danh sach yeu thich de thay doi thu tu theo y muon.
+
+| Muc | Mo ta |
+|------|------|
+| **So luong toi da** | Co the dang ky toi da 20 muc yeu thich |
+| **Thay doi thu tu** | Keo tha (drag & drop) de sap xep theo thu tu mong muon |
+| **Dang ky/Huy** | Nhan bieu tuong ngoi sao tren thanh tieu de de chuyen doi ngay |
+
+> **Luu y**: Cai dat yeu thich duoc tu dong luu theo tai khoan, nen se duoc duy tri khi truy cap tu may tinh khac.
+
+### 5.7 Chuyen doi giao dien Toi/Sang
+
+He thong web ho tro che do toi (dark mode) va che do sang (light mode). Hay chon giao dien phu hop voi moi truong su dung.
+
+#### Cach chuyen doi giao dien
+
+1. Nhan **nut chuyen doi giao dien** tren thanh tieu de.
+2. Neu dang o che do sang, chuyen sang che do toi. Neu dang o che do toi, chuyen sang che do sang.
+3. Cai dat giao dien duoc **tu dong luu**, giao dien da chon se duoc duy tri khi truy cap lan sau.
+
+| Giao dien | Mo ta |
+|------|------|
+| **Che do sang** | Nen sang, chu toi. Phu hop voi moi truong van phong thong thuong |
+| **Che do toi** | Nen toi, chu sang. Giam moi mat khi lam viec ban dem hoac moi truong toi |
+
+> **Luu y**: Chuong trinh CS (chuong trinh can hien truong) cung co the chuyen doi giao dien toi/sang bang cach nhan bieu tuong chuyen doi giao dien tren thanh tieu de.
+
+### 5.8 Phim tat va quan ly tab (Web)
+
+He thong web ho tro phim tat va menu chuot phai tab, giup thao tac nhanh hon.
+
+#### Phim tat
+
+| Phim tat | Chuc nang |
+|--------|------|
+| `Ctrl + N` | Dang ky moi |
+| `Ctrl + F` | Focus tim kiem |
+| `Ctrl + W` | Dong tab hien tai |
+| `Ctrl + Tab` | Chuyen sang tab tiep theo |
+| `Escape` | Dong modal/pop-up |
+
+#### Menu chuot phai tab
+
+Khi nhan chuot phai vao tab dang mo, cac menu sau se hien thi:
+
+| Muc menu | Mo ta |
+|-----------|------|
+| **Dong tab hien tai** | Dong tab da nhan chuot phai |
+| **Dong cac tab khac** | Dong tat ca cac tab ngoai tru tab da nhan chuot phai |
+| **Dong cac tab ben phai** | Dong tat ca cac tab ben phai cua tab da nhan chuot phai |
+| **Dong tat ca** | Dong tat ca cac tab ngoai tru tab co dinh |
+
+> **Luu y**: Tab co dinh (vi du: quan ly tram can) khong bi anh huong boi menu dong tab.
 
 ---
 
@@ -1288,6 +1404,7 @@ Sau day la cac thuat ngu chinh su dung trong he thong, sap xep theo thu tu ABC.
 | 1.0 | 2026-01-29 | Nhom quan tri he thong | Soan ban dau |
 | 1.1 | 2026-01-29 | Nhom quan tri he thong | Them chuc nang yeu thich, phan anh phuong thuc ghi lich su cuoc goi lien he, them xem lich su can, them cai dat thong bao trang ca nhan, them thong ke theo doanh nghiep tren bang dieu khien, them trang trang thai tram can thoi gian thuc, phan anh chuc nang danh muc/tim kiem/ghim thong bao, huong dan ho tro giao dien toi/sang |
 | 1.2 | 2026-01-29 | Nhom quan tri he thong | Phan anh tinh nang moi: huong dan gioi thieu, phim tat, chi tiet man hinh dieu khien tram can, giam sat thiet bi, trang truy van can, trang thong ke/bao cao, trang huong dan su dung, bo nho cache ngoai tuyen di dong |
+| 1.3 | 2026-01-30 | Nhom quan tri he thong | Phan anh tinh nang moi: yeu thich web (bieu tuong ngoi sao thanh tieu de, keo tha sap xep, toi da 20 muc), FAQ theo danh muc, bang tom tat thiet bi giam sat, sua ho so va cai dat thong bao day/email trang ca nhan, bo loc danh muc thong bao (He thong/Bao tri/Cap nhat/Chung), loc theo doanh nghiep/loai hang trong thong ke, dang ky hoi dap/khieu nai, huong dan chi tiet chuyen doi giao dien toi/sang, phim tat (Ctrl+W/Ctrl+Tab) va menu chuot phai tab |
 
 ---
 
@@ -1303,15 +1420,19 @@ Khi truy cap he thong lan dau, **huong dan gioi thieu** se tu dong hien thi. He 
 | **Noi dung** | Cach su dung menu thanh ben, dieu huong tab, tim kiem, yeu thich |
 | **Bo qua** | Co the ket thuc bat ky luc nao bang nut "Bo qua" |
 
-### B.2 Phim tat
+### B.2 Phim tat va quan ly tab
 
-He thong web ho tro phim tat.
+He thong web ho tro phim tat va menu chuot phai tab. Chi tiet xem tai [5.8 Phim tat va quan ly tab (Web)](#58-phim-tat-va-quan-ly-tab-web).
 
 | Phim tat | Chuc nang |
 |--------|------|
 | `Ctrl + N` | Dang ky moi |
 | `Ctrl + F` | Focus tim kiem |
+| `Ctrl + W` | Dong tab hien tai |
+| `Ctrl + Tab` | Chuyen sang tab tiep theo |
 | `Escape` | Dong modal/pop-up |
+
+Khi nhan chuot phai tab: Dong tab hien tai, Dong cac tab khac, Dong cac tab ben phai, Dong tat ca.
 
 ### B.3 Trang truy van can
 

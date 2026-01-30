@@ -1,6 +1,6 @@
 # Hệ thống Cân thông minh Busan - Hướng dẫn nhanh cho người dùng
 
-**Số tài liệu**: BSW-MAN-003 | **Phiên bản**: 1.2 | **Cập nhật lần cuối**: 2026-01-29
+**Số tài liệu**: BSW-MAN-003 | **Phiên bản**: 1.3 | **Cập nhật lần cuối**: 2026-01-30
 
 ---
 
@@ -64,11 +64,16 @@
 
 | Tính năng | Quy trình |
 |-----------|-----------|
-| **Cài đặt Thông báo** | Trang cá nhân → **Cài đặt Thông báo** → Bật/Tắt theo loại thông báo |
+| **Yêu thích** | Nhấp biểu tượng ☆ trên thanh tiêu đề → Đăng ký/hủy menu thường dùng (tối đa 20, truy cập nhanh từ thanh tiêu đề) |
+| **Trang cá nhân** | Menu người dùng góc trên phải → Sửa hồ sơ, đổi mật khẩu, cài đặt thông báo |
 | **Đổi Mật khẩu** | Trang cá nhân → **Đổi Mật khẩu** → Nhập mật khẩu hiện tại/mới → **Đổi** |
-| **Đổi Giao diện** | (Web) Menu người dùng góc trên phải → Chuyển chế độ Tối/Sáng |
-| **Liên hệ Hỗ trợ** | Trang cá nhân → **Liên hệ** → Chọn Phòng điều khiển Logistics / Kho vật tư → **Gọi** |
+| **Cài đặt Thông báo** | Trang cá nhân → **Cài đặt Thông báo** → Bật/Tắt theo loại thông báo |
 | **Xem Thông báo** | Thông báo → Lọc danh mục/tìm kiếm → Xem chi tiết (📌 Thông báo ghim ở đầu) |
+| **Hướng dẫn sử dụng** | Hướng dẫn → Xem FAQ theo danh mục → Chọn mục muốn tìm hiểu |
+| **Giám sát Thiết bị** | Giám sát Thiết bị → Kiểm tra trạng thái kết nối thiết bị theo trạm cân thời gian thực (Bình thường/Bất thường) |
+| **Thống kê/Báo cáo** | Thống kê/Báo cáo → Chọn kỳ ngày/tháng → Xem biểu đồ → **Tải Excel** |
+| **Hỏi đáp/Khiếu nại** | Trang cá nhân → **Hỏi đáp** → Chọn loại hỏi đáp → Soạn nội dung → **Đăng ký** |
+| **Đổi Giao diện** | (Web) Nhấp nút giao diện trên thanh tiêu đề để chuyển Tối/Sáng / (CS) Nhấp biểu tượng trên thanh tiêu đề |
 
 ---
 
@@ -95,7 +100,7 @@
 
 ---
 
-## 7. Hướng dẫn nhanh Tính năng mới (v1.2)
+## 7. Hướng dẫn nhanh Tính năng mới (v1.3)
 
 ### Phím tắt Web
 
@@ -103,6 +108,8 @@
 |----------|-----------|
 | `Ctrl+N` | Đăng ký mới |
 | `Ctrl+F` | Tập trung Tìm kiếm |
+| `Ctrl+W` | Đóng tab hiện tại |
+| `Ctrl+Tab` | Chuyển sang tab tiếp theo |
 | `Esc` | Đóng Modal |
 
 ### Tìm kiếm Cân & Thống kê
@@ -111,7 +118,7 @@
 |-----------|----------------------|
 | **Tìm kiếm Cân** | Tìm kiếm Cân → Nhập điều kiện kỳ/xe/hàng → **Tìm kiếm** → **Tải Excel** |
 | **Xem Thống kê** | Thống kê/Báo cáo → Chọn kỳ/điều kiện → Xem biểu đồ → **Tải Excel** |
-| **Giám sát Thiết bị** | Giám sát Thiết bị → Kiểm tra trạng thái kết nối thiết bị theo trạm cân thời gian thực |
+| **Giám sát Thiết bị** | Giám sát Thiết bị → Kiểm tra trạng thái kết nối thiết bị theo trạm cân thời gian thực (Bình thường/Bất thường) |
 
 ### 📱 Hỗ trợ Ngoại tuyến Di động
 

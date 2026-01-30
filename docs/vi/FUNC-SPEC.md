@@ -2332,18 +2332,18 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 
 | NFR-ID | Tên NFR | FUNC liên quan | Trạng thái phản ánh |
 |--------|---------|----------------|---------------------|
-| NFR-001 | Hiệu năng | FUNC-001,002,003,004,006,007,010,024 | COVERED |
-| NFR-002 | Bảo mật | FUNC-004,009,017,025-API | COVERED |
+| NFR-001 | Hiệu năng | FUNC-001,002,003,004,006,007,010,024,033,038 | COVERED |
+| NFR-002 | Bảo mật | FUNC-004,009,017,025-API,034,036 | COVERED |
 | NFR-003 | Khả năng mở rộng | FUNC-003,008 | COVERED |
-| NFR-004 | Tính sẵn sàng | FUNC-001,007,010,011,016 | COVERED |
-| NFR-005 | Tính dùng được | FUNC-005,006,017 | COVERED |
+| NFR-004 | Tính sẵn sàng | FUNC-001,007,010,011,016,033 | COVERED |
+| NFR-005 | Tính dùng được | FUNC-005,006,017,031,038,039 | COVERED |
 
 ### 9.4 Xác nhận phản ánh ràng buộc kỹ thuật TRD
 
 | Ràng buộc | FUNC phản ánh | Xác nhận |
 |-----------|---------------|----------|
-| Spring Boot 3.2 Backend | FUNC-025~028-API, FUNC-005~009 | OK |
-| React 18 + Ant Design Web | FUNC-005,006,008,009,030 | OK |
+| Spring Boot 3.2 Backend | FUNC-025~035-API, FUNC-005~009, FUNC-031~038 | OK |
+| React 18 + Ant Design Web | FUNC-005,006,008,009,030~039 | OK |
 | Flutter 3.x Di động | FUNC-017~024 | OK |
 | C# .NET WinForms CS | FUNC-010~016 | OK |
 | PostgreSQL 16 DB | Toàn bộ chức năng CRUD dữ liệu | OK |
@@ -2351,7 +2351,7 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 | RS-232C Indicator | FUNC-010 | OK |
 | TCP/UDP LPR/Cảm biến | FUNC-040,041,042 | OK |
 | Xác thực JWT | FUNC-017,025-API | OK |
-| WebSocket thời gian thực | FUNC-006 | OK |
+| WebSocket thời gian thực | FUNC-006,033 | OK |
 | Thông báo FCM Push | FUNC-024,028-API | OK |
 | Tích hợp KakaoTalk/SMS | FUNC-009,021 | OK |
 
@@ -2361,7 +2361,7 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 
 ## 10. Hiện trạng triển khai (Implementation Status)
 
-> **Cập nhật lần cuối**: 2026-01-29
+> **Cập nhật lần cuối**: 2026-01-30
 
 ### 10.1 Hiện trạng triển khai màn hình Web Frontend
 
@@ -2374,18 +2374,18 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 | `/inquiry` | Tra cứu cân | FUNC-006 | ✅ Hoàn thành | Tìm kiếm chi tiết, Xuất Excel |
 | `/gate-pass` | Quản lý xuất cổng | FUNC-030 | ✅ Hoàn thành | Quy trình phê duyệt/từ chối |
 | `/slips` | Phiếu cân điện tử | FUNC-009 | ✅ Hoàn thành | Tra cứu/Chia sẻ/In |
-| `/statistics` | Thống kê/Báo cáo | FUNC-006 | ✅ Hoàn thành | Biểu đồ phân tích theo thời kỳ/điều kiện |
+| `/statistics` | Thống kê/Báo cáo | FUNC-038 | ✅ Hoàn thành | Thống kê theo ngày/tháng, xuất Excel |
 | `/weighing-station` | Điều khiển trạm cân | FUNC-011 | ✅ Hoàn thành | Tab cố định, tích hợp thiết bị thời gian thực |
-| `/monitoring` | Giám sát thiết bị | FUNC-010 | ✅ Hoàn thành | Giám sát trạng thái thiết bị |
+| `/monitoring` | Giám sát thiết bị | FUNC-033 | ✅ Hoàn thành | Giám sát trạng thái thiết bị, healthcheck, WebSocket |
 | `/master/companies` | Quản lý công ty vận tải | FUNC-008 | ✅ Hoàn thành | Mô hình MasterCrudPage |
 | `/master/vehicles` | Quản lý xe | FUNC-008 | ✅ Hoàn thành | Mô hình MasterCrudPage |
 | `/master/scales` | Quản lý trạm cân | FUNC-008 | ✅ Hoàn thành | Mô hình MasterCrudPage |
 | `/master/codes` | Quản lý mã chung | FUNC-008 | ✅ Hoàn thành | Mô hình MasterCrudPage |
-| `/notices` | Thông báo | - | ✅ Hoàn thành | Bộ lọc danh mục, thông báo ghim |
-| `/help` | Hướng dẫn sử dụng | - | ✅ Hoàn thành | Trợ giúp/FAQ |
-| `/mypage` | Trang cá nhân | - | ✅ Hoàn thành | Hồ sơ, Đổi mật khẩu |
+| `/notices` | Thông báo | FUNC-035 | ✅ Hoàn thành | Bộ lọc danh mục, quản lý ghim/phát hành, lượt xem |
+| `/help` | Hướng dẫn sử dụng | FUNC-032 | ✅ Hoàn thành | FAQ theo danh mục, lượt xem, quản lý ADMIN |
+| `/mypage` | Trang cá nhân | FUNC-034 | ✅ Hoàn thành | Hồ sơ/Mật khẩu/Cài đặt thông báo |
 | `/admin/users` | Quản lý người dùng | FUNC-008 | ✅ Hoàn thành | Chỉ ADMIN |
-| `/admin/settings` | Cài đặt hệ thống | - | ✅ Hoàn thành | Chỉ ADMIN |
+| `/admin/settings` | Cài đặt hệ thống | FUNC-036 | ✅ Hoàn thành | Chỉ ADMIN, cài đặt theo danh mục/loại |
 | `/admin/audit-logs` | Nhật ký kiểm toán | - | ✅ Hoàn thành | Chỉ ADMIN |
 
 ### 10.2 Hiện trạng triển khai màn hình ứng dụng di động
@@ -2437,6 +2437,13 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 | notification | FUNC-024, 028-API | ✅ Hoàn thành | FCM + Thông báo trong ứng dụng |
 | websocket | FUNC-006 | ✅ Hoàn thành | Truyền trạng thái cân/thiết bị thời gian thực |
 | dashboard | FUNC-006 | ✅ Hoàn thành | API thống kê |
+| favorite | FUNC-031 | ✅ Hoàn thành | Đăng ký/xóa/thay đổi thứ tự yêu thích |
+| faq | FUNC-032 | ✅ Hoàn thành | FAQ CRUD theo danh mục |
+| device | FUNC-033 | ✅ Hoàn thành | Giám sát thiết bị + healthcheck |
+| notice | FUNC-035 | ✅ Hoàn thành | Thông báo CRUD + ghim/phát hành |
+| settings | FUNC-036 | ✅ Hoàn thành | Quản lý cài đặt hệ thống |
+| inquiry | FUNC-037 | ✅ Hoàn thành | Đăng ký/quản lý hỏi đáp/khiếu nại |
+| statistics | FUNC-038 | ✅ Hoàn thành | Tra cứu thống kê + xuất Excel |
 | audit | - | ✅ Hoàn thành | Nhật ký kiểm toán |
 
 ### 10.5 Chức năng triển khai bổ sung (ngoài đặc tả)
@@ -2444,18 +2451,16 @@ Tài liệu này định nghĩa chi tiết hoạt động của từng chức n�
 | Chức năng | Mô tả | Vị trí triển khai |
 |-----------|-------|-------------------|
 | Tour hướng dẫn | Hướng dẫn người dùng mới | `OnboardingTour.tsx` |
-| Phím tắt | Hỗ trợ phím tắt theo trang | `useKeyboardShortcuts.ts` |
 | Phát hiện tab hoạt động | Cập nhật dữ liệu khi chuyển tab trình duyệt | `useTabVisible.ts` |
 | Hiệu ứng số | Hiệu ứng hoạt hình thẻ KPI bảng điều khiển | `AnimatedNumber.tsx` |
-| Sắp xếp kéo thả | Sắp xếp lại hàng bảng bằng kéo thả | `SortableTable.tsx` (@dnd-kit) |
 | Giao diện trạng thái trống | Màn hình hướng dẫn khi không có dữ liệu | `EmptyState.tsx` |
-| Yêu thích | Yêu thích điều phối xe/công ty | `FavoriteButton.tsx`, `FavoritesList.tsx` |
-| Theme sáng/tối | Hỗ trợ chuyển đổi theme | `ThemeContext.tsx`, `themeConfig.ts` |
-| Điều hướng đa tab | Tối đa 10 tab, hỗ trợ tab cố định | `TabContext.tsx`, `pageRegistry.ts` |
+| Theme sáng/tối | Hỗ trợ chuyển đổi theme | Web: `ThemeContext.tsx`, `themeConfig.ts` / CS: `Theme.cs` (toggle HeaderBar, lưu theme.dat) |
 | Cache ngoại tuyến (di động) | Dựa trên SharedPreferences | `offline_cache_service.dart` |
 | Bộ mô phỏng phần cứng | Mô phỏng thiết bị cho phát triển | `Simulators/*.cs` |
+
+> **Ghi chú**: Trong phiên bản v1.2, các chức năng "ngoài đặc tả" trước đây gồm Yêu thích (FUNC-031), Điều hướng đa tab/Phím tắt/Sắp xếp kéo thả (FUNC-039) đã được đưa vào đặc tả chính thức.
 
 ---
 
 *Tài liệu này được soạn dựa trên PRD-20260127-154446, TRD-20260127-155235, WBS-20260127-160043.*
-*Hiện trạng triển khai tính đến ngày 2026-01-29.*
+*Hiện trạng triển khai tính đến ngày 2026-01-30.*
